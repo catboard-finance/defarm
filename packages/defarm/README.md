@@ -33,13 +33,13 @@ npm run release
 ### `CAKE` price
 ```typescript
 import { pancakeswap } from '@undefiorg/defarm'
-pancake.fetchTokenUSDPricesBySymbols(['CAKE']).then(console.log)
+pancakeswap.fetchTokenUSDPricesBySymbols(['CAKE']).then(console.log)
 ```
 
 ### `ALPACA`, `BNB` prices
 ```typescript
 import { pancakeswap } from '@undefiorg/defarm'
-const results = await fetchTokenUSDPricesBySymbols(['ALPACA', 'BNB']).then(console.log)
+pancakeswap.fetchTokenUSDPricesBySymbols(['ALPACA', 'BNB']).then(console.log)
 ```
 
 ### `ALPACA` lend info w/ price
@@ -51,5 +51,5 @@ alpaca.fetchLendsBySymbols(['ALPACA']).then(console.log)
 ### `CAKE-BNB` pool info w/ price + APR
 ```typescript
 import { pancakeswap } from '@undefiorg/defarm'
-pancake.fetchFarmsWithAPRBySymbols(['CAKE-BNB LP']).then(console.log)
+pancakeswap.fetchFarmsWithAPRBySymbols(['CAKE-BNB LP']).then(console.log)
 ```
