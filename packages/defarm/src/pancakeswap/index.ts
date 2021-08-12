@@ -40,16 +40,24 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
         pairs.unshift('USDC-BUSD LP')
     }
 
-    console.log('symbols:', symbols)
-
     const farms = await fetchFarmsWithAPRBySymbols(pairs)
 
     // Remove `USDC-BUSD LP`
-    pairs.shift()
+    if (pairs.includes('ETH-USDC LP')) {
+        pairs.shift()
+    }
 
     const prices = symbols.map((symbol, i) => {
         const pair = pairs[i]
         const farm = farms.find(farm => farm.lpSymbol === pair)
+
+        if (!farm) {
+            return {
+                symbol,
+                address: null,
+                busdPrice: null,
+            }
+        }
 
         if (symbol === 'BNB') {
             return {
@@ -65,8 +73,6 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
             busdPrice: farm.token.busdPrice,
         }
     })
-
-    console.log('prices:', prices)
 
     return prices
 }
@@ -85,7 +91,7 @@ export const getPairByAddress = (baseAddress: string, quoteAddress: string) => {
 }
 
 export const fetchFarmsWithAPRBySymbols = async (lpSymbols: string[]) => {
-    const pids: number[] = lpSymbols.map(lpSymbol => farmsSymbolMap[lpSymbol].pid)
+    const pids: number[] = lpSymbols.map(lpSymbol => farmsSymbolMap[lpSymbol]?.pid).filter(pid => pid)
     return fetchFarmsWithAPR(pids)
 }
 

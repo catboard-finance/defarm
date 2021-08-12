@@ -8,7 +8,7 @@ describe('🍰🦙', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
-  it.skip('can get CAKE price', async () => {
+  it('can get CAKE price', async () => {
     const [cake] = await fetchTokenUSDPricesBySymbols(['CAKE'])
 
     expect(cake.address).toEqual('0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82')
@@ -31,14 +31,14 @@ describe('🍰🦙', () => {
     expect(parseFloat(bnb.busdPrice)).toBeGreaterThan(0)
   });
 
-  it.skip('can get ALPACA price', async () => {
+  it('can get ALPACA price', async () => {
     const [alpaca] = await fetchLendsBySymbols(['ALPACA'])
 
     expect(parseFloat(alpaca.outputToken.busdPrice)).toBeGreaterThan(0)
     expect(parseFloat(alpaca.ibTokenPrice)).toBeGreaterThan(0)
   });
 
-  it.skip('can get CAKE-BNB LP info', async () => {
+  it('can get CAKE-BNB LP info', async () => {
     const [cake_bnb] = await fetchFarmsWithAPRBySymbols(['CAKE-BNB LP'])
 
     expect(cake_bnb.lpSymbol).toEqual('CAKE-BNB LP')
@@ -46,11 +46,15 @@ describe('🍰🦙', () => {
     expect(parseFloat(cake_bnb.apr)).toBeGreaterThan(0)
   });
 
-  // it('can return null for unknown price', async () => {
-  //   const [alpaca, not_exist] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'NOT_EXIST'])
-  //   expect(not_exist).toBeNull()
+  it('can return null for unknown price', async () => {
+    const [alpaca, not_exist] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'NOT_EXIST'])
 
-  //   expect(alpaca.address).toEqual('0x8f0528ce5ef7b51152a59745befdd91d97091d2f')
-  //   expect(parseFloat(alpaca.busdPrice)).toBeGreaterThan(0)
-  // });
+    expect(not_exist.symbol).toEqual('NOT_EXIST')
+    expect(not_exist.address).toBeNull()
+    expect(not_exist.busdPrice).toBeNull()
+
+    expect(alpaca.symbol).toEqual(tokens.alpaca.symbol)
+    expect(alpaca.address).toEqual(tokens.alpaca.address[56])
+    expect(parseFloat(alpaca.busdPrice)).toBeGreaterThan(0)
+  });
 })
