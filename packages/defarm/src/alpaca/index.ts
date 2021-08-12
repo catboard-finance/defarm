@@ -12,8 +12,8 @@ export const fetchLendsBySymbols = async (symbols: string[] = null, digit: numbe
 
   const [lends, prices] = await lendsAndPrices
 
-  const results = lends.map((lend, i) => {
-    const busdPrice = new BigNumber(prices[i])
+  const results = lends.map((lend) => {
+    const busdPrice = new BigNumber(prices.find(price => price.symbol === lend.inputToken.symbol).busdPrice)
     const inputToken_busdPrice = busdPrice.toFixed(digit)
     const outputToken_busdPrice = busdPrice.times(lend.ibTokenPrice).toFixed(digit)
 
