@@ -1,7 +1,7 @@
 import tokens from './tokens'
 import { FarmConfig } from './types'
 
-export const farmsConfig: FarmConfig[] = [
+const farms: FarmConfig[] = [
   /**
    * These 3 farms (PID 0, 251, 252) should always be at the top of the file.
    */
@@ -2728,7 +2728,7 @@ interface FarmSymbolMap {
 }
 
 const _farmsSymbolMap = {}
-farmsConfig.forEach(farmConfig => {
+farms.forEach(farmConfig => {
   _farmsSymbolMap[farmConfig.lpSymbol] = _farmsSymbolMap[farmConfig.lpSymbol] || farmConfig
 })
 
@@ -2739,8 +2739,10 @@ interface FarmAddressMap {
 }
 
 const _farmsAddressMap = {}
-farmsConfig.forEach(farmConfig => {
+farms.forEach(farmConfig => {
   _farmsAddressMap[farmConfig.lpAddresses[56]] = _farmsAddressMap[farmConfig.lpAddresses[56]] || farmConfig
 })
 
 export const farmsAddressMap: FarmAddressMap = _farmsAddressMap
+
+export default farms

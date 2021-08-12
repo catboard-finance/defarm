@@ -1,10 +1,10 @@
 import BigNumber from "bignumber.js";
-import { poolsConfig } from "./config/constants";
+import { farmsConfig, poolsConfig, tokensConfig } from "./config/constants";
 import { fetchPoolsBlockLimits, fetchPoolsTotalStaking } from "./pools/fetchPools";
 import { getTokenPricesFromFarm } from "./pools/helpers";
 import { getFarmApr, getPoolApr } from "./utils/apr";
 import { getBalanceNumber } from "./utils/formatBalance";
-import { farmsConfig, farmsAddressMap, farmsSymbolMap } from './config/constants/farms'
+import { farmsAddressMap, farmsSymbolMap } from './config/constants/farms'
 import isArchivedPid from './utils/farmHelpers'
 import priceHelperLpsConfig from './config/constants/priceHelperLps'
 import fetchFarms from "./farms/fetchFarms";
@@ -16,32 +16,71 @@ import { calculateLiquidityMinted } from "./swap/mint";
 import { ChainId, Token, Pair } from '@pancakeswap/sdk'
 import { FarmConfig, PoolConfig } from "./config/constants/types";
 
+export const config = {
+    farms: farmsConfig,
+    pools: poolsConfig,
+    tokens: tokensConfig,
+}
+
 export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
-    const busdFarms = await fetchFarmsWithAPRBySymbolsAndQuote(symbols, 'BUSD')
-    const prices = busdFarms.map(farm => {
-        // BNB-BUSD not exists, only BUSD-BNB will need to use `quoteToken` for BNB price
-        if (farm.lpSymbol === 'BUSD-BNB LP') {
-            return farm.quoteToken.busdPrice
+    // [0, 251, 252, 283] = ['CAKE', 'CAKE-BNB LP', 'BUSD-BNB LP', 'USDC-BUSD LP']
+    // 252 = BNB-BUSD not exists, only BUSD-BNB
+    // 400 = ETH-USDC LP
+
+    // Uppercase
+    symbols = symbols.map(symbol => symbol.toUpperCase());
+
+    const quoteSymbol = 'BUSD'
+    const pairs = symbols.map(symbol => {
+        if (symbol === 'BNB') {
+            return `${quoteSymbol}-${symbol} LP`
+        } else if (symbol === 'ETH') {
+            return `ETH-USDC LP`
         }
 
-        return farm.token.busdPrice
+        return `${symbol}-${quoteSymbol} LP`
+    })
+
+    // ETH-USDC LP required USDC-BUSD LP' for calculate busdPrice
+    if (pairs.includes('ETH-USDC LP')) {
+        pairs.unshift('USDC-BUSD LP')
+    }
+
+    const farms = await fetchFarmsWithAPRBySymbols(pairs)
+
+    // Remove `USDC-BUSD LP`
+    if (pairs.includes('ETH-USDC LP')) {
+        pairs.shift()
+    }
+
+    const prices = symbols.map((symbol, i) => {
+        const pair = pairs[i]
+        const farm = farms.find(farm => farm.lpSymbol === pair)
+
+        if (!farm) {
+            return {
+                symbol,
+                address: null,
+                busdPrice: null,
+            }
+        }
+
+        if (symbol === 'BNB') {
+            return {
+                symbol,
+                address: farm.quoteToken.address[56],
+                busdPrice: farm.quoteToken.busdPrice,
+            }
+        }
+
+        return {
+            symbol,
+            address: farm.token.address[56],
+            busdPrice: farm.token.busdPrice,
+        }
     })
 
     return prices
-}
-
-export const fetchFarmsWithAPRBySymbolsAndQuote = async (symbols: string[], quoteSymbol: string) => {
-    const farmConfigs = symbols.map(symbol => {
-        // BNB-BUSD not exists, only BUSD-BNB
-        if (symbol === 'BNB' && quoteSymbol === 'BUSD') {
-            return farmsSymbolMap[`${quoteSymbol}-${symbol} LP`].pid
-        }
-
-        return farmsSymbolMap[`${symbol}-${quoteSymbol} LP`].pid
-    })
-
-    const farms = await fetchFarmsWithAPR(farmConfigs)
-    return farms
 }
 
 export const fetchFarmsWithAPRByAddresses = async (addresses: string[]) => {
@@ -58,7 +97,7 @@ export const getPairByAddress = (baseAddress: string, quoteAddress: string) => {
 }
 
 export const fetchFarmsWithAPRBySymbols = async (lpSymbols: string[]) => {
-    const pids: number[] = lpSymbols.map(lpSymbol => farmsSymbolMap[lpSymbol].pid)
+    const pids: number[] = lpSymbols.map(lpSymbol => farmsSymbolMap[lpSymbol]?.pid).filter(pid => pid)
     return fetchFarmsWithAPR(pids)
 }
 
@@ -66,19 +105,18 @@ export const fetchFarmsWithAPR = async (pids: number[]) => {
     // All farm?
     let _pids = pids ? pids : farmsConfig.map(farm => farm.pid)
 
-    const farmToFetchList = Array.from(new Set([0, 251, 252, ..._pids]))
+    const farmToFetchList = Array.from(new Set([0, 251, 252, 283, ..._pids]))
     const all_lp: any[] = await fetchFarmsPublicDataAsync(farmsConfig, farmToFetchList)
     const cakePrice = new BigNumber(all_lp[1].token.busdPrice)
 
     const result = all_lp.map((farm: Farm) => {
-        if (!farm.lpTotalInQuoteToken) throw new Error('Required lpTotalInQuoteToken.')
-        if (!farm.quoteToken.busdPrice) throw new Error('Required quoteToken.busdPrice.')
-        if (!farm.poolWeight) throw new Error('Required poolWeight.')
-        if (!farm.tokenPriceVsQuote) throw new Error('Required tokenPriceVsQuote.')
+        if (!farm.lpTotalInQuoteToken || !farm.quoteToken.busdPrice || farm.pid === 0) {
+            return farm
+        }
 
         const totalLiquidity = new BigNumber(farm.lpTotalInQuoteToken).times(farm.quoteToken.busdPrice)
-        farm.apr = farm.pid !== 0 ? getFarmApr(new BigNumber(farm.poolWeight), cakePrice, totalLiquidity).toString() : null
-        farm.mintRate = farm.pid !== 0 ? calculateLiquidityMinted(ChainId.MAINNET, farm, "1", farm.tokenPriceVsQuote)?.toSignificant() : null
+        farm.apr = getFarmApr(new BigNumber(farm.poolWeight), cakePrice, totalLiquidity)?.toString()
+        farm.mintRate = calculateLiquidityMinted(ChainId.MAINNET, farm, "1", farm.tokenPriceVsQuote)?.toSignificant()
         return farm
     })
 

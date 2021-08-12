@@ -1,13 +1,13 @@
 {
   "name": "@undefiorg/defarm",
-  "version": "0.3.0",
+  "version": "0.6.0",
   "main": "lib/index.js",
   "types": "lib",
   "license": "MIT",
   "author": "katopz",
   "scripts": {
     "gcp-login": "npx google-artifactregistry-auth",
-    "test-watch": "jest --clearCache && jest --watch --runInBand --detectOpenHandles --no-cache ",
+    "test-dev": "jest --clearCache && jest --watch --runInBand --detectOpenHandles --no-cache ",
     "test": "jest",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
