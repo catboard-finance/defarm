@@ -1,4 +1,4 @@
-export const tokens = {
+const tokens = {
   bnb: {
     symbol: 'BNB',
     projectLink: 'https://www.binance.com/',

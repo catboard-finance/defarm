@@ -1,10 +1,10 @@
 import BigNumber from "bignumber.js";
-import { poolsConfig } from "./config/constants";
+import { farmsConfig, poolsConfig, tokensConfig } from "./config/constants";
 import { fetchPoolsBlockLimits, fetchPoolsTotalStaking } from "./pools/fetchPools";
 import { getTokenPricesFromFarm } from "./pools/helpers";
 import { getFarmApr, getPoolApr } from "./utils/apr";
 import { getBalanceNumber } from "./utils/formatBalance";
-import { farmsConfig, farmsAddressMap, farmsSymbolMap } from './config/constants/farms'
+import { farmsAddressMap, farmsSymbolMap } from './config/constants/farms'
 import isArchivedPid from './utils/farmHelpers'
 import priceHelperLpsConfig from './config/constants/priceHelperLps'
 import fetchFarms from "./farms/fetchFarms";
@@ -15,6 +15,12 @@ import web3NoAccount from "./utils/web3";
 import { calculateLiquidityMinted } from "./swap/mint";
 import { ChainId, Token, Pair } from '@pancakeswap/sdk'
 import { FarmConfig, PoolConfig } from "./config/constants/types";
+
+export const config = {
+    farms: farmsConfig,
+    pools: poolsConfig,
+    tokens: tokensConfig,
+}
 
 export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
     // [0, 251, 252, 283] = ['CAKE', 'CAKE-BNB LP', 'BUSD-BNB LP', 'USDC-BUSD LP']

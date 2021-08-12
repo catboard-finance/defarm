@@ -2315,8 +2315,6 @@ const pools: PoolConfig[] = [
   },
 ]
 
-export default pools
-
 interface PoolAddressMap {
   [address: string]: PoolConfig;
 }
@@ -2327,3 +2325,5 @@ pools.forEach(poolConfig => {
 })
 
 export const poolsAddressMap: PoolAddressMap = _poolsAddressMap
+
+export default pools
