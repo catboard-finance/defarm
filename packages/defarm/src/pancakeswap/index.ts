@@ -21,6 +21,9 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
     // 252 = BNB-BUSD not exists, only BUSD-BNB
     // 400 = ETH-USDC LP
 
+    // Uppercase
+    symbols = symbols.map(symbol => symbol.toUpperCase());
+
     const quoteSymbol = 'BUSD'
     const pairs = symbols.map(symbol => {
         if (symbol === 'BNB') {
@@ -37,7 +40,12 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
         pairs.unshift('USDC-BUSD LP')
     }
 
+    console.log('symbols:', symbols)
+
     const farms = await fetchFarmsWithAPRBySymbols(pairs)
+
+    // Remove `USDC-BUSD LP`
+    pairs.shift()
 
     const prices = symbols.map((symbol, i) => {
         const pair = pairs[i]
@@ -57,6 +65,8 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
             busdPrice: farm.token.busdPrice,
         }
     })
+
+    console.log('prices:', prices)
 
     return prices
 }
