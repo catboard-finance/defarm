@@ -6,6 +6,21 @@ describe('🍰🦙', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
+  it('can get CAKE price', async () => {
+    const results = await fetchTokenUSDPricesBySymbols(['CAKE'])
+    const result0 = results[0]
+
+    expect(parseFloat(result0)).toBeGreaterThan(1)
+  });
+
+  it('can get ALPACA, BNB prices', async () => {
+    const results = await fetchTokenUSDPricesBySymbols(['ALPACA', 'BNB'])
+    const [alpaca, bnb] = results
+
+    expect(parseFloat(alpaca)).toBeGreaterThan(0)
+    expect(parseFloat(bnb)).toBeGreaterThan(0)
+  });
+
   it('can get ALPACA price', async () => {
     const results = await fetchLendsBySymbols(['ALPACA'])
     const result0 = results[0]
@@ -20,12 +35,5 @@ describe('🍰🦙', () => {
 
     expect(result0.lpSymbol).toEqual('CAKE-BNB LP')
     expect(parseFloat(result0.apr)).toBeGreaterThan(0)
-  });
-
-  it('can get CAKE price', async () => {
-    const results = await fetchTokenUSDPricesBySymbols(['CAKE'])
-    const result0 = results[0]
-
-    expect(parseFloat(result0)).toBeGreaterThan(1)
   });
 })

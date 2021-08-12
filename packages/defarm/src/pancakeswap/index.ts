@@ -16,14 +16,30 @@ import { calculateLiquidityMinted } from "./swap/mint";
 import { ChainId, Token, Pair } from '@pancakeswap/sdk'
 import { FarmConfig, PoolConfig } from "./config/constants/types";
 
-export const fetchTokenUSDPricesBySymbols = async (symbols: string[], digit = 20) => {
+export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
     const busdFarms = await fetchFarmsWithAPRBySymbolsAndQuote(symbols, 'BUSD')
-    const prices = busdFarms.map(farm => farm.token.busdPrice)
+    const prices = busdFarms.map(farm => {
+        // BNB-BUSD not exists, only BUSD-BNB will need to use `quoteToken` for BNB price
+        if (farm.lpSymbol === 'BUSD-BNB LP') {
+            return farm.quoteToken.busdPrice
+        }
+
+        return farm.token.busdPrice
+    })
+
     return prices
 }
 
 export const fetchFarmsWithAPRBySymbolsAndQuote = async (symbols: string[], quoteSymbol: string) => {
-    const farmConfigs = symbols.map(symbol => farmsSymbolMap[`${symbol}-${quoteSymbol} LP`].pid)
+    const farmConfigs = symbols.map(symbol => {
+        // BNB-BUSD not exists, only BUSD-BNB
+        if (symbol === 'BNB' && quoteSymbol === 'BUSD') {
+            return farmsSymbolMap[`${quoteSymbol}-${symbol} LP`].pid
+        }
+
+        return farmsSymbolMap[`${symbol}-${quoteSymbol} LP`].pid
+    })
+
     const farms = await fetchFarmsWithAPR(farmConfigs)
     return farms
 }
