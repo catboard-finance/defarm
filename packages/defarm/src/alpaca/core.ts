@@ -21,8 +21,33 @@ export interface IPoolAddress {
   address: string
 }
 
+interface IIbPool {
+  id: number
+  address: string
+  stakingToken: string
+  unstakingToken: string
+}
+
+const IB_ONLY_POOLS = POOLS.filter(pool => pool.stakingToken.startsWith('ib'))
+const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
+  return {
+    id: pool.id,
+    address: pool.address,
+    stakingToken: pool.stakingToken,
+    unstakingToken: pool.stakingToken.slice(2),
+  }
+})
+
+export const getTokenFormIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken === symbol)
+
+export const getSupportedUSDSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
+
+const filterSupportedSymbols = (symbols: string[] = null) => {
+  return symbols ? POOLS.filter(pool => symbols.includes(pool.stakingToken.slice(2))) : POOLS
+}
+
 export const readBlockLendsBySymbols = async (symbols: string[] = null, block = 'latest', chain: Chain = 'bsc'): Promise<IBSCAlpacaLends[]> => {
-  const pools = symbols ? POOLS.filter(pool => symbols.includes(pool.stakingToken.slice(2))) : POOLS
+  const pools = filterSupportedSymbols(symbols)
   const lends = await readBlockLendsByPoolAddresses(block, chain, pools)
   if (!lends || lends.length <= 0) return []
   return lends

@@ -28,19 +28,19 @@ npm login
 npm run release
 ```
 
-## Example
+## Example: USD Price
 
-### `CAKE` price
+### `CAKE` price from pancakeswap
 ```typescript
 import { pancakeswap } from '@undefiorg/defarm'
 const results = await pancakeswap.fetchTokenUSDPricesBySymbols(['CAKE']);
 console.log(results);
 ```
 
-### `ALPACA`, `ETH`, `BNB` prices
+### `ALPACA`, `ETH`, `BNB` prices from pancakeswap
 ```typescript
 import { pancakeswap } from '@undefiorg/defarm'
-const results = await fetchTokenUSDPricesBySymbols(['ALPACA', 'ETH', 'BNB']);
+const results = await pancakeswap.fetchTokenUSDPricesBySymbols(['ALPACA', 'ETH', 'BNB']);
 console.log(results);
 ```
 Result
@@ -63,6 +63,22 @@ Result
   }
 ]
 ```
+
+### `ibALPACA` price from pancakeswap
+```typescript
+import { alpaca } from '@undefiorg/defarm'
+
+// It's a good idea to check for supported symbols before calling fetchTokenUSDPricesBySymbols
+const supportedSymbols = alpaca.getSupportedUSDSymbols()
+console.log(supportedSymbols);
+
+// Better use to fetch only supported `ibToken` prices
+const [ibALPACA] = await alpaca.fetchTokenUSDPricesBySymbols(['ibALPACA'])
+console.log(results);
+```
+---
+
+## Example: Info
 
 ### `ALPACA` lend info w/ price
 ```typescript

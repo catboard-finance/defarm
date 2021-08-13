@@ -1,11 +1,16 @@
 import { fetchLendsBySymbols } from "./alpaca";
-import { fetchFarmsWithAPRBySymbols, fetchTokenUSDPricesBySymbols } from "./pancakeswap";
+import { fetchFarmsWithAPRBySymbols, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from "./pancakeswap";
 import { farmsSymbolMap } from "./pancakeswap/config/constants/farms";
 import tokens from "./pancakeswap/config/constants/tokens";
 
 describe('🍰🦙', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
+  });
+
+  it('has supported symbol list', async () => {
+    const supportedSymbols = getSupportedUSDSymbols()
+    expect(supportedSymbols).toEqual(["ETH", "MX", "bCFX", "QKC", "MTRG", "TUSD", "WELL", "DERI", "CHR", "CAKE", "WMASS", "UBXT", "BTR", "PMON", "ONE", "OIN", "KUN", "MATH", "xMARK", "BTCB", "DFD", "ALPACA", "HAKKA", "HOO", "TXL", "FOR", "NULS", "RAMP", "DEXE", "TPT", "IOTX", "LINA", "UST", "USDC", "DAI", "VAI", "USDT", "HAKKA", "HOO", "TXL", "FOR", "NULS", "RAMP", "DEXE", "TPT", "xMARK", "IOTX", "LINA", "UST", "USDC", "DAI", "VAI", "USDT"])
   });
 
   it('can get CAKE price', async () => {
