@@ -40,7 +40,7 @@ const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
 
 export const getTokenFormIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken === symbol)
 
-export const getSupportedSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
+export const getSupportedUSDSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
 
 const filterSupportedSymbols = (symbols: string[] = null) => {
   return symbols ? POOLS.filter(pool => symbols.includes(pool.stakingToken.slice(2))) : POOLS

@@ -4,7 +4,7 @@ import { readBlockLendsBySymbols, IBSCAlpacaLends, getTokenFormIBSymbol } from "
 import BigNumber from "bignumber.js";
 import { fetchTokenUSDPricesBySymbols as pancakeswap_fetchTokenUSDPricesBySymbols } from "../pancakeswap";
 
-export { getSupportedSymbols } from './core'
+export { getSupportedUSDSymbols } from './core'
 
 export const fetchLendsBySymbols = async (symbols: string[] = null, digit: number = 18, block = 'latest', chain: Chain = 'bsc'): Promise<IBSCAlpacaLends[]> => {
   // Convert to symbol if get ibSymbol as input e.g. ibALPACA → ALPACA

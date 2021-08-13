@@ -4,7 +4,7 @@ import { fetchPoolsBlockLimits, fetchPoolsTotalStaking } from "./pools/fetchPool
 import { getTokenPricesFromFarm } from "./pools/helpers";
 import { getFarmApr, getPoolApr } from "./utils/apr";
 import { getBalanceNumber } from "./utils/formatBalance";
-import { farmsAddressMap, farmsSymbolMap } from './config/constants/farms'
+import farms, { farmsAddressMap, farmsSymbolMap } from './config/constants/farms'
 import isArchivedPid from './utils/farmHelpers'
 import priceHelperLpsConfig from './config/constants/priceHelperLps'
 import fetchFarms from "./farms/fetchFarms";
@@ -20,6 +20,14 @@ export const config = {
     farms: farmsConfig,
     pools: poolsConfig,
     tokens: tokensConfig,
+}
+
+export const getSupportedUSDSymbols = () => {
+    return ['ETH',
+        ...farms
+            .filter(farm => farm.quoteToken.symbol === 'BUSD')
+            .map(farm => farm.token.symbol)
+    ];
 }
 
 export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {

@@ -1,4 +1,4 @@
-import { fetchTokenUSDPricesBySymbols, getSupportedSymbols } from ".";
+import { fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from ".";
 
 describe('🦙', () => {
   beforeEach(() => {
@@ -6,7 +6,7 @@ describe('🦙', () => {
   });
 
   it('has supported symbol list', async () => {
-    const supportedSymbols = getSupportedSymbols()
+    const supportedSymbols = getSupportedUSDSymbols()
     expect(supportedSymbols).toEqual([
       'ibWBNB', 'ibBUSD', 'ibETH', 'ibALPACA', 'ibUSDT', 'ibBTCB', 'ibTUSD'
     ])
