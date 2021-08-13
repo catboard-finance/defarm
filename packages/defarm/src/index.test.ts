@@ -1,9 +1,10 @@
 import { fetchLendsBySymbols } from "./alpaca";
-import { fetchFarmsWithAPRBySymbols, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from "./pancakeswap";
+import { fetchFarmsWithAPRBySymbols, fetchFarmUserDataAsync, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from "./pancakeswap";
+import { farmsConfig } from "./pancakeswap/config/constants";
 import { farmsSymbolMap } from "./pancakeswap/config/constants/farms";
 import tokens from "./pancakeswap/config/constants/tokens";
 
-describe('🍰🦙', () => {
+describe('🍰🦙 global data', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
@@ -63,3 +64,21 @@ describe('🍰🦙', () => {
     expect(parseFloat(alpaca.busdPrice)).toBeGreaterThan(0)
   });
 })
+
+describe('🍰 user data', () => {
+  it('can get user data', async () => {
+    const account = "0xE462f59392C5b2754283162A665bb4d6Ff5033ab"
+    const pid = farmsConfig[0].pid
+    const userData = await fetchFarmUserDataAsync(farmsConfig, { account, pids: [pid] })
+
+    expect(userData).toEqual([
+      {
+        pid: 0,
+        allowance: '0',
+        tokenBalance: '0',
+        stakedBalance: '0',
+        earnings: '0'
+      }
+    ])
+  });
+});
