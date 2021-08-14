@@ -19,6 +19,7 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "dev": "tsc -b -w",
+    "bump": "git flow release start $1 && git flow release finish $1 && git push --all --follow-tags",
     "release": "npm run build && npm publish --access=public"
   },
   "files": [
