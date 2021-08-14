@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js'
 import { Farm, Pool } from '../types'
 import { getAddress } from '../utils/addressHelpers'
-import { getFarmApr } from '../utils/apr'
 import { BIG_ZERO } from '../utils/bigNumber'
 
 type UserData =
@@ -48,14 +47,3 @@ export const getTokenPricesFromFarm = (farms: Farm[]) => {
     return prices
   }, {})
 }
-
-export const getFarmsWithAPR = (farms: Farm[], cakePrice) => farms.map((farm) => {
-  if (!farm.lpTotalInQuoteToken || !farm.quoteToken.busdPrice) {
-    return farm
-  }
-
-  const totalLiquidity = new BigNumber(farm.lpTotalInQuoteToken).times(farm.quoteToken.busdPrice)
-  const apr = getFarmApr(new BigNumber(farm.poolWeight), cakePrice, totalLiquidity)
-
-  return { ...farm, apr, liquidity: totalLiquidity }
-})

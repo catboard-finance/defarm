@@ -32,6 +32,8 @@ export interface Farm extends FarmConfig {
     earnings: string
   },
   apr?: string
+  cakeRewardsApr?: string
+  lpRewardsApr?: string
   mintRate?: string
 }
 

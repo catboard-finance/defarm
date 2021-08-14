@@ -1,10 +1,11 @@
+require('./env.ts')
 import BigNumber from "bignumber.js";
 import { farmsConfig, poolsConfig, tokensConfig } from "./config/constants";
 import { fetchPoolsBlockLimits, fetchPoolsTotalStaking } from "./pools/fetchPools";
 import { getTokenPricesFromFarm } from "./pools/helpers";
 import { getFarmApr, getPoolApr } from "./utils/apr";
 import { getBalanceNumber } from "./utils/formatBalance";
-import farms, { farmsAddressMap, farmsSymbolMap } from './config/constants/farms'
+import farms from './config/constants/farms'
 import isArchivedPid from './utils/farmHelpers'
 import priceHelperLpsConfig from './config/constants/priceHelperLps'
 import fetchFarms from "./farms/fetchFarms";
@@ -16,6 +17,7 @@ import { calculateLiquidityMinted } from "./swap/mint";
 import { ChainId, Token, Pair } from '@pancakeswap/sdk'
 import { FarmConfig, PoolConfig } from "./config/constants/types";
 import { fetchFarmUserAllowances, fetchFarmUserTokenBalances, fetchFarmUserStakedBalances, fetchFarmUserEarnings } from "./farms/fetchFarmUser";
+import { farmsAddressMap, farmsSymbolMap } from './config/constants/mapper'
 
 export const config = {
 	farms: farmsConfig,
@@ -124,7 +126,9 @@ export const fetchFarmsWithAPR = async (pids: number[]) => {
 		}
 
 		const totalLiquidity = new BigNumber(farm.lpTotalInQuoteToken).times(farm.quoteToken.busdPrice)
-		farm.apr = getFarmApr(new BigNumber(farm.poolWeight), cakePrice, totalLiquidity)?.toString()
+		const { cakeRewardsApr, lpRewardsApr } = getFarmApr(new BigNumber(farm.poolWeight), cakePrice, totalLiquidity, farm.lpAddresses[ChainId.MAINNET]) || { cakeRewardsApr: 0, lpRewardsApr: 0 }
+		farm.cakeRewardsApr = cakeRewardsApr.toString()
+		farm.lpRewardsApr = lpRewardsApr.toString()
 		farm.mintRate = calculateLiquidityMinted(ChainId.MAINNET, farm, "1", farm.tokenPriceVsQuote)?.toSignificant()
 		return farm
 	})

@@ -1,12 +1,11 @@
-import { MAINNET_CHAIN_ID } from '../config'
+import { ChainId } from '@pancakeswap/sdk'
 import addresses from '../config/constants/contracts'
 import tokens from '../config/constants/tokens'
 import { Address } from '../config/constants/types'
 
 export const getAddress = (address: Address): string => {
-  // @ts-ignore
-  const chainId = process.env.REACT_APP_CHAIN_ID | "56"
-  return address[chainId] ? address[chainId] : address[MAINNET_CHAIN_ID]
+  const chainId = process.env.REACT_APP_CHAIN_ID
+  return address[chainId] ? address[chainId] : address[ChainId.MAINNET]
 }
 
 export const getCakeAddress = () => {
@@ -20,12 +19,6 @@ export const getMulticallAddress = () => {
 }
 export const getWbnbAddress = () => {
   return getAddress(tokens.wbnb.address)
-}
-export const getLotteryAddress = () => {
-  return getAddress(addresses.lottery)
-}
-export const getLotteryTicketAddress = () => {
-  return getAddress(addresses.lotteryNFT)
 }
 export const getLotteryV2Address = () => {
   return getAddress(addresses.lotteryV2)
@@ -62,4 +55,13 @@ export const getPredictionsAddress = () => {
 }
 export const getChainlinkOracleAddress = () => {
   return getAddress(addresses.chainlinkOracle)
+}
+export const getBunnySpecialCakeVaultAddress = () => {
+  return getAddress(addresses.bunnySpecialCakeVault)
+}
+export const getBunnySpecialPredictionAddress = () => {
+  return getAddress(addresses.bunnySpecialPrediction)
+}
+export const getFarmAuctionAddress = () => {
+  return getAddress(addresses.farmAuction)
 }

@@ -42,6 +42,12 @@
         "internalType": "uint256",
         "name": "lotteryId",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "firstTicketIdNextLottery",
+        "type": "uint256"
       }
     ],
     "name": "LotteryClose",
@@ -59,7 +65,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "injectedAmount",
         "type": "uint256"
       }
     ],
@@ -99,6 +105,36 @@
         "internalType": "uint256",
         "name": "lotteryId",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "startTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "endTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceTicketInCake",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "firstTicketId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "injectedAmount",
+        "type": "uint256"
       }
     ],
     "name": "LotteryOpen",
@@ -118,9 +154,28 @@
         "internalType": "address",
         "name": "treasury",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "injector",
+        "type": "address"
       }
     ],
-    "name": "NewOperatorAndTreasuryAddresses",
+    "name": "NewOperatorAndTreasuryAndInjectorAddresses",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "randomGenerator",
+        "type": "address"
+      }
+    ],
+    "name": "NewRandomGenerator",
     "type": "event"
   },
   {
@@ -155,6 +210,18 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "lotteryId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "numberTickets",
         "type": "uint256"
       }
     ],
@@ -301,6 +368,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_randomGeneratorAddress",
+        "type": "address"
+      }
+    ],
+    "name": "changeRandomGenerator",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_lotteryId",
         "type": "uint256"
@@ -366,6 +446,11 @@
         "internalType": "uint256",
         "name": "_lotteryId",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_autoInjection",
+        "type": "bool"
       }
     ],
     "name": "drawFinalNumberAndMakeLotteryClaimable",
@@ -392,64 +477,13 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "lotteries",
+    "inputs": [],
+    "name": "injectorAddress",
     "outputs": [
       {
-        "internalType": "enum PancakeSwapLottery.Status",
-        "name": "status",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "startTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "endTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "priceTicketInCake",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "discountDivisor",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "treasuryFee",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "firstTicketId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "lastTicketId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amountCollectedInCake",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint32",
-        "name": "finalNumber",
-        "type": "uint32"
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -457,7 +491,33 @@
   },
   {
     "inputs": [],
-    "name": "maxNumberTicketsPerBuy",
+    "name": "maxNumberTicketsPerBuyOrClaim",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxPriceTicketInCake",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "minPriceTicketInCake",
     "outputs": [
       {
         "internalType": "uint256",
@@ -489,6 +549,19 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingInjectionNextLottery",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -548,6 +621,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_minPriceTicketInCake",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPriceTicketInCake",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMinAndMaxTicketPriceInCake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_operatorAddress",
         "type": "address"
@@ -556,9 +647,14 @@
         "internalType": "address",
         "name": "_treasuryAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_injectorAddress",
+        "type": "address"
       }
     ],
-    "name": "setOperatorAndTreasuryAddresses",
+    "name": "setOperatorAndTreasuryAndInjectorAddresses",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -567,7 +663,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_lengthLottery",
+        "name": "_endTime",
         "type": "uint256"
       },
       {
@@ -617,6 +713,105 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "viewCurrentLotteryId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_lotteryId",
+        "type": "uint256"
+      }
+    ],
+    "name": "viewLottery",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "enum PancakeSwapLottery.Status",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "startTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "endTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "priceTicketInCake",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "discountDivisor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[6]",
+            "name": "rewardsBreakdown",
+            "type": "uint256[6]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "treasuryFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[6]",
+            "name": "cakePerBracket",
+            "type": "uint256[6]"
+          },
+          {
+            "internalType": "uint256[6]",
+            "name": "countWinnersPerBracket",
+            "type": "uint256[6]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "firstTicketId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "firstTicketIdNextLottery",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountCollectedInCake",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "finalNumber",
+            "type": "uint32"
+          }
+        ],
+        "internalType": "struct PancakeSwapLottery.Lottery",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -698,12 +893,22 @@
         "type": "uint256"
       }
     ],
-    "name": "viewUserTicketsForLottery",
+    "name": "viewUserInfoForLotteryId",
     "outputs": [
       {
         "internalType": "uint256[]",
         "name": "",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "uint32[]",
+        "name": "",
+        "type": "uint32[]"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "",
+        "type": "bool[]"
       },
       {
         "internalType": "uint256",

@@ -7,9 +7,7 @@ describe('🦙', () => {
 
   it('has supported symbol list', async () => {
     const supportedSymbols = getSupportedUSDSymbols()
-    expect(supportedSymbols).toEqual([
-      'ibWBNB', 'ibBUSD', 'ibETH', 'ibALPACA', 'ibUSDT', 'ibBTCB', 'ibTUSD'
-    ])
+    expect(supportedSymbols).toMatchSnapshot()
   });
 
   it('can get ibALPACA price', async () => {
@@ -26,9 +24,10 @@ describe('🦙', () => {
 
   it('can get ALPACA, ibALPACA price', async () => {
     const [ALPACA, ibALPACA] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'ibALPACA'])
+    console.log(ALPACA, ibALPACA)
 
-    expect(parseFloat(ALPACA.busdPrice)).toBeDefined()
-    expect(parseFloat(ibALPACA.busdPrice)).toBeDefined()
+    expect(parseFloat(ALPACA.busdPrice)).toBeGreaterThan(0)
+    expect(parseFloat(ibALPACA.busdPrice)).toBeGreaterThan(0)
     expect(parseFloat(ibALPACA.busdPrice)).toBeGreaterThan(parseFloat(ALPACA.busdPrice))
   });
 })
