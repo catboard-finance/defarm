@@ -1,27 +1,29 @@
 import { fetchLendsBySymbols } from "./alpaca";
-import { fetchFarmsWithAPRBySymbols, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from "./pancakeswap";
-import { farmsSymbolMap } from "./pancakeswap/config/constants/farms";
+import { fetchFarmsWithAPRBySymbols, fetchFarmUserDataAsync, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from "./pancakeswap";
+import { farmsConfig } from "./pancakeswap/config/constants";
+import { farmsSymbolMap } from "./pancakeswap/config/constants/mapper";
 import tokens from "./pancakeswap/config/constants/tokens";
 
-describe('🍰🦙', () => {
+describe('🍰🦙 global data', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
   it('has supported symbol list', async () => {
     const supportedSymbols = getSupportedUSDSymbols()
-    expect(supportedSymbols).toEqual(["ETH", "MX", "bCFX", "QKC", "MTRG", "TUSD", "WELL", "DERI", "CHR", "CAKE", "WMASS", "UBXT", "BTR", "PMON", "ONE", "OIN", "KUN", "MATH", "xMARK", "BTCB", "DFD", "ALPACA", "HAKKA", "HOO", "TXL", "FOR", "NULS", "RAMP", "DEXE", "TPT", "IOTX", "LINA", "UST", "USDC", "DAI", "VAI", "USDT", "HAKKA", "HOO", "TXL", "FOR", "NULS", "RAMP", "DEXE", "TPT", "xMARK", "IOTX", "LINA", "UST", "USDC", "DAI", "VAI", "USDT"])
+    expect(supportedSymbols).toMatchSnapshot()
   });
 
   it('can get CAKE price', async () => {
     const [cake] = await fetchTokenUSDPricesBySymbols(['CAKE'])
 
-    expect(cake.address).toEqual('0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82')
+    expect(cake.address).toMatchSnapshot()
     expect(parseFloat(cake.busdPrice)).toBeGreaterThan(1)
   });
 
   it('can get ALPACA, ETH, BNB prices', async () => {
     const [alpaca, eth, bnb] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'ETH', 'BNB'])
+    // console.log(alpaca, eth, bnb)
 
     expect(alpaca.symbol).toEqual(tokens.alpaca.symbol)
     expect(alpaca.address).toEqual(tokens.alpaca.address[56])
@@ -48,7 +50,9 @@ describe('🍰🦙', () => {
 
     expect(cake_bnb.lpSymbol).toEqual('CAKE-BNB LP')
     expect(cake_bnb.lpAddresses[56]).toEqual(farmsSymbolMap['CAKE-BNB LP'].lpAddresses[56])
-    expect(parseFloat(cake_bnb.apr)).toBeGreaterThan(0)
+    expect(parseFloat(cake_bnb.cakeRewardsApr)).toBeGreaterThan(0)
+    expect(parseFloat(cake_bnb.lpRewardsApr)).toBeGreaterThan(0)
+    expect(parseFloat(cake_bnb.mintRate)).toBeGreaterThan(0)
   });
 
   it('can return null for unknown price', async () => {
@@ -63,3 +67,21 @@ describe('🍰🦙', () => {
     expect(parseFloat(alpaca.busdPrice)).toBeGreaterThan(0)
   });
 })
+
+describe('🍰 user data', () => {
+  it('can get user data', async () => {
+    const account = "0xE462f59392C5b2754283162A665bb4d6Ff5033ab"
+    const pid = farmsConfig[0].pid
+    const userData = await fetchFarmUserDataAsync(farmsConfig, { account, pids: [pid] })
+
+    expect(userData).toEqual([
+      {
+        pid: 0,
+        allowance: '0',
+        tokenBalance: '0',
+        stakedBalance: '0',
+        earnings: '0'
+      }
+    ])
+  }, 10000)
+});

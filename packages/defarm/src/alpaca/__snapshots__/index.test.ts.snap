@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`🦙 has supported symbol list 1`] = `
+Array [
+  "ibWBNB",
+  "ibBUSD",
+  "ibETH",
+  "ibALPACA",
+  "ibUSDT",
+  "ibBTCB",
+  "ibTUSD",
+]
+`;

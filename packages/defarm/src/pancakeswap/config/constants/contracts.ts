@@ -7,21 +7,13 @@ export default {
     97: '0xd3af5fe61dbaf8f73149bfcfa9fb653ff096029a',
     56: '0x6ab8463a4185b80905e05a9ff80a2d6b714b9e95',
   },
-  lottery: {
-    97: '0x99c2EcD51d52c036B00130d882Bc65f20Fdecf9f',
-    56: '0x3C3f2049cc17C136a604bE23cF7E42745edf3b91',
-  },
-  lotteryNFT: {
-    97: '0x8175c10383511b3a1C68f9dB222dc14A19CC950e',
-    56: '0x5e74094Cd416f55179DBd0E45b1a8ED030e396A1',
-  },
   lotteryV2: {
-    97: '0x4D8B718b4e617ea49bCe6B508c23353Cc7bADd28',
-    56: '',
+    97: '0x5790c3534F30437641541a0FA04C992799602998',
+    56: '0x5aF6D33DE2ccEC94efb1bDF8f92Bd58085432d2c',
   },
   multiCall: {
     56: '0xfF6FD90A470Aaa0c1B8A54681746b07AcdFedc9B',
-    97: '',
+    97: '0x8F3273Fb89B075b1645095ABaC6ed17B2d4Bc576',
   },
   pancakeProfile: {
     56: '0xDf4dBf6536201370F95e06A0F8a7a70fE40E388a',
@@ -66,5 +58,17 @@ export default {
   chainlinkOracle: {
     56: '0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE',
     97: '',
+  },
+  bunnySpecialCakeVault: {
+    56: '0x5B4a770Abe7Eafb2601CA4dF9d73EA99363E60a4',
+    97: '',
+  },
+  bunnySpecialPrediction: {
+    56: '0x342c99e9aC24157657095eC69CB04b73257e7A9C',
+    97: '',
+  },
+  farmAuction: {
+    56: '0xb92Ab7c1edcb273AbA24b0656cEb3681654805D2',
+    97: '0x3F9602593b4f7C67ab045DB51BbDEa94E40fA9Fe',
   },
 }
