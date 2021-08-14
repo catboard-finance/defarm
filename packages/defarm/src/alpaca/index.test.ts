@@ -24,7 +24,7 @@ describe('🦙', () => {
 
   it('can get ALPACA, ibALPACA price', async () => {
     const [ALPACA, ibALPACA] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'ibALPACA'])
-    console.log(ALPACA, ibALPACA)
+    // console.log(ALPACA, ibALPACA)
 
     expect(parseFloat(ALPACA.busdPrice)).toBeGreaterThan(0)
     expect(parseFloat(ibALPACA.busdPrice)).toBeGreaterThan(0)

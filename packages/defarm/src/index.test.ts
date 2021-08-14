@@ -23,7 +23,7 @@ describe('🍰🦙 global data', () => {
 
   it('can get ALPACA, ETH, BNB prices', async () => {
     const [alpaca, eth, bnb] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'ETH', 'BNB'])
-    console.log(alpaca, eth, bnb)
+    // console.log(alpaca, eth, bnb)
 
     expect(alpaca.symbol).toEqual(tokens.alpaca.symbol)
     expect(alpaca.address).toEqual(tokens.alpaca.address[56])
