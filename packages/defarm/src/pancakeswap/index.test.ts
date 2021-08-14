@@ -1,10 +1,9 @@
-import { fetchLendsBySymbols } from "./alpaca";
-import { fetchFarmsWithAPRBySymbols, fetchFarmUserDataAsync, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from "./pancakeswap";
-import { farmsConfig } from "./pancakeswap/config/constants";
-import { farmsSymbolMap } from "./pancakeswap/config/constants/mapper";
-import tokens from "./pancakeswap/config/constants/tokens";
+import { fetchFarmsWithAPRBySymbols, fetchFarmUserDataAsync, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from ".";
+import { farmsConfig } from "./config/constants";
+import { farmsSymbolMap } from "./config/constants/mapper";
+import tokens from "./config/constants/tokens";
 
-describe('🍰🦙 global data', () => {
+describe('🍰 global data', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
@@ -36,13 +35,6 @@ describe('🍰🦙 global data', () => {
     expect(bnb.symbol).toEqual(tokens.bnb.symbol)
     expect(bnb.address).toEqual(tokens.wbnb.address[56])
     expect(parseFloat(bnb.busdPrice)).toBeGreaterThan(0)
-  }, 10000);
-
-  it('can get ALPACA price', async () => {
-    const [alpaca] = await fetchLendsBySymbols(['ALPACA'])
-
-    expect(parseFloat(alpaca.outputToken.busdPrice)).toBeGreaterThan(0)
-    expect(parseFloat(alpaca.ibTokenPrice)).toBeGreaterThan(0)
   }, 10000);
 
   it('can get CAKE-BNB LP info', async () => {

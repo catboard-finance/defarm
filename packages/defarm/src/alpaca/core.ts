@@ -7,6 +7,7 @@ export type Token = {
   symbol: string
   decimals: number
   busdPrice?: string
+  address: string
 }
 
 export interface IBSCAlpacaLends {

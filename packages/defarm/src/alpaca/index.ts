@@ -50,7 +50,7 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
 
     return {
       symbol: token.symbol,
-      address: null,
+      address: token.address,
       busdPrice: token.busdPrice,
     }
   })
