@@ -1,7 +1,7 @@
 import { alpaca, pancakeswap } from '@undefiorg/defarm'
 
 export const fetchALPACA = async () => {
-  const results = await alpaca.fetchLendsBySymbols(['ALPACA'])
+  const results = await alpaca.fetchTokenUSDPricesBySymbols(['ibALPACA'])
   console.log(results)
   return results
 }

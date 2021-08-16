@@ -6,3 +6,4 @@ git commit -m "v$VERSION"
 git flow release start $VERSION
 git flow release finish -m "v$VERSION" $VERSION
 git push --all --follow-tags
+unset GIT_MERGE_AUTOEDIT
