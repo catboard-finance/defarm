@@ -22,6 +22,10 @@ yarn test
 yarn test-dev
 ```
 
+## Debug/Breakpoint
+- [x] Code: By `SHIFT` + `OPTION` + `D`
+- [x] Jest: By click `Debug` above each test.
+
 ## Release
 ```
 yarn login

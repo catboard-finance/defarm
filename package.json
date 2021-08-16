@@ -13,13 +13,14 @@
     "lint": "tslint -p tsconfig.json",
     "clean": "rm -rf lib",
     "coverage": "jest --coverage",
-    "version-bump": "git commit -am \"Version bump to $(npm version patch | cut -c 2-)\"",
+    "bump-minor": "git commit -am \"Version bump to $(npm version minor | cut -c 2-)\"",
+    "bump-patch": "git commit -am \"Version bump to $(npm version patch | cut -c 2-)\"",
     "prebuild": "npm run clean && npm test",
     "build": "tsc --project tsconfig.build.json",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "dev": "tsc -b -w",
-    "bump": "export VERSION=$(grep '\"version\"' package.json | cut -d '\"' -f 4 | head -n 1) && git flow release start $VERSION && git flow release finish -m 'v$VERSION' $VERSION && git push --all --follow-tags",
+    "prerelease": "export VERSION=$(grep '\"version\"' package.json | cut -d '\"' -f 4 | head -n 1) && export GIT_MERGE_AUTOEDIT=no && echo Release $VERSION && git commit -am \"v$VERSION\" && git flow release start $VERSION && git flow release finish -m \"v$VERSION\" $VERSION && git push --all --follow-tags && unset GIT_MERGE_AUTOEDIT",
     "release": "npm run build && npm publish --access=public"
   },
   "files": [
