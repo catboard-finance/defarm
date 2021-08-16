@@ -10,6 +10,12 @@ describe('🦙', () => {
     expect(supportedSymbols).toMatchSnapshot()
   }, 10000);
 
+  it('is not case sensitive', async () => {
+    const [ibALPACA] = await fetchTokenUSDPricesBySymbols(['IBaLPaCa'])
+    expect(ibALPACA.address).toBe('0xf1bE8ecC990cBcb90e166b71E368299f0116d421')
+    expect(parseFloat(ibALPACA.busdPrice)).toBeDefined()
+  }, 10000);
+
   it('can get ibALPACA price', async () => {
     const [ibALPACA] = await fetchTokenUSDPricesBySymbols(['ibALPACA'])
 

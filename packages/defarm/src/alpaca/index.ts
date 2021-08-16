@@ -18,7 +18,7 @@ export const fetchLendsBySymbols = async (symbols: string[] = null, digit: numbe
   const [lends, prices] = await lendsAndPrices
 
   const results = lends.map((lend) => {
-    const price = prices.find(price => price.symbol === lend.inputToken.symbol)
+    const price = prices.find(price => price.symbol.toUpperCase() === lend.inputToken.symbol.toUpperCase())
     const busdPrice = new BigNumber(price.busdPrice)
     const inputToken_busdPrice = busdPrice.toFixed(digit)
     const outputToken_busdPrice = busdPrice.times(lend.ibTokenPrice).toFixed(digit)
@@ -43,7 +43,7 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
   const lends = await fetchLendsBySymbols(symbols)
   const tokens = lends.map(lend => lend.inputToken).concat(lends.map(lend => lend.outputToken))
   const prices = symbols.map(symbol => {
-    const token = tokens.find(token => symbol === token.symbol)
+    const token = tokens.find(token => symbol.toUpperCase() === token.symbol.toUpperCase())
     if (!token) return {
       symbol,
     }

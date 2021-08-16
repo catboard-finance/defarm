@@ -39,7 +39,7 @@ const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
   }
 })
 
-export const getTokenFormIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken === symbol)
+export const getTokenFormIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 
 export const getSupportedUSDSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
 
