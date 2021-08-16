@@ -9,7 +9,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@undefiorg/defarm": "file:../../defarm/lib"
+    "@undefiorg/defarm": "^0.10.2"
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
