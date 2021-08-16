@@ -20,7 +20,7 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "dev": "tsc -b -w",
-    "prerelease": "export VERSION=$(grep '\"version\"' package.json | cut -d '\"' -f 4 | head -n 1) && export GIT_MERGE_AUTOEDIT=no && echo Release $VERSION && git flow release start \"v$VERSION\" && git flow release finish -m \"v$VERSION\" $VERSION && git push --all --follow-tags && unset GIT_MERGE_AUTOEDIT",
+    "prerelease": "export VERSION=$(grep '\"version\"' package.json | cut -d '\"' -f 4 | head -n 1) && export GIT_MERGE_AUTOEDIT=no && echo Release $VERSION && git fetch . develop:main && git push --all --follow-tags && unset GIT_MERGE_AUTOEDIT",
     "release": "npm run build && npm publish --access=public"
   },
   "files": [
