@@ -1,4 +1,4 @@
-import tokens from '../../config/constants/tokens'
+import tokens from './tokens'
 import { Address } from './types'
 
 const { bondly, safemoon } = tokens

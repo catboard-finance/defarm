@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import getRpcUrl from '../utils/getRpcUrl'
+import getRpcUrl from './getRpcUrl'
 
 const RPC_URL = getRpcUrl()
 
