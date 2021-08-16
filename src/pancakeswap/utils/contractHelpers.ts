@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { simpleRpcProvider } from '../utils/providers'
+import { simpleRpcProvider } from './providers'
 import { poolsConfig } from '../config/constants'
 import { PoolCategory } from '../config/constants/types'
 
@@ -24,7 +24,7 @@ import {
   getBunnySpecialCakeVaultAddress,
   getBunnySpecialPredictionAddress,
   getFarmAuctionAddress,
-} from '../utils/addressHelpers'
+} from './addressHelpers'
 
 // ABI
 import profileABI from '../config/abi/pancakeProfile.json'

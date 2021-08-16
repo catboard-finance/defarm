@@ -3,8 +3,8 @@ import { Campaign } from '../config/constants/types'
 import ifosList from '../config/constants/ifo'
 import { campaignMap } from '../config/constants/campaigns'
 import { Achievement, TranslatableText } from '../types'
-import { multicallv2 } from '../utils/multicall'
-import { getPointCenterIfoAddress } from '../utils/addressHelpers'
+import { multicallv2 } from './multicall'
+import { getPointCenterIfoAddress } from './addressHelpers'
 import pointCenterIfoABI from '../config/abi/pointCenterIfo.json'
 
 interface IfoMapResponse {

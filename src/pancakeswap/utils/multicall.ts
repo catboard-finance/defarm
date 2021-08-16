@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { getMulticallContract } from '../utils/contractHelpers'
+import { getMulticallContract } from './contractHelpers'
 import { MultiCallResponse } from './types'
 
 export interface Call {
