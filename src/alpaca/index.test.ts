@@ -44,7 +44,7 @@ describe('🦙', () => {
   it('can get ibBUSD, BUSD price', async () => {
     const [ibBUSD, BUSD] = await fetchTokenUSDPricesBySymbols(['ibBUSD', 'BUSD'])
 
-    expect(parseFloat(BUSD.busdPrice)).not.toEqual(1)
+    expect(parseFloat(BUSD.busdPrice)).toEqual(1)
     expect(parseFloat(ibBUSD.busdPrice)).toBeGreaterThan(0)
   }, 10000);
 
