@@ -76,6 +76,14 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
 		const pair = pairs[i]
 		const farm = farms.find(farm => farm.lpSymbol === pair)
 
+		if (symbol === 'BUSD') {
+			return {
+				symbol,
+				address: tokensConfig.busd.address,
+				busdPrice: "1",
+			}
+		}
+
 		if (!farm) {
 			return {
 				symbol,

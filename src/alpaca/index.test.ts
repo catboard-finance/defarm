@@ -40,4 +40,18 @@ describe('🦙', () => {
     expect(parseFloat(ibALPACA.busdPrice)).toBeGreaterThan(0)
     expect(parseFloat(ibALPACA.busdPrice)).toBeGreaterThan(parseFloat(ALPACA.busdPrice))
   }, 10000);
+
+  it('can get ibBUSD, BUSD price', async () => {
+    const [ibBUSD, BUSD] = await fetchTokenUSDPricesBySymbols(['ibBUSD', 'BUSD'])
+
+    expect(parseFloat(BUSD.busdPrice)).not.toEqual(1)
+    expect(parseFloat(ibBUSD.busdPrice)).toBeGreaterThan(0)
+  }, 10000);
+
+  it('can get ibUSDT price', async () => {
+    const [ibUSDT, USDT] = await fetchTokenUSDPricesBySymbols(['ibUSDT', 'USDT'])
+
+    expect(parseFloat(USDT.busdPrice)).not.toEqual(1)
+    expect(parseFloat(ibUSDT.busdPrice)).toBeGreaterThan(0)
+  }, 10000);
 })
