@@ -1,7 +1,10 @@
-import { readBlockForPositionValue } from "./userEncoder"
+import { getPositionIds } from "../vaults"
+import { getPositionValue } from "./position"
 
 export const fetchPositionValue = async (account: string) => {
-  const positionValue = await readBlockForPositionValue(account)
+  const positions = await getPositionIds(account)
+  // TODO : loop positions
+  const positionValue = await getPositionValue(positions[0])
 
   return positionValue
 }

@@ -1,6 +1,6 @@
 
 import { Chain } from "@defillama/sdk/build/general";
-import { readBlockLendsBySymbols, IBSCAlpacaLends, getTokenFormIBSymbol } from "../core";
+import { getLendsBySymbols, IBSCAlpacaLends, getTokenFormIBSymbol } from "../core";
 import BigNumber from "bignumber.js";
 import { fetchTokenUSDPricesBySymbols as pancakeswap_fetchTokenUSDPricesBySymbols } from "../../pancakeswap";
 
@@ -11,7 +11,7 @@ export const fetchLendsBySymbols = async (symbols: string[] = null, digit: numbe
   const notIBSymbols = Array.from(new Set(symbols.map(symbol => getTokenFormIBSymbol(symbol)?.unstakingToken || symbol)))
 
   const lendsAndPrices = Promise.all([
-    readBlockLendsBySymbols(notIBSymbols, block, chain),
+    getLendsBySymbols(notIBSymbols, block, chain),
     pancakeswap_fetchTokenUSDPricesBySymbols(notIBSymbols)
   ])
 

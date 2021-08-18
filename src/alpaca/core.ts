@@ -47,14 +47,14 @@ export const filterSupportedSymbols = (symbols: string[] = null) => {
   return symbols ? POOLS.filter(pool => symbols.includes(pool.stakingToken.slice(2))) : POOLS
 }
 
-export const readBlockLendsBySymbols = async (symbols: string[] = null, block = 'latest', chain: Chain = 'bsc'): Promise<IBSCAlpacaLends[]> => {
+export const getLendsBySymbols = async (symbols: string[] = null, block = 'latest', chain: Chain = 'bsc'): Promise<IBSCAlpacaLends[]> => {
   const pools = filterSupportedSymbols(symbols)
-  const lends = await readBlockLendsByPoolAddresses(block, chain, pools)
+  const lends = await getLendsByPoolAddresses(block, chain, pools)
   if (!lends || lends.length <= 0) return []
   return lends
 }
 
-export const readBlockLendsByPoolAddresses = async (block = 'latest', chain: Chain = 'bsc', pools: IPoolAddress[]): Promise<IBSCAlpacaLends[]> => {
+export const getLendsByPoolAddresses = async (block = 'latest', chain: Chain = 'bsc', pools: IPoolAddress[]): Promise<IBSCAlpacaLends[]> => {
   const abi = {}
   pools_abi.forEach(pool => abi[`${pool.name}`] = pool)
 

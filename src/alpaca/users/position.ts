@@ -7,11 +7,11 @@ interface ICall {
   params?: any[];
 }
 
-export const readBlockForPositionValue = async (account: string, block = 'latest', chain: Chain = 'bsc'): Promise<string[]> => {
+export const getPositionValue = async (positionId: number, block = 'latest', chain: Chain = 'bsc'): Promise<string[]> => {
   const target = '0xe8084D7Ded35E2840386f04d609cdb49C7E36d88'
   let calls: ICall[] = [{
     target,
-    params: [18308],
+    params: [positionId],
   }]
 
   const shareAmount = (
