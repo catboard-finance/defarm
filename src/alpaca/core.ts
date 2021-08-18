@@ -43,7 +43,7 @@ export const getTokenFormIBSymbol = (symbol: string) => IB_POOLS.find(pool => po
 
 export const getSupportedUSDSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
 
-const filterSupportedSymbols = (symbols: string[] = null) => {
+export const filterSupportedSymbols = (symbols: string[] = null) => {
   return symbols ? POOLS.filter(pool => symbols.includes(pool.stakingToken.slice(2))) : POOLS
 }
 
@@ -54,7 +54,7 @@ export const readBlockLendsBySymbols = async (symbols: string[] = null, block = 
   return lends
 }
 
-const readBlockLendsByPoolAddresses = async (block = 'latest', chain: Chain = 'bsc', pools: IPoolAddress[]): Promise<IBSCAlpacaLends[]> => {
+export const readBlockLendsByPoolAddresses = async (block = 'latest', chain: Chain = 'bsc', pools: IPoolAddress[]): Promise<IBSCAlpacaLends[]> => {
   const abi = {}
   pools_abi.forEach(pool => abi[`${pool.name}`] = pool)
 
