@@ -5,6 +5,9 @@ Decode Defi Farm for human readable.
 - [x] `ALPACA`: fetchLendsBySymbols
 - [x] `CAKE`: fetchFarmsWithAPRBySymbols
 - [x] `CAKE`: fetchTokenUSDPricesBySymbols
+- [ ] `ALPACA`: `USER` fetchPositionValue
+- [ ] `ALPACA`: `USER` fetchPoolReward
+- [ ] `CAKE`: `USER` fetchPoolReward
 
 ## Installation
 ```
