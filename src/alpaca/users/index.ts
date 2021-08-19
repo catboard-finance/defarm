@@ -1,10 +1,9 @@
-import { getPositionIds } from "../vaults"
-import { getPositionValue } from "./position"
+import { getPositions } from "../vaults"
+import { getPositionsInfo } from "./position"
 
-export const fetchPositionValue = async (account: string) => {
-  const positions = await getPositionIds(account)
-  // TODO : loop positions
-  const positionValue = await getPositionValue(positions[0])
+export const fetchPositionsInfo = async (account: string) => {
+  const positions = await getPositions(account)
+  const positionsInfo = await getPositionsInfo(positions)
 
-  return positionValue
+  return positionsInfo
 }
