@@ -11,5 +11,5 @@ describe('🦙 User', () => {
     console.log('log:', log)
 
     expect(log).toBeDefined()
-  }, 10000);
+  }, 100000);
 })
