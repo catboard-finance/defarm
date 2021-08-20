@@ -5,9 +5,12 @@ Decode Defi Farm for human readable.
 - [x] `ALPACA`: fetchLendsBySymbols
 - [x] `CAKE`: fetchFarmsWithAPRBySymbols
 - [x] `CAKE`: fetchTokenUSDPricesBySymbols
-- [ ] `ALPACA`: `USER` fetchPositionValue
+- [ ] `ALPACA`: `USER` Get user's active position
 - [ ] `ALPACA`: `USER` fetchPoolReward
 - [ ] `CAKE`: `USER` fetchPoolReward
+
+## TODO
+- [ ] Indexing user from ALPACA position from [Vault](https://bscscan.com/address/0x158da805682bdc8ee32d52833ad41e74bb951e59#readProxyContract).
 
 ## Installation
 ```
