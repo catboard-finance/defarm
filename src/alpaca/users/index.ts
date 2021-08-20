@@ -20,7 +20,7 @@ export const formatBigNumberToFixed = (number: BigNumber, displayDecimals = 18, 
   return (+formattedString).toFixed(displayDecimals)
 }
 
-const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.BigNumber.from(value))
+export const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.BigNumber.from(value))
 
 export const fetchPositionsInfo = async (account: string) => {
   // Raw
@@ -30,9 +30,10 @@ export const fetchPositionsInfo = async (account: string) => {
   // Parsed
   const parsedPositionsInfo = positionsInfo.map(positionInfo => ({
     ...positionInfo,
-    positionValue: parseFloat(stringToFixed(positionInfo.positionValue)),
-    totalDebt: parseFloat(stringToFixed(positionInfo.totalDebt)),
+    positionValue: parseFloat(formatBigNumberToFixed(positionInfo.positionValue)),
+    totalDebt: parseFloat(formatBigNumberToFixed(positionInfo.totalDebt)),
     vaultSymbol: positionInfo.vaultSymbol,
+    equityValue: parseFloat(formatBigNumberToFixed(positionInfo.positionValue.sub(positionInfo.totalDebt))),
   }))
 
   return parsedPositionsInfo

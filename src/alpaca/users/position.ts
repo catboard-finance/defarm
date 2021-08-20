@@ -1,5 +1,6 @@
 import { api } from "@defillama/sdk";
 import { Chain } from "@defillama/sdk/build/general";
+import { BigNumber } from "ethers";
 import abi from './activePosition.abi.json'
 
 interface ICall {
@@ -15,15 +16,15 @@ interface IPosition {
   worker: string // address // "0xe8084d7ded35e2840386f04d609cdb49c7e36d88",
   checkedAt: string // Date // "02021-08-12T14:30:25.412Z",
   adjustNote: string // null,
-  debtShare: string // BigNumber // "4641020177806889684795"
+  debtShare: BigNumber // BigNumber // "4641020177806889684795"
 }
 
 interface IEncodedPosition extends Omit<IPosition, 'debtShare'> {
-  positionValue: string // BigNumber
+  positionValue: BigNumber // BigNumber
 }
 
 interface IEncodedVault {
-  totalDebt: string // BigNumber
+  totalDebt: BigNumber // BigNumber
 }
 
 interface PositionsInfo extends IEncodedPosition, IEncodedVault {
@@ -63,11 +64,9 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
     })
   ).output;
 
-  const positionValues = balances.map(balance => balance.output)
-
   let encodedPositions: IEncodedPosition[] = positions.map((position, i) => ({
     ...position,
-    positionValue: positionValues[i]
+    positionValue: BigNumber.from(balances[i].output)
   }))
 
   // Call debtShareToVal(debtShare) for `totalDebt`
@@ -87,7 +86,7 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
   ).output;
 
   const encodedVaults: IEncodedVault[] = totalDebts.map(totalDebt => ({
-    totalDebt: totalDebt.output
+    totalDebt: BigNumber.from(totalDebt.output)
   }))
 
   // Call debtToken
@@ -107,9 +106,12 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
 
   let positionsInfo: PositionsInfo[] = encodedPositions.map((encodedPosition, i) => ({
     ...encodedPosition,
-    totalDebt: encodedVaults[i].totalDebt,
+    totalDebt: BigNumber.from(encodedVaults[i].totalDebt),
     vaultSymbol: symbols[i].output,
   }))
+
+  // Call equityValue
+
 
   return positionsInfo
 }
