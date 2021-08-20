@@ -8,7 +8,7 @@ interface ICall {
   params?: any[];
 }
 
-interface IPosition {
+interface IApiPosition {
   id: number // 811867,
   vault: string // address // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
   owner: string // address // "0x8155430e4860e791aeddb43e4764d15de7e0def1",
@@ -19,77 +19,45 @@ interface IPosition {
   debtShare: BigNumber // BigNumber // "4641020177806889684795"
 }
 
-interface IEncodedPosition extends Omit<IPosition, 'debtShare'> {
-  positionValue: BigNumber // BigNumber
+interface IEncodedUserPosition extends IApiPosition {
+  positionValueUSD: BigNumber // BigNumber
+  debtValueUSD: BigNumber // BigNumber
 }
 
-interface IEncodedVault {
-  totalDebt: BigNumber // BigNumber
-}
-
-interface PositionsInfo extends IEncodedPosition, IEncodedVault {
+interface UserPosition extends IEncodedUserPosition {
   vaultSymbol: string // symbol
 }
 
-export const getPositionsInfo = async (positions: IPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<PositionsInfo[]> => {
+export const getUserPositions = async (positions: IApiPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<UserPosition[]> => {
   // Call shares(positionId) for shareAmount
   let calls: ICall[] = positions.map(position => ({
-    target: position.worker,
+    target: position.vault,
     params: [position.positionId],
   }))
 
-  const shareAmounts = (
+  const positionInfos = (
     await api.abi.multiCall({
       // @ts-ignore
       block,
       calls,
-      abi: abi.shares,
+      abi: abi.positionInfo,
       chain,
     })
   ).output
 
-  // Call shareToBalance(shareAmount) for `positionValue`
-  calls = shareAmounts.map((shareAmount, i) => ({
-    target: positions[i].worker,
-    params: [shareAmount.output],
-  }))
-
-  const balances = (
-    await api.abi.multiCall({
-      // @ts-ignore
-      block,
-      calls,
-      abi: abi.shareToBalance,
-      chain,
-    })
-  ).output;
-
-  let encodedPositions: IEncodedPosition[] = positions.map((position, i) => ({
-    ...position,
-    positionValue: BigNumber.from(balances[i].output)
-  }))
-
-  // Call debtShareToVal(debtShare) for `totalDebt`
-  calls = positions.map((shareAmount, i) => ({
+  // Call positionInfo for positionValue, debtValue
+  calls = positionInfos.map((positionInfo, i) => ({
     target: positions[i].vault,
-    params: [shareAmount.debtShare],
+    params: [positionInfo.positionId],
   }))
 
-  const totalDebts = (
-    await api.abi.multiCall({
-      // @ts-ignore
-      block,
-      calls,
-      abi: abi.debtShareToVal,
-      chain,
-    })
-  ).output;
-
-  const encodedVaults: IEncodedVault[] = totalDebts.map(totalDebt => ({
-    totalDebt: BigNumber.from(totalDebt.output)
+  let encodedPositions: IEncodedUserPosition[] = positions.map((position, i) => ({
+    ...position,
+    positionValueUSD: BigNumber.from(positionInfos[i].output[0]),
+    debtValueUSD: BigNumber.from(positionInfos[i].output[1])
   }))
 
-  // Call debtToken
+  // Call symbol
   calls = positions.map((_, i) => ({
     target: positions[i].vault
   }))
@@ -104,37 +72,10 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
     })
   ).output;
 
-  // Call positionInfo
-
-  let positionsInfo: PositionsInfo[] = encodedPositions.map((encodedPosition, i) => ({
+  let positionsInfo: UserPosition[] = encodedPositions.map((encodedPosition, i) => ({
     ...encodedPosition,
-    totalDebt: BigNumber.from(encodedVaults[i].totalDebt),
     vaultSymbol: symbols[i].output,
   }))
 
   return positionsInfo
 }
-
-// const getVaultInfo = async (positions: IPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedVault[]> => {
-//   // Call debtShareToVal(debtShare) for `totalDebt`
-//   const calls = positions.map((shareAmount, i) => ({
-//     target: positions[i].worker,
-//     params: [shareAmount.debtShare],
-//   }))
-
-//   const totalDebts = (
-//     await api.abi.multiCall({
-//       // @ts-ignore
-//       block,
-//       calls,
-//       abi: abi.debtShareToVal,
-//       chain,
-//     })
-//   ).output;
-
-//   const encodedVaults: IEncodedVault[] = totalDebts.map(totalDebt => ({
-//     totalDebt: totalDebt
-//   }))
-
-//   return encodedVaults
-// }

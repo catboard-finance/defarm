@@ -1,6 +1,6 @@
-import fetch from 'node-fetch'
+// import fetch from 'node-fetch'
 import { getPositions } from "../vaults"
-import { getPositionsInfo as getUserPositions } from "./position"
+import { getUserPositions as getUserPositions } from "./position"
 
 import { formatUnits } from "@ethersproject/units";
 import { BigNumber, ethers } from "ethers";
@@ -25,37 +25,32 @@ export const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.Bi
 
 export const fetchPositionsInfo = async (account: string) => {
   // Raw
-  const positions = [10121] || await getPositions(account)
+  const positions = await getPositions(account)
   const userPositions = await getUserPositions(positions)
 
   // Prices
   // const PRICE_URI = 'https://api.binance.com/api/v3/ticker/price?symbol='
-  const PRICE_URI = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='
-  const [CAKE, ALAPACA] = await Promise.all([
-    (await fetch(`${PRICE_URI}pancakeswap-token`)).json(),
-    (await fetch(`${PRICE_URI}alpaca-finance`)).json()
-  ])
+  // const PRICE_URI = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='
+  // const [CAKE, ALAPACA] = await Promise.all([
+  //   (await fetch(`${PRICE_URI}pancakeswap-token`)).json(),
+  //   (await fetch(`${PRICE_URI}alpaca-finance`)).json()
+  // ])
 
-  CAKE
-  ALAPACA
+  // CAKE
+  // ALAPACA
 
   // Parsed
   const parsedUserPositions = userPositions.map(userPosition => {
-    const positionValue = parseFloat(formatBigNumberToFixed(userPosition.positionValue))
-
-    // TODO GET SYMBOL
-    const positionValueUSDT = positionValue * 22.37 / 2
-
-    const totalDebt = parseFloat(formatBigNumberToFixed(userPosition.totalDebt))
-    const equityValue = positionValueUSDT - totalDebt
-    const debtRatio = totalDebt <= 0 ? 0 : 100 * totalDebt / positionValueUSDT
+    const positionValueUSD = parseFloat(formatBigNumberToFixed(userPosition.positionValueUSD))
+    const debtValueUSD = parseFloat(formatBigNumberToFixed(userPosition.debtValueUSD))
+    const equityValue = positionValueUSD - debtValueUSD
+    const debtRatio = debtValueUSD <= 0 ? 0 : 100 * debtValueUSD / positionValueUSD
     const safetyBuffer = 80 - debtRatio
 
     return ({
       ...userPosition,
-      positionValue,
-      positionValueUSDT,
-      totalDebt,
+      positionValueUSD,
+      debtValueUSD,
       vaultSymbol: userPosition.vaultSymbol,
       equityValue,
       debtRatio,
