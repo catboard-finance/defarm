@@ -56,14 +56,14 @@
     "stateMutability": "view",
     "type": "function"
   },
-  "debtToken": {
+  "symbol": {
     "inputs": [],
-    "name": "debtToken",
+    "name": "symbol",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "string",
         "name": "",
-        "type": "address"
+        "type": "string"
       }
     ],
     "stateMutability": "view",

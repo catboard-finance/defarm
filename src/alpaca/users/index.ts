@@ -31,7 +31,8 @@ export const fetchPositionsInfo = async (account: string) => {
   const parsedPositionsInfo = positionsInfo.map(positionInfo => ({
     ...positionInfo,
     positionValue: parseFloat(stringToFixed(positionInfo.positionValue)),
-    totalDebt: parseFloat(stringToFixed(positionInfo.totalDebt))
+    totalDebt: parseFloat(stringToFixed(positionInfo.totalDebt)),
+    vaultSymbol: positionInfo.vaultSymbol,
   }))
 
   return parsedPositionsInfo

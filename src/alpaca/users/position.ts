@@ -9,10 +9,10 @@ interface ICall {
 
 interface IPosition {
   id: number // 811867,
-  vault: string // Address // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
-  owner: string // Address // "0x8155430e4860e791aeddb43e4764d15de7e0def1",
+  vault: string // address // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
+  owner: string // address // "0x8155430e4860e791aeddb43e4764d15de7e0def1",
   positionId: number // 18308,
-  worker: string // Address // "0xe8084d7ded35e2840386f04d609cdb49c7e36d88",
+  worker: string // address // "0xe8084d7ded35e2840386f04d609cdb49c7e36d88",
   checkedAt: string // Date // "02021-08-12T14:30:25.412Z",
   adjustNote: string // null,
   debtShare: string // BigNumber // "4641020177806889684795"
@@ -27,7 +27,7 @@ interface IEncodedVault {
 }
 
 interface PositionsInfo extends IEncodedPosition, IEncodedVault {
-
+  vaultSymbol: string // symbol
 }
 
 export const getPositionsInfo = async (positions: IPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<PositionsInfo[]> => {
@@ -90,12 +90,28 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
     totalDebt: totalDebt.output
   }))
 
-  const positionInfo: PositionsInfo[] = encodedPositions.map((encodedPosition, i) => ({
-    ...encodedPosition,
-    totalDebt: encodedVaults[i].totalDebt
+  // Call debtToken
+  calls = positions.map((_, i) => ({
+    target: positions[i].vault
   }))
 
-  return positionInfo
+  const symbols = (
+    await api.abi.multiCall({
+      // @ts-ignore
+      block,
+      calls,
+      abi: abi.symbol,
+      chain,
+    })
+  ).output;
+
+  let positionsInfo: PositionsInfo[] = encodedPositions.map((encodedPosition, i) => ({
+    ...encodedPosition,
+    totalDebt: encodedVaults[i].totalDebt,
+    vaultSymbol: symbols[i].output,
+  }))
+
+  return positionsInfo
 }
 
 // const getVaultInfo = async (positions: IPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedVault[]> => {
