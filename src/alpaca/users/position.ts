@@ -1,8 +1,6 @@
 import { api } from "@defillama/sdk";
 import { Chain } from "@defillama/sdk/build/general";
-import { formatUnits } from "@ethersproject/units";
-import { BigNumber } from "ethers";
-import abi from './positionValue.abi.json'
+import abi from './activePosition.abi.json'
 
 interface ICall {
   target: string;
@@ -21,20 +19,18 @@ interface IPosition {
 }
 
 interface IEncodedPosition extends Omit<IPosition, 'debtShare'> {
-  debtShare: number
-  balance: number
+  positionValue: string // BigNumber
 }
 
-/**
- * Method to format the display of wei given an ethers.BigNumber object with toFixed
- * Note: rounds
- */
-export const formatBigNumberToFixed = (number: BigNumber, displayDecimals = 18, decimals = 18) => {
-  const formattedString = formatUnits(number, decimals)
-  return (+formattedString).toFixed(displayDecimals)
+interface IEncodedVault {
+  totalDebt: string // BigNumber
 }
 
-export const getPositionsInfo = async (positions: IPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedPosition[]> => {
+interface PositionsInfo extends IEncodedPosition, IEncodedVault {
+
+}
+
+export const getPositionsInfo = async (positions: IPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<PositionsInfo[]> => {
   // Call shares(positionId) for shareAmount
   let calls: ICall[] = positions.map(position => ({
     target: position.worker,
@@ -51,7 +47,7 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
     })
   ).output
 
-  // Call shareToBalance(shareAmount) for balance
+  // Call shareToBalance(shareAmount) for `positionValue`
   calls = shareAmounts.map((shareAmount, i) => ({
     target: positions[i].worker,
     params: [shareAmount.output],
@@ -67,13 +63,61 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
     })
   ).output;
 
-  const balanceOutputs = balances.map(balance => parseFloat(formatBigNumberToFixed(balance.output)))
+  const positionValues = balances.map(balance => balance.output)
 
-  const encodedPositions: IEncodedPosition[] = positions.map((position, i) => ({
+  let encodedPositions: IEncodedPosition[] = positions.map((position, i) => ({
     ...position,
-    debtShare: parseFloat(formatBigNumberToFixed(BigNumber.from(position.debtShare))),
-    balance: balanceOutputs[i]
+    positionValue: positionValues[i]
   }))
 
-  return encodedPositions
+  // Call debtShareToVal(debtShare) for `totalDebt`
+  calls = positions.map((shareAmount, i) => ({
+    target: positions[i].vault,
+    params: [shareAmount.debtShare],
+  }))
+
+  const totalDebts = (
+    await api.abi.multiCall({
+      // @ts-ignore
+      block,
+      calls,
+      abi: abi.debtShareToVal,
+      chain,
+    })
+  ).output;
+
+  const encodedVaults: IEncodedVault[] = totalDebts.map(totalDebt => ({
+    totalDebt: totalDebt.output
+  }))
+
+  const positionInfo: PositionsInfo[] = encodedPositions.map((encodedPosition, i) => ({
+    ...encodedPosition,
+    totalDebt: encodedVaults[i].totalDebt
+  }))
+
+  return positionInfo
 }
+
+// const getVaultInfo = async (positions: IPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedVault[]> => {
+//   // Call debtShareToVal(debtShare) for `totalDebt`
+//   const calls = positions.map((shareAmount, i) => ({
+//     target: positions[i].worker,
+//     params: [shareAmount.debtShare],
+//   }))
+
+//   const totalDebts = (
+//     await api.abi.multiCall({
+//       // @ts-ignore
+//       block,
+//       calls,
+//       abi: abi.debtShareToVal,
+//       chain,
+//     })
+//   ).output;
+
+//   const encodedVaults: IEncodedVault[] = totalDebts.map(totalDebt => ({
+//     totalDebt: totalDebt
+//   }))
+
+//   return encodedVaults
+// }
