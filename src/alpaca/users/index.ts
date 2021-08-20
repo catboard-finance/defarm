@@ -1,5 +1,6 @@
+import fetch from 'node-fetch'
 import { getPositions } from "../vaults"
-import { getPositionsInfo } from "./position"
+import { getPositionsInfo as getUserPositions } from "./position"
 
 import { formatUnits } from "@ethersproject/units";
 import { BigNumber, ethers } from "ethers";
@@ -24,17 +25,43 @@ export const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.Bi
 
 export const fetchPositionsInfo = async (account: string) => {
   // Raw
-  const positions = await getPositions(account)
-  const positionsInfo = await getPositionsInfo(positions)
+  const positions = [10121] || await getPositions(account)
+  const userPositions = await getUserPositions(positions)
+
+  // Prices
+  // const PRICE_URI = 'https://api.binance.com/api/v3/ticker/price?symbol='
+  const PRICE_URI = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='
+  const [CAKE, ALAPACA] = await Promise.all([
+    (await fetch(`${PRICE_URI}pancakeswap-token`)).json(),
+    (await fetch(`${PRICE_URI}alpaca-finance`)).json()
+  ])
+
+  CAKE
+  ALAPACA
 
   // Parsed
-  const parsedPositionsInfo = positionsInfo.map(positionInfo => ({
-    ...positionInfo,
-    positionValue: parseFloat(formatBigNumberToFixed(positionInfo.positionValue)),
-    totalDebt: parseFloat(formatBigNumberToFixed(positionInfo.totalDebt)),
-    vaultSymbol: positionInfo.vaultSymbol,
-    equityValue: parseFloat(formatBigNumberToFixed(positionInfo.positionValue.sub(positionInfo.totalDebt))),
-  }))
+  const parsedUserPositions = userPositions.map(userPosition => {
+    const positionValue = parseFloat(formatBigNumberToFixed(userPosition.positionValue))
 
-  return parsedPositionsInfo
+    // TODO GET SYMBOL
+    const positionValueUSDT = positionValue * 22.37 / 2
+
+    const totalDebt = parseFloat(formatBigNumberToFixed(userPosition.totalDebt))
+    const equityValue = positionValueUSDT - totalDebt
+    const debtRatio = totalDebt <= 0 ? 0 : 100 * totalDebt / positionValueUSDT
+    const safetyBuffer = 80 - debtRatio
+
+    return ({
+      ...userPosition,
+      positionValue,
+      positionValueUSDT,
+      totalDebt,
+      vaultSymbol: userPosition.vaultSymbol,
+      equityValue,
+      debtRatio,
+      safetyBuffer,
+    })
+  })
+
+  return parsedUserPositions
 }

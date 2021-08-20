@@ -1,7 +1,7 @@
 import { api } from "@defillama/sdk";
 import { Chain } from "@defillama/sdk/build/general";
 import { BigNumber } from "ethers";
-import abi from './activePosition.abi.json'
+import abi from './userPosition.abi.json'
 
 interface ICall {
   target: string;
@@ -104,14 +104,13 @@ export const getPositionsInfo = async (positions: IPosition[], block = 'latest',
     })
   ).output;
 
+  // Call positionInfo
+
   let positionsInfo: PositionsInfo[] = encodedPositions.map((encodedPosition, i) => ({
     ...encodedPosition,
     totalDebt: BigNumber.from(encodedVaults[i].totalDebt),
     vaultSymbol: symbols[i].output,
   }))
-
-  // Call equityValue
-
 
   return positionsInfo
 }
