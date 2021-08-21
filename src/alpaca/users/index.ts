@@ -23,7 +23,7 @@ export const formatBigNumberToFixed = (number: BigNumber, displayDecimals = 18, 
 
 export const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.BigNumber.from(value))
 
-export const fetchPositionsInfo = async (account: string) => {
+export const fetchUserPositions = async (account: string) => {
   // Raw
   const positions = await getPositions(account)
   const userPositions = await getUserPositions(positions)
