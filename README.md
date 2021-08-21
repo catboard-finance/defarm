@@ -11,6 +11,8 @@ Decode Defi Farm for human readable.
 
 ## TODO
 - [ ] Indexing user from ALPACA position from [Vault](https://bscscan.com/address/0x158da805682bdc8ee32d52833ad41e74bb951e59#readProxyContract).
+- [ ] Try typechain.
+- [ ] Try full achieved node.
 
 ## Installation
 ```
