@@ -1,52 +1,19 @@
 {
-  "shares": {
+  "positionInfo": {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "id",
         "type": "uint256"
       }
     ],
-    "name": "shares",
+    "name": "positionInfo",
     "outputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  "shareToBalance": {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "share",
-        "type": "uint256"
-      }
-    ],
-    "name": "shareToBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  "debtShareToVal": {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "debtShare",
-        "type": "uint256"
-      }
-    ],
-    "name": "debtShareToVal",
-    "outputs": [
+      },
       {
         "internalType": "uint256",
         "name": "",
@@ -69,25 +36,14 @@
     "stateMutability": "view",
     "type": "function"
   },
-  "positionInfo": {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      }
-    ],
-    "name": "positionInfo",
+  "farmingToken": {
+    "inputs": [],
+    "name": "farmingToken",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "stateMutability": "view",

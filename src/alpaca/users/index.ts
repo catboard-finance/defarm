@@ -1,4 +1,4 @@
-// import fetch from 'node-fetch'
+import fetch from 'node-fetch'
 import { getPositions } from "../vaults"
 import { getUserPositions as getUserPositions } from "./position"
 
@@ -29,15 +29,21 @@ export const fetchPositionsInfo = async (account: string) => {
   const userPositions = await getUserPositions(positions)
 
   // Prices
-  // const PRICE_URI = 'https://api.binance.com/api/v3/ticker/price?symbol='
+  const PRICE_URI = 'https://api.binance.com/api/v3/ticker/price?symbol='
+  const [CAKE, ALPACA] = await Promise.all([
+    (await fetch(`${PRICE_URI}CAKEUSDT`)).json(),
+    (await fetch(`${PRICE_URI}ALPACAUSDT`)).json()
+  ])
   // const PRICE_URI = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='
   // const [CAKE, ALAPACA] = await Promise.all([
   //   (await fetch(`${PRICE_URI}pancakeswap-token`)).json(),
   //   (await fetch(`${PRICE_URI}alpaca-finance`)).json()
   // ])
 
-  // CAKE
-  // ALAPACA
+  const priceMap = {
+    CAKE,
+    ALPACA
+  }
 
   // Parsed
   const parsedUserPositions = userPositions.map(userPosition => {
@@ -46,6 +52,9 @@ export const fetchPositionsInfo = async (account: string) => {
     const equityValue = positionValueUSD - debtValueUSD
     const debtRatio = debtValueUSD <= 0 ? 0 : 100 * debtValueUSD / positionValueUSD
     const safetyBuffer = 80 - debtRatio
+    const farmTokenPriceUSD = priceMap[userPosition.farmSymbol].price
+    const quoteTokenAmount = positionValueUSD * 0.5
+    const farmTokenAmount = quoteTokenAmount / farmTokenPriceUSD
 
     return ({
       ...userPosition,
@@ -55,6 +64,8 @@ export const fetchPositionsInfo = async (account: string) => {
       equityValue,
       debtRatio,
       safetyBuffer,
+      farmTokenAmount,
+      quoteTokenAmount,
     })
   })
 

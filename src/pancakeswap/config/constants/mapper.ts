@@ -1,5 +1,5 @@
-import { farmsConfig } from './index'
-import { FarmConfig } from './types'
+import { farmsConfig, tokensConfig } from './index'
+import { FarmConfig, Token } from './types'
 
 interface FarmSymbolMap {
   [lpSymbol: string]: FarmConfig;
@@ -22,3 +22,16 @@ farmsConfig.forEach(farmConfig => {
 })
 
 export const farmsAddressMap: FarmAddressMap = _farmsAddressMap
+
+
+interface TokenAddressMap {
+  [address: string]: Token;
+}
+
+const _tokensAddressMap = {}
+for (const [_, value] of Object.entries(tokensConfig)) {
+  if (!value["address"]) continue
+  _tokensAddressMap[value["address"][56]] = _tokensAddressMap[value["address"][56]] || value
+}
+
+export const tokensAddressMap: TokenAddressMap = _tokensAddressMap

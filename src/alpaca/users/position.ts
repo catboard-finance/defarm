@@ -1,6 +1,7 @@
 import { api } from "@defillama/sdk";
 import { Chain } from "@defillama/sdk/build/general";
 import { BigNumber } from "ethers";
+import { tokensAddressMap } from "../../pancakeswap/config/constants/mapper";
 import abi from './userPosition.abi.json'
 
 interface ICall {
@@ -25,6 +26,7 @@ interface IEncodedUserPosition extends IApiPosition {
 }
 
 interface UserPosition extends IEncodedUserPosition {
+  farmSymbol: string // symbol
   vaultSymbol: string // symbol
 }
 
@@ -57,7 +59,7 @@ export const getUserPositions = async (positions: IApiPosition[], block = 'lates
     debtValueUSD: BigNumber.from(positionInfos[i].output[1])
   }))
 
-  // Call symbol
+  // Get quote symbol
   calls = positions.map((_, i) => ({
     target: positions[i].vault
   }))
@@ -72,10 +74,33 @@ export const getUserPositions = async (positions: IApiPosition[], block = 'lates
     })
   ).output;
 
-  let positionsInfo: UserPosition[] = encodedPositions.map((encodedPosition, i) => ({
-    ...encodedPosition,
-    vaultSymbol: symbols[i].output,
+  // Get base symbol as `farmingToken`
+  calls = positions.map((_, i) => ({
+    target: positions[i].worker
   }))
+
+  const farmingTokens = (
+    await api.abi.multiCall({
+      // @ts-ignore
+      block,
+      calls,
+      abi: abi.farmingToken,
+      chain,
+    })
+  ).output
+
+  // Merge
+  let positionsInfo: UserPosition[] = encodedPositions.map((encodedPosition, i) => {
+    const tokenAddress = farmingTokens[i].output
+    const mapped = tokensAddressMap[tokenAddress]
+    const farmSymbol = mapped.symbol
+
+    return ({
+      ...encodedPosition,
+      farmSymbol,
+      vaultSymbol: symbols[i].output,
+    })
+  })
 
   return positionsInfo
 }
