@@ -1,11 +1,11 @@
 require('dotenv').config()
 import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
-import { ITransaction } from '../../users';
 import { BigNumber, ethers } from 'ethers';
 import ALPACA_VAULT_ABI from '../abi/Vault.abi.json'
 import { parseEther } from 'ethers/lib/utils';
 import { formatBigNumberToFixed } from '..';
+import alpacaInfo from '../info.mainnet.json'
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 
@@ -18,11 +18,20 @@ export const getPositions = async (account: string, block = 'latest', chain: Cha
   return data.positions
 }
 
-const ALPACA_VAULTS = ["0x158da805682bdc8ee32d52833ad41e74bb951e59"]
+const ALPACA_VAULT_ADDRESSES = [
+  "0x5f94f61095731b669b30ed1f3f4586BBb51f4001", // Pancakeswap
+  "0xcE37fD1Ff0A6cb4A6A59cd46CCf55D5Dc70ec585", // Waultswap
+  "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90", // PancakeswapSingleAsset
+  ...alpacaInfo.Vaults.map(vault => vault.address)
+].map(vault => vault.toLowerCase())
 
-export const filterVaults = (txList: ITransaction[]) => {
-  return txList.filter(tx => ALPACA_VAULTS.includes(tx.to_address))
+export const filterVaults = (txList: ITransfer[]) => {
+  return txList.filter(tx => {
+    return ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
+  })
 }
+
+// POC ////////////////////////////////////////
 
 const WORKER_ADDRESS_MAP = {
   "0xe8084D7Ded35E2840386f04d609cdb49C7E36d88": "USDT CakeMaxiWorker",
