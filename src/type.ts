@@ -1,5 +1,3 @@
-import fetch from 'node-fetch'
-fetch
 export interface ITransaction {
   hash: string // "0x5590f91d196f06f8ad23ae26ae11f918805264735550b377fb8c6078d312bc6a",
   nonce: string // "19",
