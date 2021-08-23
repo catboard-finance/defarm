@@ -1,4 +1,6 @@
-interface ITransaction {
+import fetch from 'node-fetch'
+fetch
+export interface ITransaction {
   hash: string // "0x5590f91d196f06f8ad23ae26ae11f918805264735550b377fb8c6078d312bc6a",
   nonce: string // "19",
   transaction_index: string // "494",
@@ -18,14 +20,14 @@ interface ITransaction {
   block_hash: string // "0x9673166f4eb5e5f7a224d40ec2d3572777f51badf2e6ce7ed5bfb373b6325e06"
 }
 
-interface ITransactionResponse {
+export interface ITransactionResponse {
   total: number // 22,
   page: number // 0,
   page_size: number // 500,
   result: ITransaction[]
 }
 
-interface ITransfer {
+export interface ITransfer {
   transaction_hash: string //0x09ed731658832544e14c8b0d89eb970b892dd056a6499b10f9a31e9d15ebda5d",
   address: string //0x5190b01965b6e3d786706fd4a999978626c19880",
   block_timestamp: string //2021-08-13T17:19:09.000Z",

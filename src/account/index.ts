@@ -2,6 +2,7 @@ require('dotenv').config()
 
 import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
+import { ITransactionResponse, ITransaction, ITransfer } from '../type';
 
 const MORALIS_API_URI = `https://deep-index.moralis.io/api/v2`
 

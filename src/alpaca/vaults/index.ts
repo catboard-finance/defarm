@@ -6,6 +6,7 @@ import ALPACA_VAULT_ABI from '../abi/Vault.abi.json'
 import { parseEther } from 'ethers/lib/utils';
 import alpacaInfo from '../info.mainnet.json'
 import { formatBigNumberToFixed } from '../utils/converter';
+import { ITransfer } from '../../type';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 
