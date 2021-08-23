@@ -5,7 +5,15 @@ export interface ICall {
   params?: any[];
 }
 
-export interface UserLend {
+export interface IUserLend {
   poolAddress: string;
   balance: BigNumber;
+}
+
+export interface IUserStake {
+  poolAddress: string; // address;
+  amount: BigNumber;
+  rewardDebt: BigNumber;
+  bonusDebt: BigNumber;
+  fundedBy: string // address;
 }

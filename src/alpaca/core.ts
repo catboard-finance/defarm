@@ -30,7 +30,7 @@ interface IIbPool {
 }
 
 const IB_ONLY_POOLS = POOLS.filter(pool => pool.stakingToken.startsWith('ib'))
-const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
+export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
   return {
     id: pool.id,
     address: pool.address,

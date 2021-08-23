@@ -1,4 +1,4 @@
-import { fetchUserPositions, fetchUserLends } from ".";
+import { fetchUserPositions, fetchUserLends, fetchUserStakes } from ".";
 
 describe('User', () => {
   beforeEach(() => {
@@ -18,5 +18,13 @@ describe('User', () => {
     console.log('lends:', lends)
 
     expect(lends).toBeDefined
+  }, 10000)
+
+  it(`can fetch user info from stake`, async () => {
+    const account = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
+    const stakes = await fetchUserStakes(account)
+    console.log('stakes:', stakes)
+
+    expect(stakes).toBeDefined
   }, 10000)
 })

@@ -2,17 +2,13 @@ import { api } from "@defillama/sdk";
 import { Chain } from "@defillama/sdk/build/general";
 import { BigNumber } from "ethers";
 import abi from './userLend.abi.json'
-import pools from '../pools.json'
-import { ICall, UserLend } from "./type";
+import { ICall, IUserLend } from "./type";
+import { IB_POOLS } from '../core'
 
-const ALPACA_LEND_POOL_ADDRESSES = pools
-  .filter(pool => pool.stakingToken.startsWith("ib"))
-  .map(pool => pool.address.toLowerCase())
-
-export const getUserLends = async (account: string, block = 'latest', chain: Chain = 'bsc'): Promise<UserLend[]> => {
+export const getUserLends = async (account: string, block = 'latest', chain: Chain = 'bsc'): Promise<IUserLend[]> => {
   // Call balanceOf(account) for balanceOf
-  let calls: ICall[] = ALPACA_LEND_POOL_ADDRESSES.map(poolAddress => ({
-    target: poolAddress,
+  let calls: ICall[] = IB_POOLS.map(pool => ({
+    target: pool.address,
     params: [account],
   }))
 
@@ -26,7 +22,7 @@ export const getUserLends = async (account: string, block = 'latest', chain: Cha
     })
   ).output
 
-  let lendInfos: UserLend[] = lendBalances.map((lendBalance) => {
+  let lendInfos: IUserLend[] = lendBalances.map((lendBalance) => {
     const poolAddress = lendBalance.input.target
     const balance = BigNumber.from(lendBalance.output)
 

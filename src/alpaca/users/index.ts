@@ -5,6 +5,7 @@ import { getUserPositions as getUserPositions } from "./position"
 import { formatUnits } from "@ethersproject/units";
 import { BigNumber, ethers } from "ethers";
 import { getUserLends } from './lend';
+import { getUserStakes } from './stake';
 
 /**
  * Method to format the display of wei given an ethers.BigNumber object with toFixed
@@ -76,3 +77,18 @@ export const fetchUserLends = async (account: string) => {
 
   return parsedLend
 }
+
+export const fetchUserStakes = async (account: string) => {
+  // Raw
+  const lends = await getUserStakes(account)
+  const parsedStake = lends.map(stake => ({
+    ...stake,
+    amount: parseFloat(formatBigNumberToFixed(stake.amount)),
+    rewardDebt: parseFloat(formatBigNumberToFixed(stake.rewardDebt)),
+    bonusDebt: parseFloat(formatBigNumberToFixed(stake.bonusDebt)),
+    fundedBy: stake.fundedBy,
+  }))
+
+  return parsedStake
+}
+
