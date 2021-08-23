@@ -5,27 +5,27 @@ import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions } from "./position"
 import { getUserStakes } from './stake'
 
+const LEND_PRICE_SYMBOL_MAP = {
+  wBNB: 'wbnb',
+  CAKE: 'pancakeswap-token',
+  ALPACA: 'alpaca-finance',
+  BUSD: 'binance-usd',
+  USDT: 'tether',
+  TUSD: 'true-usd',
+  BTCB: 'bitcoin-bep2',
+  ETH: 'ethereum',
+}
+
 export const fetchUserPositions = async (account: string) => {
   // Raw
   const positions = await getPositions(account)
   const userPositions = await getUserPositions(positions)
+  const ids = [...new Set(userPositions.map(userPosition => LEND_PRICE_SYMBOL_MAP[userPosition.farmSymbol]))]
 
-  // Prices
-  const PRICE_URI = 'https://api.binance.com/api/v3/ticker/price?symbol='
-  const [CAKE, ALPACA] = await Promise.all([
-    (await fetch(`${PRICE_URI}CAKEUSDT`)).json(),
-    (await fetch(`${PRICE_URI}ALPACAUSDT`)).json()
-  ])
-  // const PRICE_URI = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='
-  // const [CAKE, ALAPACA] = await Promise.all([
-  //   (await fetch(`${PRICE_URI}pancakeswap-token`)).json(),
-  //   (await fetch(`${PRICE_URI}alpaca-finance`)).json()
-  // ])
-
-  const priceMap = {
-    CAKE,
-    ALPACA
-  }
+  const PRICE_URI = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}`
+  const priceList: [] = await (await fetch(PRICE_URI)).json()
+  const _usdPriceMap: any[] = priceList.map(e => ({ [`${(e['symbol'] as string).toUpperCase()}`]: e['current_price'] }))
+  const usdPriceMap = Object.assign({}, ..._usdPriceMap)
 
   // Parsed
   const parsedUserPositions = userPositions.map(userPosition => {
@@ -34,7 +34,7 @@ export const fetchUserPositions = async (account: string) => {
     const equityValue = positionValueUSD - debtValueUSD
     const debtRatio = debtValueUSD <= 0 ? 0 : 100 * debtValueUSD / positionValueUSD
     const safetyBuffer = 80 - debtRatio
-    const farmTokenPriceUSD = priceMap[userPosition.farmSymbol].price
+    const farmTokenPriceUSD = usdPriceMap[userPosition.farmSymbol.toUpperCase()] as number
     const quoteTokenAmount = positionValueUSD * 0.5
     const farmTokenAmount = quoteTokenAmount / farmTokenPriceUSD
 
