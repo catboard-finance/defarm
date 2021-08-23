@@ -4,13 +4,7 @@ import { getUserPositions as getUserPositions } from "./position"
 
 import { formatUnits } from "@ethersproject/units";
 import { BigNumber, ethers } from "ethers";
-
-// Expected for view
-// positionValue: c,
-// totalDebt: f,
-// debtRatio: b,
-// killBuffer: x,
-// currentLeverage: o
+import { getUserLends } from './lend';
 
 /**
  * Method to format the display of wei given an ethers.BigNumber object with toFixed
@@ -70,4 +64,15 @@ export const fetchUserPositions = async (account: string) => {
   })
 
   return parsedUserPositions
+}
+
+export const fetchUserLends = async (account: string) => {
+  // Raw
+  const lends = await getUserLends(account)
+  const parsedLend = lends.map(lend => ({
+    ...lend,
+    balance: parseFloat(formatBigNumberToFixed(lend.balance))
+  }))
+
+  return parsedLend
 }

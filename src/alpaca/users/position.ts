@@ -2,12 +2,8 @@ import { api } from "@defillama/sdk";
 import { Chain } from "@defillama/sdk/build/general";
 import { BigNumber } from "ethers";
 import { tokensAddressMap } from "../../pancakeswap/config/constants/mapper";
+import { ICall } from "./type";
 import abi from './userPosition.abi.json'
-
-interface ICall {
-  target: string;
-  params?: any[];
-}
 
 interface IApiPosition {
   id: number // 811867,

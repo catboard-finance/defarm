@@ -1,16 +1,22 @@
-import { fetchUserPositions } from ".";
+import { fetchUserPositions, fetchUserLends } from ".";
 
-describe('🦙 User', () => {
+describe('User', () => {
   beforeEach(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
-  it(`can fetch user's position value`, async () => {
+  it(`can fetch user position value`, async () => {
     const account = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
     const positionValues = await fetchUserPositions(account)
 
     expect(positionValues).toBeDefined
   }, 10000);
 
-  it.todo('can get reward from `CAKE`');
+  it(`can fetch balance from lend`, async () => {
+    const account = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
+    const lends = await fetchUserLends(account)
+    console.log('lends:', lends)
+
+    expect(lends).toBeDefined
+  }, 10000)
 })
