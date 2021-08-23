@@ -68,13 +68,13 @@ describe('🍰🦙 global data', () => {
   }, 10000);
 })
 
-describe('🍰 user data', () => {
-  it('can get user data', async () => {
+describe('🍰 account data', () => {
+  it('can get account data', async () => {
     const account = "0xE462f59392C5b2754283162A665bb4d6Ff5033ab"
     const pid = farmsConfig[0].pid
-    const userData = await fetchFarmUserDataAsync(farmsConfig, { account, pids: [pid] })
+    const accountData = await fetchFarmUserDataAsync(farmsConfig, { account, pids: [pid] })
 
-    expect(userData).toEqual([
+    expect(accountData).toEqual([
       {
         pid: 0,
         allowance: '0',

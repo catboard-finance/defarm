@@ -1,22 +1,9 @@
 import fetch from 'node-fetch'
+import { formatBigNumberToFixed } from '../utils/converter'
 import { getPositions } from "../vaults"
+import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions } from "./position"
-
-import { formatUnits } from "@ethersproject/units";
-import { BigNumber, ethers } from "ethers";
-import { getUserLends } from './lend';
-import { getUserStakes } from './stake';
-
-/**
- * Method to format the display of wei given an ethers.BigNumber object with toFixed
- * Note: rounds
- */
-export const formatBigNumberToFixed = (number: BigNumber, displayDecimals = 18, decimals = 18) => {
-  const formattedString = formatUnits(number, decimals)
-  return (+formattedString).toFixed(displayDecimals)
-}
-
-export const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.BigNumber.from(value))
+import { getUserStakes } from './stake'
 
 export const fetchUserPositions = async (account: string) => {
   // Raw

@@ -1,4 +1,4 @@
-import { getAccountTransactions, getAccountTransfers } from ".";
+import { getTransactions, getTransfers } from ".";
 import { filterVaults } from "../alpaca";
 import mocked_transfers from './__snapshots__/transfers.json'
 
@@ -10,18 +10,17 @@ describe('🐈 User', () => {
   });
 
   it('can get all account transactions.', async () => {
-    const txList = await getAccountTransactions(ACCOUNT)
+    const txList = await getTransactions(ACCOUNT)
     expect(txList).toBeDefined()
   });
 
   it('can get all account transfers.', async () => {
-    const txList = await getAccountTransfers(ACCOUNT)
+    const txList = await getTransfers(ACCOUNT)
     expect(txList).toBeDefined()
   });
 
   it('can get all alpaca vault related transfers.', async () => {
     const txList = filterVaults(mocked_transfers)
-    console.log(txList)
     expect(txList).toBeDefined()
   });
 })

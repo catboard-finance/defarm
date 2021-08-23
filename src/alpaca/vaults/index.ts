@@ -4,8 +4,8 @@ import { Chain } from "@defillama/sdk/build/general";
 import { BigNumber, ethers } from 'ethers';
 import ALPACA_VAULT_ABI from '../abi/Vault.abi.json'
 import { parseEther } from 'ethers/lib/utils';
-import { formatBigNumberToFixed } from '..';
 import alpacaInfo from '../info.mainnet.json'
+import { formatBigNumberToFixed } from '../utils/converter';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 

@@ -1,5 +1,5 @@
 import POOLS from './pools.json'
-import pools_abi from './pools.abi.json'
+import pools_abi from './abi/pools.abi.json'
 import { api } from '@defillama/sdk'
 import { Chain } from '@defillama/sdk/build/general'
 
