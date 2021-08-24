@@ -22,7 +22,7 @@ export interface IPoolAddress {
   address: string
 }
 
-interface IIbPool {
+export interface IIbPool {
   id: number
   address: string
   stakingToken: string

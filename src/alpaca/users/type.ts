@@ -11,7 +11,11 @@ export interface IUserLend {
 }
 
 export interface IUserStake {
+  poolId: number
   poolAddress: string; // address;
+  stakingToken: string
+  unstakingToken: string
+
   amount: BigNumber;
   rewardDebt: BigNumber;
   bonusDebt: BigNumber;
