@@ -1,8 +1,9 @@
 import { BigNumber } from "ethers";
 import { fetchUserPositions, fetchUserLends, fetchUserStakes } from ".";
 import { sumInvestedVaults } from "..";
-import { getEventsByBlockNumber, getTransfers } from "../../account";
+import { getTransfers } from "../../account";
 import { formatBigNumberToFixed } from "../utils/converter";
+import { getPositionIds } from "../utils/events";
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 describe('User', () => {
@@ -27,8 +28,7 @@ describe('User', () => {
     const transfers = await getTransfers(TEST_ACCOUNT_ADDRESS)
 
     // 3. Get position from event
-    const topic = 'Work(uint256 indexed,uint256)'
-    const events = await getEventsByBlockNumber(TEST_ACCOUNT_ADDRESS, topic)
+    const events = await getPositionIds('0x158da805682bdc8ee32d52833ad41e74bb951e59', 9959085)
     console.log('events:', events)
 
     // 4. Get sum in and out

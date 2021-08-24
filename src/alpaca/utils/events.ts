@@ -40,7 +40,5 @@ export const getPositionIds = async (address: string, blockNumber: number, block
   }]);
 
   const decodedEventLog = iface.decodeEventLog("Work", result[0].data, result[0].topics);
-  console.log('position id:', parseInt(decodedEventLog.id))
-
-  return [parseInt(decodedEventLog.id)]
+  return parseInt(decodedEventLog.id)
 }
