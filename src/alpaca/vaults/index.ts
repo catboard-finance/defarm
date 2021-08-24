@@ -5,8 +5,9 @@ import { BigNumber, ethers } from 'ethers';
 import ALPACA_VAULT_ABI from '../abi/Vault.abi.json'
 import { parseEther } from 'ethers/lib/utils';
 import alpacaInfo from '../info.mainnet.json'
-import { formatBigNumberToFixed } from '../utils/converter';
+import { formatBigNumberToFixed, stringToFixed } from '../utils/converter';
 import { ITransfer } from '../../type';
+import _ from 'lodash'
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 
@@ -26,10 +27,68 @@ const ALPACA_VAULT_ADDRESSES = [
   ...alpacaInfo.Vaults.map(vault => vault.address)
 ].map(vault => vault.toLowerCase())
 
-export const filterVaults = (txList: ITransfer[]) => {
-  return txList.filter(tx => {
-    return ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
+export const filterVaults = (txList: ITransfer[]) => txList.filter(tx =>
+  ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase()) ||
+  ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
+)
+
+export const sumInvestedVaults = (txList: ITransfer[]) => {
+  const summaryMap: { [vaultAddress: string]: { withdraws: ITransfer[], deposits: ITransfer[], totalWithdraw: any } } = {}
+  const filteredVaults = filterVaults(txList)
+
+  // const filtered: { withdraw: ITransfer[], deposit: ITransfer[] } = { withdraws: null, deposits: null }
+  filteredVaults.forEach(tx => {
+    if (ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())) {
+      // User → 💎 → Pool
+      summaryMap[tx.to_address] = summaryMap[tx.to_address] || { withdraws: null, deposits: null, totalWithdraw: null }
+
+      summaryMap[tx.to_address].deposits = summaryMap[tx.to_address] ? summaryMap[tx.to_address].deposits || [] : []
+      summaryMap[tx.to_address].deposits.push(tx)
+    }
+    else if (ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase())) {
+      // User ← 💎 ← Pool
+      summaryMap[tx.from_address] = summaryMap[tx.from_address] || { withdraws: null, deposits: null, totalWithdraw: null }
+
+      summaryMap[tx.from_address].withdraws = summaryMap[tx.from_address].withdraws ? summaryMap[tx.from_address].withdraws || [] : []
+      summaryMap[tx.from_address].withdraws.push(tx)
+    }
   })
+
+  // Sum 
+  for (let [k, v] of Object.entries(summaryMap)) {
+    summaryMap[k].totalWithdraw = _.sumBy(v.withdraws, (e) => parseFloat(stringToFixed(e.value)))
+  }
+
+  console.log(summaryMap)
+
+  // for(let [k,v] of Object.entries(summaryMap)) {
+  //   summaryMap[k].totalWithdraw = BigNumber.from(0)
+
+  //   summaryMap[k].totalWithdraw = v.withdraws.reduce((sum, x) => {
+  //     return BigNumber.from(sum.value).add(BigNumber.from(x.value))
+  //   });
+  // }
+
+  // filteredVaults.forEach(tx => {
+  //   // Retrieve of init
+  //   summaryMap[tx.from_address] = summaryMap[tx.from_address] || BigNumber.from(0)
+
+  //   if (tx.from_address) {
+  //     // User ← 💎 ← Pool
+  //     summaryMap[tx.from_address] = summaryMap[tx.from_address].add(BigNumber.from(tx.value))
+  //   } else if (tx.to_address) {
+  //     // User → 💎 → Pool
+  //     summaryMap[tx.from_address] = summaryMap[tx.from_address].sub(BigNumber.from(tx.value))
+  //   }
+  // })
+
+  // const filtered: { from: ITransfer[], to: ITransfer[] } = { from: null, to: null }
+  // txList.forEach(tx => {
+  //   ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase()) && filtered.from.push(tx)
+  //   ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase()) && filtered.to.push(tx)
+  // })
+
+  return summaryMap
 }
 
 // POC ////////////////////////////////////////

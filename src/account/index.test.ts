@@ -2,7 +2,7 @@ import { getTransactions, getTransfers } from ".";
 import { filterVaults } from "../alpaca";
 import mocked_transfers from './__snapshots__/transfers.json'
 
-const ACCOUNT = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
+const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 
 describe('🐈 User', () => {
   beforeEach(() => {
@@ -10,12 +10,12 @@ describe('🐈 User', () => {
   });
 
   it('can get all account transactions.', async () => {
-    const txList = await getTransactions(ACCOUNT)
+    const txList = await getTransactions(TEST_ACCOUNT_ADDRESS)
     expect(txList).toBeDefined()
   });
 
   it('can get all account transfers.', async () => {
-    const txList = await getTransfers(ACCOUNT)
+    const txList = await getTransfers(TEST_ACCOUNT_ADDRESS)
     expect(txList).toBeDefined()
   });
 
