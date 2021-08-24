@@ -59,7 +59,7 @@ export const fetchUserLends = async (account: string) => {
   const lends = await getUserLends(account)
   const parsedLend = lends.map(lend => ({
     ...lend,
-    balance: parseFloat(formatBigNumberToFixed(lend.amount))
+    amount: parseFloat(formatBigNumberToFixed(lend.amount))
   }))
 
   return parsedLend
