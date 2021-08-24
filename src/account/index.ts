@@ -41,7 +41,22 @@ export const getTransactions = async (account: string, chain: Chain = 'bsc'): Pr
 }
 
 export const getTransfers = async (account: string, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
-  return _caller(account, '/erc20/transfers', null, null, chain)
+  return _caller(account, `/erc20/transfers`, null, null, chain)
+}
+
+export const getTokenPrice = async (address: string, chain: Chain = 'bsc') => {
+  return _caller(address, `/erc20/${address}/price`, null, null, chain)
+}
+
+export const getTokenPrices = async (addresses: string[], chain: Chain = 'bsc') => {
+  const pricePromises = addresses.map(e => getTokenPrice(e))
+  const prices = await Promise.all(pricePromises)
+  const pricesMap = {}
+  addresses.forEach((e, i) => {
+    pricesMap[`${e}`] = prices[i]
+  })
+
+  return pricesMap
 }
 
 export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<IBlockEvent[]> => {

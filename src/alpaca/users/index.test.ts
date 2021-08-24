@@ -1,5 +1,5 @@
 import { fetchUserPositions, fetchUserLends, fetchUserStakes } from ".";
-import { sumInvestedVaults } from "..";
+import { sumInvestedVaults, withPriceUSD } from "..";
 import { getTransfers } from "../../account";
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
@@ -18,8 +18,8 @@ describe('User', () => {
   it(`can calculate profit`, async () => {
     // 1. Get all active positions
     const positions = await fetchUserPositions(TEST_ACCOUNT_ADDRESS)
-    const activePositions = positions.filter(e => e.equityValue > 0)
-    console.log('activePositions:', activePositions)
+    const activePositions = positions.filter(e => e.equityValueUSD > 0)
+    // console.log('activePositions:', activePositions)
 
     // 2. Get all investment transactions
     const transfers = await getTransfers(TEST_ACCOUNT_ADDRESS)
@@ -32,20 +32,27 @@ describe('User', () => {
 
     // 4. Get sum in and out
     const investedVaultSummaryMap = sumInvestedVaults(transfers)
-    console.log('investedVaultSummaryMap:', investedVaultSummaryMap)
+    // console.log('investedVaultSummaryMap:', investedVaultSummaryMap)
 
-    // 5. Calculate profit
+    // 5. Get price in USD
+    const investedVaultSummaryUSDMap = withPriceUSD(investedVaultSummaryMap)
+
+    // 6. Calculate profit
     const profits = activePositions.map(pos => {
-      const investedVaultSummary = investedVaultSummaryMap[pos.vault].totalWithdraw
+      const vaultSummary = investedVaultSummaryUSDMap[pos.vault]
+      const investedVaultSummaryAmount = vaultSummary.totalDeposit - vaultSummary.totalWithdraw
+      const investedVaultSummaryUSD = investedVaultSummaryAmount * vaultSummary.tokenPriceUSD
       return {
         ...pos,
-        profit: pos.equityValue - investedVaultSummary,
+        investedAmount: investedVaultSummaryAmount,
+        investedUSD: investedVaultSummaryUSD,
+        profitUSD: pos.equityValueUSD - investedVaultSummaryUSD,
       }
     })
 
-    console.log('profits:', profits)
+    // console.log('profits:', profits)
 
-    expect(activePositions).toBeDefined
+    expect(profits).toBeDefined
   }, 10000);
 
   it(`can fetch balance from lend`, async () => {

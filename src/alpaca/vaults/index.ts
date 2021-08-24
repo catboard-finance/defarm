@@ -1,13 +1,11 @@
 require('dotenv').config()
 import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
-import { BigNumber, ethers } from 'ethers';
-import ALPACA_VAULT_ABI from '../abi/Vault.abi.json'
-import { parseEther } from 'ethers/lib/utils';
 import alpacaInfo from '../info.mainnet.json'
-import { formatBigNumberToFixed, stringToFixed } from '../utils/converter';
+import { stringToFixed, stringToFloat } from '../utils/converter';
 import { ITransfer } from '../../type';
 import _ from 'lodash'
+import { getTokenPrices } from '../../account';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 
@@ -36,28 +34,51 @@ export const filterDepositVaults = (txList: ITransfer[]) => txList.filter(tx =>
   ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
 )
 
-export const sumInvestedVaults = (txList: ITransfer[]) => {
-  const summaryMap: {
-    [vaultAddress: string]: {
-      withdraws: ITransfer[], deposits: ITransfer[], totalDeposit: number, totalWithdraw: number
-    }
-  } = {}
-  const filteredVaults = filterVaults(txList)
+export const filterNoZeroTransfer = (txList: ITransfer[]) => txList.filter(tx =>
+  stringToFloat(tx.value) > 0
+)
 
-  // const filtered: { withdraw: ITransfer[], deposit: ITransfer[] } = { withdraws: null, deposits: null }
+const getNewSummaryObject = () => ({
+  withdraws: [],
+  deposits: [],
+  totalDeposit: 0,
+  totalWithdraw: 0,
+})
+
+interface ISummaryMapValue {
+  withdraws: ITransfer[],
+  deposits: ITransfer[],
+  totalDeposit: number,
+  totalWithdraw: number,
+}
+
+interface ISummaryMap {
+  [vaultAddress: string]: ISummaryMapValue
+}
+
+interface ISummaryUSDMapValue extends ISummaryMapValue {
+  totalDepositUSD: number,
+  totalWithdrawUSD: number,
+  tokenPriceUSD: number,
+}
+
+interface ISummaryUSDMap {
+  [vaultAddress: string]: ISummaryUSDMapValue
+}
+
+export const sumInvestedVaults = (txList: ITransfer[]): ISummaryMap => {
+  const summaryMap: ISummaryMap = {}
+  const filteredVaults = filterNoZeroTransfer(filterVaults(txList))
+
   filteredVaults.forEach(tx => {
     if (ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())) {
       // User → 💎 → Pool
-      summaryMap[tx.to_address] = summaryMap[tx.to_address] || { withdraws: null, deposits: null, totalDeposit: null, totalWithdraw: null }
-
-      summaryMap[tx.to_address].deposits = summaryMap[tx.to_address] ? summaryMap[tx.to_address].deposits || [] : []
+      summaryMap[tx.to_address] = summaryMap[tx.to_address] || getNewSummaryObject()
       summaryMap[tx.to_address].deposits.push(tx)
     }
     else if (ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase())) {
       // User ← 💎 ← Pool
-      summaryMap[tx.from_address] = summaryMap[tx.from_address] || { withdraws: null, deposits: null, totalDeposit: null, totalWithdraw: null }
-
-      summaryMap[tx.from_address].withdraws = summaryMap[tx.from_address].withdraws ? summaryMap[tx.from_address].withdraws || [] : []
+      summaryMap[tx.from_address] = summaryMap[tx.from_address] || getNewSummaryObject()
       summaryMap[tx.from_address].withdraws.push(tx)
     }
   })
@@ -68,54 +89,27 @@ export const sumInvestedVaults = (txList: ITransfer[]) => {
     summaryMap[k].totalWithdraw = _.sumBy(v.withdraws, (e) => parseFloat(stringToFixed(e.value)))
   }
 
-  console.log(summaryMap)
-
-  // for(let [k,v] of Object.entries(summaryMap)) {
-  //   summaryMap[k].totalWithdraw = BigNumber.from(0)
-
-  //   summaryMap[k].totalWithdraw = v.withdraws.reduce((sum, x) => {
-  //     return BigNumber.from(sum.value).add(BigNumber.from(x.value))
-  //   });
-  // }
-
-  // filteredVaults.forEach(tx => {
-  //   // Retrieve of init
-  //   summaryMap[tx.from_address] = summaryMap[tx.from_address] || BigNumber.from(0)
-
-  //   if (tx.from_address) {
-  //     // User ← 💎 ← Pool
-  //     summaryMap[tx.from_address] = summaryMap[tx.from_address].add(BigNumber.from(tx.value))
-  //   } else if (tx.to_address) {
-  //     // User → 💎 → Pool
-  //     summaryMap[tx.from_address] = summaryMap[tx.from_address].sub(BigNumber.from(tx.value))
-  //   }
-  // })
-
-  // const filtered: { from: ITransfer[], to: ITransfer[] } = { from: null, to: null }
-  // txList.forEach(tx => {
-  //   ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase()) && filtered.from.push(tx)
-  //   ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase()) && filtered.to.push(tx)
-  // })
-
   return summaryMap
 }
 
-// POC ////////////////////////////////////////
+export const withPriceUSD = async (summaryMap: ISummaryMap): Promise<ISummaryUSDMap> => {
+  const _tokenAddresses = []
+  for (let [k] of Object.entries(summaryMap)) {
+    _tokenAddresses.concat(summaryMap[k].deposits.map(e => e.address))
+  }
 
-const WORKER_ADDRESS_MAP = {
-  "0xe8084D7Ded35E2840386f04d609cdb49C7E36d88": "USDT CakeMaxiWorker",
-  "0xECb008F4741465F9F169EC11A50Aa8871E423F33": "CAKE-USDT PancakeswapWorker",
-}
+  const tokenAddresses: string[] = Array.from(new Set(..._tokenAddresses))
+  const tokenPriceUSDMap = await getTokenPrices(tokenAddresses)
 
-export const parseVaultInput = (data: string) => {
-  const iface = new ethers.utils.Interface(ALPACA_VAULT_ABI);
-  const value = parseEther("1.0");
-  const parsedTransaction = iface.parseTransaction({ data, value });
-  const worker = WORKER_ADDRESS_MAP[parsedTransaction.args['worker']]
-  const principalAmount = formatBigNumberToFixed(parsedTransaction.args['principalAmount'] as BigNumber).toString()
-  const borrowAmount = formatBigNumberToFixed(parsedTransaction.args['borrowAmount'] as BigNumber).toString()
+  const summaryUSDMap: ISummaryUSDMap = {}
+  for (let [k] of Object.entries(summaryMap)) {
+    summaryUSDMap[k] = {
+      ...summaryMap[k],
+      tokenPriceUSD: tokenPriceUSDMap[summaryMap[k].deposits[0].address],
+      totalDepositUSD: summaryMap[k].totalDeposit * summaryUSDMap[k].tokenPriceUSD,
+      totalWithdrawUSD: summaryMap[k].totalWithdraw * summaryUSDMap[k].tokenPriceUSD,
+    }
+  }
 
-  console.log('parsed:', { worker, principalAmount, borrowAmount })
-
-  return parsedTransaction
+  return summaryUSDMap
 }

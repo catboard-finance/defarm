@@ -11,3 +11,4 @@ export const formatBigNumberToFixed = (number: BigNumber, displayDecimals = 18, 
 }
 
 export const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.BigNumber.from(value))
+export const stringToFloat = (value: string) => parseFloat(stringToFixed(value))

@@ -31,7 +31,7 @@ export const fetchUserPositions = async (account: string) => {
   const parsedUserPositions = userPositions.map(userPosition => {
     const positionValueUSD = parseFloat(formatBigNumberToFixed(userPosition.positionValueUSD))
     const debtValueUSD = parseFloat(formatBigNumberToFixed(userPosition.debtValueUSD))
-    const equityValue = positionValueUSD - debtValueUSD
+    const equityValueUSD = positionValueUSD - debtValueUSD
     const debtRatio = debtValueUSD <= 0 ? 0 : 100 * debtValueUSD / positionValueUSD
     const safetyBuffer = 80 - debtRatio
     const farmTokenPriceUSD = usdPriceMap[userPosition.farmSymbol.toUpperCase()] as number
@@ -43,7 +43,7 @@ export const fetchUserPositions = async (account: string) => {
       positionValueUSD,
       debtValueUSD,
       vaultSymbol: userPosition.vaultSymbol,
-      equityValue,
+      equityValueUSD,
       debtRatio,
       safetyBuffer,
       farmTokenAmount,
