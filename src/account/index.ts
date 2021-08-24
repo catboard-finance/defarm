@@ -6,11 +6,19 @@ import { ITransactionResponse, ITransaction, ITransfer } from '../type';
 
 const MORALIS_API_URI = `https://deep-index.moralis.io/api/v2`
 
-const _caller = async (account: string, target: string = '', body: any = {}, chain: Chain = 'bsc'): Promise<any[]> => {
-  const result = await fetch(`${MORALIS_API_URI}/${account}${target}?chain=${chain}`, {
+const _caller = async (account: string, target: string = '', body: BodyInit = null, chain: Chain = 'bsc'): Promise<any[]> => {
+  const method = body ? 'GET' : 'POST'
+  let requestInit = {
     headers: { 'x-api-key': process.env.MORALIS_API_KEY },
-    body
-  })
+    method
+  }
+
+  // body?
+  if (body) {
+    requestInit['body'] = body
+  }
+
+  const result = await fetch(`${MORALIS_API_URI}/${account}${target}?chain=${chain}`, requestInit)
   const { result: data } = await result.json() as ITransactionResponse
 
   if (!data) return null
