@@ -26,12 +26,21 @@ export interface ITransactionResponse {
 }
 
 export interface ITransfer {
-  transaction_hash: string //0x09ed731658832544e14c8b0d89eb970b892dd056a6499b10f9a31e9d15ebda5d",
-  address: string //0x5190b01965b6e3d786706fd4a999978626c19880",
-  block_timestamp: string //2021-08-13T17:19:09.000Z",
-  block_number: string //9999026",
-  block_hash: string //0x2ec97eba71bccc76487749403f060093f7ef8d286fe137ef61a295ac0757406a",
-  to_address: string //0x8155430e4860e791aeddb43e4764d15de7e0def1",
-  from_address: string //0x5190b01965b6e3d786706fd4a999978626c19880",
-  value: string //800000000000000000000000"
+  transaction_hash: string // "0x09ed731658832544e14c8b0d89eb970b892dd056a6499b10f9a31e9d15ebda5d",
+  address: string // "0x5190b01965b6e3d786706fd4a999978626c19880",
+  block_timestamp: string // "2021-08-13T17:19:09.000Z",
+  block_number: string // "9999026",
+  block_hash: string // "0x2ec97eba71bccc76487749403f060093f7ef8d286fe137ef61a295ac0757406a",
+  to_address: string // "0x8155430e4860e791aeddb43e4764d15de7e0def1",
+  from_address: string // "0x5190b01965b6e3d786706fd4a999978626c19880",
+  value: string // "800000000000000000000000"
+}
+
+export interface IBlockEvent {
+  transaction_hash: string // "0xc007bdeadc18d4c9effef31fad9a174e3605a849f3a6862c4c948b0802a1d12f",
+  address: string // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
+  block_timestamp: string // "2021-08-12T07:24:13.000Z",
+  block_number: string // "9959085",
+  block_hash: string // "0x83325835b79c92edd86b660ae66756ae719ce30fac97295a866ad4a3a7ba4784",
+  data: any //{"uid":"18243","loan":"0"}
 }

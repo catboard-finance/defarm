@@ -1,9 +1,6 @@
-import { BigNumber } from "ethers";
 import { fetchUserPositions, fetchUserLends, fetchUserStakes } from ".";
 import { sumInvestedVaults } from "..";
 import { getTransfers } from "../../account";
-import { formatBigNumberToFixed } from "../utils/converter";
-import { getPositionIds } from "../utils/events";
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 describe('User', () => {
@@ -28,8 +25,10 @@ describe('User', () => {
     const transfers = await getTransfers(TEST_ACCOUNT_ADDRESS)
 
     // 3. Get position from event
-    const events = await getPositionIds('0x158da805682bdc8ee32d52833ad41e74bb951e59', 9959085)
-    console.log('events:', events)
+    // const positionWithBlockNumber = positions.map(position => )
+
+    // const events = await getPositionIds('0x158da805682bdc8ee32d52833ad41e74bb951e59', 9959085)
+    // console.log('events:', events)
 
     // 4. Get sum in and out
     const investedVaultSummaryMap = sumInvestedVaults(transfers)
@@ -37,8 +36,7 @@ describe('User', () => {
 
     // 5. Calculate profit
     const profits = activePositions.map(pos => {
-      const investedVaultSummaryBigNumber = investedVaultSummaryMap[pos.vault].totalWithdraw || BigNumber.from(0)
-      const investedVaultSummary = parseFloat(formatBigNumberToFixed(investedVaultSummaryBigNumber))
+      const investedVaultSummary = investedVaultSummaryMap[pos.vault].totalWithdraw
       return {
         ...pos,
         profit: pos.equityValue - investedVaultSummary,

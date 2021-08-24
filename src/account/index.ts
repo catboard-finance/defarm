@@ -2,7 +2,7 @@ require('dotenv').config()
 
 import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
-import { ITransaction, ITransfer } from '../type';
+import { ITransaction, ITransfer, IBlockEvent } from '../type';
 
 const MORALIS_API_URI = `https://deep-index.moralis.io/api/v2`
 
@@ -44,7 +44,7 @@ export const getTransfers = async (account: string, chain: Chain = 'bsc'): Promi
   return _caller(account, '/erc20/transfers', null, null, chain)
 }
 
-export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
+export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<IBlockEvent[]> => {
   const params = {
     'from_block': blocknumber.toString(),
     'to_block': blocknumber.toString(),

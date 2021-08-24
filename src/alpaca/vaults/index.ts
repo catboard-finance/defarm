@@ -32,30 +32,39 @@ export const filterVaults = (txList: ITransfer[]) => txList.filter(tx =>
   ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
 )
 
+export const filterDepositVaults = (txList: ITransfer[]) => txList.filter(tx =>
+  ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
+)
+
 export const sumInvestedVaults = (txList: ITransfer[]) => {
-  const summaryMap: { [vaultAddress: string]: { withdraws: ITransfer[], deposits: ITransfer[], totalWithdraw: any } } = {}
+  const summaryMap: {
+    [vaultAddress: string]: {
+      withdraws: ITransfer[], deposits: ITransfer[], totalDeposit: number, totalWithdraw: number
+    }
+  } = {}
   const filteredVaults = filterVaults(txList)
 
   // const filtered: { withdraw: ITransfer[], deposit: ITransfer[] } = { withdraws: null, deposits: null }
   filteredVaults.forEach(tx => {
     if (ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())) {
       // User → 💎 → Pool
-      summaryMap[tx.to_address] = summaryMap[tx.to_address] || { withdraws: null, deposits: null, totalWithdraw: null }
+      summaryMap[tx.to_address] = summaryMap[tx.to_address] || { withdraws: null, deposits: null, totalDeposit: null, totalWithdraw: null }
 
       summaryMap[tx.to_address].deposits = summaryMap[tx.to_address] ? summaryMap[tx.to_address].deposits || [] : []
       summaryMap[tx.to_address].deposits.push(tx)
     }
     else if (ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase())) {
       // User ← 💎 ← Pool
-      summaryMap[tx.from_address] = summaryMap[tx.from_address] || { withdraws: null, deposits: null, totalWithdraw: null }
+      summaryMap[tx.from_address] = summaryMap[tx.from_address] || { withdraws: null, deposits: null, totalDeposit: null, totalWithdraw: null }
 
       summaryMap[tx.from_address].withdraws = summaryMap[tx.from_address].withdraws ? summaryMap[tx.from_address].withdraws || [] : []
       summaryMap[tx.from_address].withdraws.push(tx)
     }
   })
 
-  // Sum 
+  // Sum withdraw
   for (let [k, v] of Object.entries(summaryMap)) {
+    summaryMap[k].totalDeposit = _.sumBy(v.deposits, (e) => parseFloat(stringToFixed(e.value)))
     summaryMap[k].totalWithdraw = _.sumBy(v.withdraws, (e) => parseFloat(stringToFixed(e.value)))
   }
 
