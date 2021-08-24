@@ -20,7 +20,7 @@ export const fetchUserPositions = async (account: string) => {
   // Raw
   const positions = await getPositions(account)
   const userPositions = await getUserPositions(positions)
-  const ids = [...new Set(userPositions.map(userPosition => LEND_PRICE_SYMBOL_MAP[userPosition.farmSymbol]))]
+  const ids = [...new Set<string>(userPositions.map(userPosition => LEND_PRICE_SYMBOL_MAP[userPosition.farmSymbol]))]
 
   const PRICE_URI = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}`
   const priceList: [] = await (await fetch(PRICE_URI)).json()
