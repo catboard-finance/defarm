@@ -6,8 +6,8 @@ import { ITransactionResponse, ITransaction, ITransfer } from '../type';
 
 const MORALIS_API_URI = `https://deep-index.moralis.io/api/v2`
 
-const _caller = async (account: string, target: string = '', body: BodyInit = null, chain: Chain = 'bsc'): Promise<any[]> => {
-  const method = body ? 'GET' : 'POST'
+const _caller = async (account: string, target: string = '', body: any = null, chain: Chain = 'bsc'): Promise<any[]> => {
+  const method = body ? 'POST' : 'GET'
   let requestInit = {
     headers: { 'x-api-key': process.env.MORALIS_API_KEY },
     method
@@ -27,11 +27,11 @@ const _caller = async (account: string, target: string = '', body: BodyInit = nu
 }
 
 export const getTransactions = async (account: string, chain: Chain = 'bsc'): Promise<ITransaction[]> => {
-  return _caller(account, '', {}, chain)
+  return _caller(account, '', null, chain)
 }
 
 export const getTransfers = async (account: string, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
-  return _caller(account, '/erc20/transfers', {}, chain)
+  return _caller(account, '/erc20/transfers', null, chain)
 }
 
 export const getEventsByBlockNumber = async (account: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
