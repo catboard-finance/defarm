@@ -5,10 +5,12 @@ import abi from './userStake.abi.json'
 import { ICall, IUserStake } from "./type";
 import { IB_POOLS } from '../core'
 
+const fairLaunchPoolAddress = '0xa625ab01b08ce023b2a342dbb12a16f2c8489a8f'
+
 export const getUserStakes = async (account: string, block = 'latest', chain: Chain = 'bsc'): Promise<IUserStake[]> => {
   // Call balanceOf(account) for balanceOf from FairLaunch
   let calls: ICall[] = IB_POOLS.map(pool => ({
-    target: '0xa625ab01b08ce023b2a342dbb12a16f2c8489a8f', // FairLaunch
+    target: fairLaunchPoolAddress, // FairLaunch
     params: [pool.id, account],
   }))
 
@@ -31,6 +33,7 @@ export const getUserStakes = async (account: string, block = 'latest', chain: Ch
     const fundedBy = stakeBalance.output.fundedBy
 
     return {
+      fairLaunchPoolAddress,
       poolId: pool.id,
       poolAddress: pool.address,
       stakingToken: pool.stakingToken,

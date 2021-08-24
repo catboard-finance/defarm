@@ -24,11 +24,11 @@ export const getUserLends = async (account: string, block = 'latest', chain: Cha
 
   let lendInfos: IUserLend[] = lendBalances.map((lendBalance) => {
     const poolAddress = lendBalance.input.target
-    const balance = BigNumber.from(lendBalance.output)
+    const amount = BigNumber.from(lendBalance.output)
 
     return {
       poolAddress,
-      balance,
+      amount,
     }
   })
 

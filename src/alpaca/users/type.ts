@@ -7,10 +7,11 @@ export interface ICall {
 
 export interface IUserLend {
   poolAddress: string;
-  balance: BigNumber;
+  amount: BigNumber;
 }
 
 export interface IUserStake {
+  fairLaunchPoolAddress: string
   poolId: number
   poolAddress: string; // address;
   stakingToken: string
