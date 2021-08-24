@@ -19,7 +19,7 @@ describe('🐈 User', () => {
     expect(res).not.toBeNull()
   });
 
-  it.todo('can get events by topic.', async () => {
+  it.skip('can get events by topic.', async () => {
     const abi = `{
       "anonymous": false,
       "inputs": [
