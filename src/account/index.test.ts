@@ -20,8 +20,28 @@ describe('🐈 User', () => {
   });
 
   it.todo('can get events by topic.', async () => {
+    const abi = `{
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "loan",
+          "type": "uint256"
+        }
+      ],
+      "name": "Work",
+      "type": "event"
+    }`
+
     const topic = 'Work(uint256 indexed,uint256)'
-    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', topic)
+    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', abi, topic)
     console.log('events:', events)
     expect(events).not.toBeNull()
   });

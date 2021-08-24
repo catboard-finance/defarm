@@ -39,10 +39,11 @@ export const getTransfers = async (account: string, chain: Chain = 'bsc'): Promi
   return _caller(account, '/erc20/transfers', null, chain)
 }
 
-export const getEventsByBlockNumber = async (account: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
-  return _caller(account, '/events', {
+export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
+  // TODO abi post
+  return _caller(account, '/events'/*, {
     from_block: blocknumber,
     to_block: blocknumber,
     topic,
-  }, chain)
+  }*/, abi, chain)
 }
