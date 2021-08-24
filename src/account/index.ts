@@ -6,10 +6,14 @@ import { ITransaction, ITransfer } from '../type';
 
 const MORALIS_API_URI = `https://deep-index.moralis.io/api/v2`
 
-const _caller = async (account: string, target: string = '', body: any = null, chain: Chain = 'bsc'): Promise<any[]> => {
+const _caller = async (account: string, target: string = '', body: any = null, params: URLSearchParams, chain: Chain = 'bsc'): Promise<any[]> => {
   const method = body ? 'POST' : 'GET'
   let requestInit = {
-    headers: { 'x-api-key': process.env.MORALIS_API_KEY },
+    headers: {
+      'X-API-Key': process.env.MORALIS_API_KEY,
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
     method
   }
 
@@ -19,7 +23,8 @@ const _caller = async (account: string, target: string = '', body: any = null, c
   }
 
   let _error: Error
-  const result = await fetch(`${MORALIS_API_URI}/${account}${target}?chain=${chain}`, requestInit).catch(error => _error = error)
+  const uri = `${MORALIS_API_URI}/${account}${target}?chain=${chain}&${params}`
+  const result = await fetch(uri, requestInit).catch(error => _error = error)
   if (_error) {
     console.error(_error)
     return null
@@ -32,18 +37,20 @@ const _caller = async (account: string, target: string = '', body: any = null, c
 }
 
 export const getTransactions = async (account: string, chain: Chain = 'bsc'): Promise<ITransaction[]> => {
-  return _caller(account, '', null, chain)
+  return _caller(account, '', null, null, chain)
 }
 
 export const getTransfers = async (account: string, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
-  return _caller(account, '/erc20/transfers', null, chain)
+  return _caller(account, '/erc20/transfers', null, null, chain)
 }
 
 export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
-  // TODO abi post
-  return _caller(account, '/events'/*, {
-    from_block: blocknumber,
-    to_block: blocknumber,
-    topic,
-  }*/, abi, chain)
+  const params = {
+    'from_block': blocknumber.toString(),
+    'to_block': blocknumber.toString(),
+    'topic': topic
+  }
+
+  const searchParams = new URLSearchParams(params)
+  return _caller(account, '/events', abi, searchParams, chain)
 }

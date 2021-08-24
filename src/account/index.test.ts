@@ -19,7 +19,7 @@ describe('🐈 User', () => {
     expect(res).not.toBeNull()
   });
 
-  it.skip('can get events by topic.', async () => {
+  it('can get events by topic.', async () => {
     const abi = `{
       "anonymous": false,
       "inputs": [
@@ -40,9 +40,9 @@ describe('🐈 User', () => {
       "type": "event"
     }`
 
-    const topic = 'Work(uint256 indexed,uint256)'
-    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', abi, topic)
-    console.log('events:', events)
+    const topic = 'Work(uint256,uint256)'
+    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', abi, topic, 9959085)
+
     expect(events).not.toBeNull()
   });
 

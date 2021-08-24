@@ -11,7 +11,7 @@ describe('User', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
   });
 
-  it(`can fetch user position value`, async () => {
+  it.skip(`can fetch user position value`, async () => {
     const positions = await fetchUserPositions(TEST_ACCOUNT_ADDRESS)
     // console.log('positions:', positions)
 
