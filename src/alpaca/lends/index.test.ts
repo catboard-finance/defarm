@@ -1,4 +1,5 @@
-import { fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from ".";
+import { fetchTokenUSDPricesBySymbols } from ".";
+import { getSupportedUSDSymbols } from "..";
 
 describe('🦙', () => {
   beforeEach(() => {
