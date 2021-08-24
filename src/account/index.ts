@@ -2,7 +2,7 @@ require('dotenv').config()
 
 import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
-import { ITransactionResponse, ITransaction, ITransfer } from '../type';
+import { ITransaction, ITransfer } from '../type';
 
 const MORALIS_API_URI = `https://deep-index.moralis.io/api/v2`
 
@@ -18,9 +18,14 @@ const _caller = async (account: string, target: string = '', body: any = null, c
     requestInit['body'] = body
   }
 
-  const result = await fetch(`${MORALIS_API_URI}/${account}${target}?chain=${chain}`, requestInit)
-  const { result: data } = await result.json() as ITransactionResponse
+  let _error: Error
+  const result = await fetch(`${MORALIS_API_URI}/${account}${target}?chain=${chain}`, requestInit).catch(error => _error = error)
+  if (_error) {
+    console.error(_error)
+    return null
+  }
 
+  const { result: data } = await result.json()
   if (!data) return null
 
   return data
