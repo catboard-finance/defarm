@@ -23,15 +23,19 @@ export const getUserStakes = async (account: string, block = 'latest', chain: Ch
   ).output
 
   //  amount uint256, rewardDebt uint256, bonusDebt uint256, fundedBy address
-  let stakeInfos: IUserStake[] = stakeBalances.map((stakeBalance) => {
-    const poolAddress = stakeBalance.input.target
+  let stakeInfos: IUserStake[] = stakeBalances.map((stakeBalance, i) => {
+    const pool = IB_POOLS[i]
     const amount = BigNumber.from(stakeBalance.output.amount)
     const rewardDebt = BigNumber.from(stakeBalance.output.rewardDebt)
     const bonusDebt = BigNumber.from(stakeBalance.output.bonusDebt)
     const fundedBy = stakeBalance.output.fundedBy
 
     return {
-      poolAddress,
+      poolId: pool.id,
+      poolAddress: pool.address,
+      stakingToken: pool.stakingToken,
+      unstakingToken: pool.unstakingToken,
+
       amount,
       rewardDebt,
       bonusDebt,
