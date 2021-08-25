@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import fetch from 'node-fetch'
 import { getTransfers } from '../../account'
-import { DirectionType, ITransferInfo } from '../../type'
+import { ITransferInfo } from '../../type'
 import { formatBigNumberToFixed } from '../utils/converter'
 import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
@@ -93,8 +93,8 @@ export const fetchUserStakes = async (account: string) => {
   return parsedStake
 }
 
-interface IDepositTransferUSDMap {
-  [address: string]: ITransferInfo
+export interface IDepositTransferUSDMap {
+  [address: string]: ITransferInfo[]
 }
 
 export const fetchUserSummary = async (account: string) => {
@@ -113,18 +113,11 @@ export const fetchUserSummary = async (account: string) => {
   const investmentTransferUSDs = await withPriceUSD(investmentTransfers)
   const investmentTransferInfos = withDirection(investmentTransferUSDs)
 
-  // 4. Separate by direction
-  const depositTransferUSDs = _.filter(investmentTransferInfos, { direction: DirectionType.DEPOSIT })
-  // const withdrawTransferUSDs = _.filter(investmentTransferInfos, { direction: DirectionType.WITHDRAW })
-
-  // 6. Get position from event by block number
-  const depositTransferInfos = await withPositionInfo(depositTransferUSDs)
-
-  // 7. Group by positionId
-  const depositTransferUSDMap: IDepositTransferUSDMap = _.groupBy(depositTransferInfos, 'positionId') as any
+  // 4. Get position from event by block number
+  const transferInfos = await withPositionInfo(investmentTransferInfos)
 
   // 8. Add equity USD
-  const investments = summaryPositionInfo(activePositions, depositTransferUSDMap)
+  const investments = summaryPositionInfo(activePositions, transferInfos)
 
   return investments
 }

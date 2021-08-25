@@ -59,6 +59,6 @@ export enum DirectionType {
   UNKNOWN = 'unknown',
 }
 
-export interface ITransferInfo extends ITransfer {
+export interface ITransferInfo extends ITransfer, ITransferUSD {
   direction: DirectionType
 }
