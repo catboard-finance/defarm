@@ -16,17 +16,17 @@ interface IApiPosition {
   debtShare: BigNumber // BigNumber // "4641020177806889684795"
 }
 
-interface IEncodedUserPosition extends IApiPosition {
-  positionValueUSD: BigNumber // BigNumber
-  debtValueUSD: BigNumber // BigNumber
+export interface IEncodedUserPosition extends IApiPosition {
+  positionValueUSDbn: BigNumber // BigNumber
+  debtValueUSDbn: BigNumber // BigNumber
 }
 
-interface UserPosition extends IEncodedUserPosition {
+export interface IUserPosition extends IEncodedUserPosition {
   farmSymbol: string // symbol
   vaultSymbol: string // symbol
 }
 
-export const getUserPositions = async (positions: IApiPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<UserPosition[]> => {
+export const getUserPositions = async (positions: IApiPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<IUserPosition[]> => {
   // Call shares(positionId) for shareAmount
   let calls: ICall[] = positions.map(position => ({
     target: position.vault,
@@ -51,8 +51,8 @@ export const getUserPositions = async (positions: IApiPosition[], block = 'lates
 
   let encodedPositions: IEncodedUserPosition[] = positions.map((position, i) => ({
     ...position,
-    positionValueUSD: BigNumber.from(positionInfos[i].output[0]),
-    debtValueUSD: BigNumber.from(positionInfos[i].output[1])
+    positionValueUSDbn: BigNumber.from(positionInfos[i].output[0]),
+    debtValueUSDbn: BigNumber.from(positionInfos[i].output[1])
   }))
 
   // Get quote symbol
@@ -86,7 +86,7 @@ export const getUserPositions = async (positions: IApiPosition[], block = 'lates
   ).output
 
   // Merge
-  let positionsInfo: UserPosition[] = encodedPositions.map((encodedPosition, i) => {
+  let positionsInfo: IUserPosition[] = encodedPositions.map((encodedPosition, i) => {
     const tokenAddress = farmingTokens[i].output
     const mapped = tokensAddressMap[tokenAddress]
     const farmSymbol = mapped.symbol

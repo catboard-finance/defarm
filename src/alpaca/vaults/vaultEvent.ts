@@ -30,7 +30,7 @@ export const getWorkEvent = async (address: string, blockNumber: number): Promis
   const topic = 'Work(uint256,uint256)'
   const events = await getEventsByBlockNumber(address, abi, topic, blockNumber)
   return {
-    uid: events[0].data.uid,
-    loan: BigNumber.from(events[0].data.loan)
+    uid: events[0] ? events[0].data.uid : null,
+    loan: events[0] ? BigNumber.from(events[0].data.loan) : null
   }
 }

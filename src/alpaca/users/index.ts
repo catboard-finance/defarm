@@ -1,8 +1,11 @@
+import _ from 'lodash'
 import fetch from 'node-fetch'
+import { getTransfers } from '../../account'
+import { DirectionType, ITransferInfo } from '../../type'
 import { formatBigNumberToFixed } from '../utils/converter'
-import { getPositions } from "../vaults"
+import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
-import { getUserPositions as getUserPositions } from "./position"
+import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
 
 const LEND_PRICE_SYMBOL_MAP = {
@@ -16,7 +19,18 @@ const LEND_PRICE_SYMBOL_MAP = {
   ETH: 'ethereum',
 }
 
-export const fetchUserPositions = async (account: string) => {
+export interface IUserPositionUSD extends IUserPosition {
+  positionValueUSD: number;
+  debtValueUSD: number;
+  vaultSymbol: string;
+  equityValueUSD: number;
+  debtRatio: number;
+  safetyBuffer: number;
+  farmTokenAmount: number;
+  quoteTokenAmount: number;
+}
+
+export const fetchUserPositions = async (account: string): Promise<IUserPositionUSD[]> => {
   // Raw
   const positions = await getPositions(account)
   const userPositions = await getUserPositions(positions)
@@ -29,8 +43,8 @@ export const fetchUserPositions = async (account: string) => {
 
   // Parsed
   const parsedUserPositions = userPositions.map(userPosition => {
-    const positionValueUSD = parseFloat(formatBigNumberToFixed(userPosition.positionValueUSD))
-    const debtValueUSD = parseFloat(formatBigNumberToFixed(userPosition.debtValueUSD))
+    const positionValueUSD = parseFloat(formatBigNumberToFixed(userPosition.positionValueUSDbn))
+    const debtValueUSD = parseFloat(formatBigNumberToFixed(userPosition.debtValueUSDbn))
     const equityValueUSD = positionValueUSD - debtValueUSD
     const debtRatio = debtValueUSD <= 0 ? 0 : 100 * debtValueUSD / positionValueUSD
     const safetyBuffer = 80 - debtRatio
@@ -79,3 +93,38 @@ export const fetchUserStakes = async (account: string) => {
   return parsedStake
 }
 
+interface IDepositTransferUSDMap {
+  [address: string]: ITransferInfo
+}
+
+export const fetchUserSummary = async (account: string) => {
+  // TODO price map first
+
+  // 1. Get all active positions
+  const positions = await fetchUserPositions(account)
+  const activePositions = positions.filter(e => e.equityValueUSD > 0)
+  // console.log('activePositions:', activePositions)
+
+  // 2. Get all investment related transactions
+  const transfers = await getTransfers(account)
+  const investmentTransfers = filterInvestmentTransfers(transfers)
+
+  // 3. Prepare price in USD for required symbols
+  const investmentTransferUSDs = await withPriceUSD(investmentTransfers)
+  const investmentTransferInfos = withDirection(investmentTransferUSDs)
+
+  // 4. Separate by direction
+  const depositTransferUSDs = _.filter(investmentTransferInfos, { direction: DirectionType.DEPOSIT })
+  // const withdrawTransferUSDs = _.filter(investmentTransferInfos, { direction: DirectionType.WITHDRAW })
+
+  // 6. Get position from event by block number
+  const depositTransferInfos = await withPositionInfo(depositTransferUSDs)
+
+  // 7. Group by positionId
+  const depositTransferUSDMap: IDepositTransferUSDMap = _.groupBy(depositTransferInfos, 'positionId') as any
+
+  // 8. Add equity USD
+  const investments = summaryPositionInfo(activePositions, depositTransferUSDMap)
+
+  return investments
+}

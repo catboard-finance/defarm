@@ -1,12 +1,12 @@
 
 import { Chain } from "@defillama/sdk/build/general";
-import { getLendsBySymbols, IBSCAlpacaLends, getTokenFormIBSymbol } from "../core";
+import { getLendsBySymbols, IBSCAlpacaLends, getTokenFromIBSymbol, Token } from "../core";
 import BigNumber from "bignumber.js";
 import { fetchTokenUSDPricesBySymbols as pancakeswap_fetchTokenUSDPricesBySymbols } from "../../pancakeswap";
 
 export const fetchLendsBySymbols = async (symbols: string[] = null, digit: number = 18, block = 'latest', chain: Chain = 'bsc'): Promise<IBSCAlpacaLends[]> => {
   // Convert to symbol if get ibSymbol as input e.g. ibALPACA → ALPACA
-  const notIBSymbols = Array.from(new Set(symbols.map(symbol => getTokenFormIBSymbol(symbol)?.unstakingToken || symbol)))
+  const notIBSymbols = [...Array.from(new Set(symbols.map(symbol => getTokenFromIBSymbol(symbol)?.unstakingToken || symbol)))]
 
   const lendsAndPrices = Promise.all([
     getLendsBySymbols(notIBSymbols, block, chain),
@@ -37,20 +37,19 @@ export const fetchLendsBySymbols = async (symbols: string[] = null, digit: numbe
   return results
 }
 
-export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
+export const fetchTokenUSDPricesBySymbols = async (symbols: string[]): Promise<Token[]> => {
   const lends = await fetchLendsBySymbols(symbols)
   const tokens = lends.map(lend => lend.inputToken).concat(lends.map(lend => lend.outputToken))
   const prices = symbols.map(symbol => {
     const token = tokens.find(token => symbol.toUpperCase() === token.symbol.toUpperCase())
     if (!token) return {
       symbol,
+      address: null,
+      busdPrice: null,
+      decimals: null,
     }
 
-    return {
-      symbol: token.symbol,
-      address: token.address,
-      busdPrice: token.busdPrice,
-    }
+    return token
   })
 
   return prices

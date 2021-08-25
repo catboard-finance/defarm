@@ -1,4 +1,6 @@
 import POOLS from './pools.json'
+import TOKENS from './tokens.json'
+
 import pools_abi from './abi/pools.abi.json'
 import { api } from '@defillama/sdk'
 import { Chain } from '@defillama/sdk/build/general'
@@ -39,7 +41,12 @@ export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
   }
 })
 
-export const getTokenFormIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
+const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`${TOKENS[k].toLowerCase()}`]: k })))
+export const getSymbolsFromAddresses = (addresses: string[]) => addresses.map(e => _TOKEN_LOWER_MAP[e])
+
+export const getTokenFromPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
+
+export const getTokenFromIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 
 export const getSupportedUSDSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
 
