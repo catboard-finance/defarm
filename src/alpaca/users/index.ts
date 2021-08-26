@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import { getTransfers } from '../../account'
 import { ITransferInfo } from '../../type'
 import { formatBigNumberToFixed } from '../utils/converter'
+import { getSymbolPriceUSDMapByAddresses } from '../utils/price'
 import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
@@ -98,8 +99,6 @@ export interface IDepositTransferUSDMap {
 }
 
 export const fetchUserSummary = async (account: string) => {
-  // TODO price map first
-
   // 1. Get all active positions
   const positions = await fetchUserPositions(account)
   const activePositions = positions.filter(e => e.equityValueUSD > 0)
@@ -109,14 +108,17 @@ export const fetchUserSummary = async (account: string) => {
   const transfers = await getTransfers(account)
   const investmentTransfers = filterInvestmentTransfers(transfers)
 
-  // 3. Prepare price in USD for required symbols
-  const investmentTransferUSDs = await withPriceUSD(investmentTransfers)
+  // 3. Apply USD
+  const symbolPriceUSDMap = await getSymbolPriceUSDMapByAddresses(investmentTransfers)
+
+  // 5. Prepare price in USD for required symbols
+  const investmentTransferUSDs = await withPriceUSD(investmentTransfers, symbolPriceUSDMap)
   const investmentTransferInfos = withDirection(investmentTransferUSDs)
 
-  // 4. Get position from event by block number
+  // 6. Get position from event by block number
   const transferInfos = await withPositionInfo(investmentTransferInfos)
 
-  // 8. Add equity USD
+  // 7. Add equity USD
   const investments = summaryPositionInfo(activePositions, transferInfos)
 
   return investments

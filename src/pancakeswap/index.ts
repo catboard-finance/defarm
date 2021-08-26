@@ -41,7 +41,13 @@ export const getSupportedUSDSymbols = () => {
 	];
 }
 
-export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
+export interface IPriceMap {
+	symbol: string,
+	address?: string,
+	busdPrice?: string,
+}
+
+export const fetchTokenUSDPricesBySymbols = async (symbols: string[]): Promise<IPriceMap[]> => {
 	// [0, 251, 252, 283] = ['CAKE', 'CAKE-BNB LP', 'BUSD-BNB LP', 'USDC-BUSD LP']
 	// 252 = BNB-BUSD not exists, only BUSD-BNB
 	// 400 = ETH-USDC LP
@@ -79,7 +85,7 @@ export const fetchTokenUSDPricesBySymbols = async (symbols: string[]) => {
 		if (symbol === 'BUSD') {
 			return {
 				symbol,
-				address: tokensConfig.busd.address,
+				address: tokensConfig.busd.address[56],
 				busdPrice: "1",
 			}
 		}

@@ -6,9 +6,7 @@ import { stringToFloat } from '../utils/converter';
 import { DirectionType, ITransfer, ITransferInfo, ITransferUSD } from '../../type';
 import _ from 'lodash'
 import { IUserPositionUSD } from '..';
-import { getSymbolsFromAddresses } from '../core';
 import { getPositionIds } from '../utils/events';
-import { fetchTokenUSDPricesBySymbols } from '../../pancakeswap';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 
@@ -58,17 +56,7 @@ export const filterNoZeroTransfer = (txList: ITransfer[]) => txList.filter(tx =>
 
 export const filterInvestmentTransfers = (transfers: ITransfer[]) => filterNoZeroTransfer(filterVaults(transfers))
 
-export const withPriceUSD = async (transfers: ITransfer[]): Promise<ITransferUSD[]> => {
-  // Get all unique address
-  const tokenAddresses: string[] = [...Array.from(new Set(transfers.map(tx => tx.address)))]
-  const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)
-
-  // TODO: Move to external
-  // Get current usd price
-  const tokenPriceUSDs = await fetchTokenUSDPricesBySymbols(tokenSymbols)
-  const symbolPriceUSDMap = {}
-  tokenPriceUSDs.forEach((e, i) => symbolPriceUSDMap[tokenAddresses[i]] = e)
-
+export const withPriceUSD = async (transfers: ITransfer[], symbolPriceUSDMap: object): Promise<ITransferUSD[]> => {
   // Attach usd price and return
   return transfers.map(tx => {
     const tokenPriceUSD = parseFloat(symbolPriceUSDMap[tx.address].busdPrice)

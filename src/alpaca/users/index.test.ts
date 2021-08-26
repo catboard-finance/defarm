@@ -13,13 +13,6 @@ describe('User', () => {
     expect(positions).toBeDefined
   }, 10000);
 
-  it(`can calculate profits`, async () => {
-    const profits = await fetchUserSummary(TEST_ACCOUNT_ADDRESS)
-    console.log('profits:', profits)
-
-    expect(profits).toBeDefined
-  }, 100000);
-
   it(`can fetch balance from lend`, async () => {
     const lends = await fetchUserLends(TEST_ACCOUNT_ADDRESS)
     // console.log('lends:', lends)
@@ -33,4 +26,11 @@ describe('User', () => {
 
     expect(stakes).toBeDefined
   }, 10000)
+
+  it(`can calculate profits`, async () => {
+    const profits = await fetchUserSummary(TEST_ACCOUNT_ADDRESS)
+    console.log('profits:', profits)
+
+    expect(profits).toBeDefined
+  }, 100000);
 })
