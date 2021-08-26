@@ -50,7 +50,9 @@ export interface IBlockEvent {
 // Database Scope
 
 export interface ITransferUSD extends ITransfer {
-  busdPrice: number
+  tokenPriceUSD: number,
+  tokenAmount: number,
+  tokenAmountUSD: number,
 }
 
 export enum DirectionType {

@@ -41,13 +41,13 @@ describe('🐈 User', () => {
     }`
 
     const topic = 'Work(uint256,uint256)'
-    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', abi, topic, 9959085)
+    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', abi, topic, 9967403)
 
     expect(events).not.toBeNull()
   });
 
   it('can get all alpaca vault related transfers.', async () => {
-    const res = filterVaults(mocked_transfers)
+    const res = filterVaults(mocked_transfers['result'])
     expect(res).toBeDefined()
   });
 })

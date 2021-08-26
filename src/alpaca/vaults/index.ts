@@ -5,7 +5,6 @@ import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
 import { DirectionType, ITransfer, ITransferInfo, ITransferUSD } from '../../type';
 import _ from 'lodash'
-import { getTokenPrices } from '../../account';
 import { IUserPositionUSD } from '..';
 import { getSymbolsFromAddresses } from '../core';
 import { getPositionIds } from '../utils/events';
@@ -22,12 +21,24 @@ export const getPositions = async (account: string, block = 'latest', chain: Cha
   return data.positions
 }
 
-const ALPACA_VAULT_ADDRESSES = [
+// TODO list all supported address
+
+// Interest Bearing BUSD
+const ALPACA_BUSD_VAULT_ADDRESSES = [
+  "0x3fC149995021f1d7AEc54D015Dad3c7Abc952bf0", // Pancakeswap
+  "0x61e58dE669d842C2d77288Df629af031b3283c81", // Waultswap
+  "0x38912684b1d20Fe9D725e8B39c39458Fac5A4833", // PancakeswapSingleAsset
+].map(vault => vault.toLowerCase())
+
+// Interest Bearing USDT
+const ALPACA_USDT_VAULT_ADDRESSES = [
   "0x5f94f61095731b669b30ed1f3f4586BBb51f4001", // Pancakeswap
   "0xcE37fD1Ff0A6cb4A6A59cd46CCf55D5Dc70ec585", // Waultswap
   "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90", // PancakeswapSingleAsset
   ...alpacaInfo.Vaults.map(vault => vault.address)
 ].map(vault => vault.toLowerCase())
+
+const ALPACA_VAULT_ADDRESSES = [...ALPACA_BUSD_VAULT_ADDRESSES, ...ALPACA_USDT_VAULT_ADDRESSES]
 
 export const filterVaults = (txList: ITransfer[]) => txList.filter(tx =>
   ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase()) ||
@@ -41,27 +52,6 @@ export const filterDepositVaults = (txList: ITransfer[]) => txList.filter(tx =>
 export const filterNoZeroTransfer = (txList: ITransfer[]) => txList.filter(tx =>
   stringToFloat(tx.value) > 0
 )
-
-interface ISummaryMapValue {
-  withdraws: ITransfer[],
-  deposits: ITransfer[],
-  totalDeposit: number,
-  totalWithdraw: number,
-}
-
-interface ISummaryMap {
-  [vaultAddress: string]: ISummaryMapValue
-}
-
-interface ISummaryUSDMapValue extends ISummaryMapValue {
-  totalDepositUSD: number,
-  totalWithdrawUSD: number,
-  tokenPriceUSD: number,
-}
-
-interface ISummaryUSDMap {
-  [vaultAddress: string]: ISummaryUSDMapValue
-}
 
 export const filterInvestmentTransfers = (transfers: ITransfer[]) => filterNoZeroTransfer(filterVaults(transfers))
 
@@ -77,11 +67,18 @@ export const withPriceUSD = async (transfers: ITransfer[]): Promise<ITransferUSD
   tokenPriceUSDs.forEach((e, i) => symbolPriceUSDMap[tokenAddresses[i]] = e)
 
   // Attach usd price and return
-  return transfers.map(tx => ({
-    ...tx,
-    symbol: symbolPriceUSDMap[tx.address].symbol,
-    busdPrice: parseFloat(symbolPriceUSDMap[tx.address].busdPrice) * stringToFloat(tx.value),
-  }))
+
+  return transfers.map(tx => {
+    const tokenPriceUSD = parseFloat(symbolPriceUSDMap[tx.address].busdPrice)
+    const tokenAmount = stringToFloat(tx.value)
+    return ({
+      ...tx,
+      symbol: symbolPriceUSDMap[tx.address].symbol,
+      tokenPriceUSD,
+      tokenAmount,
+      tokenAmountUSD: tokenPriceUSD * tokenAmount,
+    })
+  })
 }
 
 export const withDirection = (transfers: ITransferUSD[]): ITransferInfo[] => {
@@ -106,7 +103,18 @@ interface ITransferPositionInfo extends ITransferInfo {
 
 export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITransferPositionInfo[]> => {
   const promises = transfers.map(tx => {
-    return getPositionIds(DirectionType.DEPOSIT ? tx.to_address : tx.from_address, parseInt(tx.block_number))
+    let targetAddress = DirectionType.DEPOSIT ? tx.to_address : tx.from_address
+
+    // poc mapping to vault address
+    if (ALPACA_USDT_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
+      targetAddress = '0x158Da805682BdC8ee32d52833aD41E74bb951E59'
+    }
+
+    if (ALPACA_BUSD_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
+      targetAddress = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f'
+    }
+
+    return getPositionIds(targetAddress, parseInt(tx.block_number))
   })
 
   const results = await Promise.all(promises)
@@ -120,6 +128,8 @@ export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITra
 }
 
 interface IPositionSummary {
+  totalDeposit: number
+  totalWithdraw: number
   totalDepositUSD: number
   totalWithdrawUSD: number
 }
@@ -134,43 +144,28 @@ export const summaryPositionInfo = (activePositions: IUserPositionUSD[], transfe
     }
 
     // 2. Sum by direction
-    const depositTransferUSDs = transferPositionInfos.filter(e => e.direction === DirectionType.DEPOSIT)
-    const totalWithdrawUSDs = transferPositionInfos.filter(e => e.direction === DirectionType.WITHDRAW)
+    const deposits = transferPositionInfos.filter(e => e.direction === DirectionType.DEPOSIT)
+    const withdraws = transferPositionInfos.filter(e => e.direction === DirectionType.WITHDRAW)
 
     const positionSummary: IPositionSummary = {
-      totalDepositUSD: _.sumBy(depositTransferUSDs, 'busdPrice'),
-      totalWithdrawUSD: _.sumBy(totalWithdrawUSDs, 'busdPrice'),
+      totalDepositUSD: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmountUSD'),
+      totalWithdrawUSD: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmountUSD'),
+      totalDeposit: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmount'),
+      totalWithdraw: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmount'),
     }
 
     const investedPositionSummaryUSD = positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD
 
+    delete pos.positionValueUSDbn
+    delete pos.debtValueUSDbn
+
     return {
       ...pos,
       ...positionSummary,
+      deposits,
+      withdraws,
       investedUSD: positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD,
       profitUSD: pos.equityValueUSD - investedPositionSummaryUSD,
     }
   })
-}
-
-export const deprecated_withPriceUSD = async (summaryMap: ISummaryMap): Promise<ISummaryUSDMap> => {
-  const _tokenAddresses = []
-  for (let [k] of Object.entries(summaryMap)) {
-    _tokenAddresses.concat(summaryMap[k].deposits.map(e => e.address))
-  }
-
-  const tokenAddresses: string[] = [...Array.from(new Set(_tokenAddresses))]
-  const tokenPriceUSDMap = await getTokenPrices(tokenAddresses)
-
-  const summaryUSDMap: ISummaryUSDMap = {}
-  for (let [k] of Object.entries(summaryMap)) {
-    summaryUSDMap[k] = {
-      ...summaryMap[k],
-      tokenPriceUSD: tokenPriceUSDMap[summaryMap[k].deposits[0].address],
-      totalDepositUSD: summaryMap[k].totalDeposit * summaryUSDMap[k].tokenPriceUSD,
-      totalWithdrawUSD: summaryMap[k].totalWithdraw * summaryUSDMap[k].tokenPriceUSD,
-    }
-  }
-
-  return summaryUSDMap
 }
