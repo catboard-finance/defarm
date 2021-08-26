@@ -6,7 +6,7 @@ export interface IWorkEvent {
   loan: BigNumber
 }
 
-export const getWorkEvent = async (address: string, blockNumber: number): Promise<IWorkEvent> => {
+export const getWorkEvent = async (address: string, blockNumber: number, transactionHash: string): Promise<IWorkEvent> => {
   const abi = `{
   "anonymous": false,
   "inputs": [
@@ -29,8 +29,9 @@ export const getWorkEvent = async (address: string, blockNumber: number): Promis
 
   const topic = 'Work(uint256,uint256)'
   const events = await getEventsByBlockNumber(address, abi, topic, blockNumber)
+  const matchedEvent = events.find(e => e.transaction_hash === transactionHash)
   return {
-    uid: events[0] ? events[0].data.uid : null,
-    loan: events[0] ? BigNumber.from(events[0].data.loan) : null
+    uid: matchedEvent ? matchedEvent.data.uid : null,
+    loan: matchedEvent ? BigNumber.from(matchedEvent.data.loan) : null
   }
 }

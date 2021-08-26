@@ -8,8 +8,8 @@ import { getWorkEvent } from "../vaults/vaultEvent";
 const GETBLOCK_API_KEY = process.env.GETBLOCK_API_KEY
 const RPC_URL = `https://bsc.getblock.io/mainnet/?api_key=${GETBLOCK_API_KEY}`
 
-export const getPositionIds = async (address: string, blockNumber: number): Promise<any> => {
-  const workEvent = await getWorkEvent(address, blockNumber)
+export const getPositionIds = async (address: string, blockNumber: number, transactionHash: string): Promise<any> => {
+  const workEvent = await getWorkEvent(address, blockNumber, transactionHash)
   return workEvent.uid
 }
 

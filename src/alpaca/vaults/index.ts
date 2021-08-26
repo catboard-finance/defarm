@@ -5,7 +5,7 @@ import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
 import { DirectionType, ITransfer, ITransferInfo, ITransferUSD } from '../../type';
 import _ from 'lodash'
-import { IUserPositionUSD } from '..';
+import { getSymbolsFromAddresses, IUserPositionUSD } from '..';
 import { getPositionIds } from '../utils/events';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
@@ -56,14 +56,18 @@ export const filterNoZeroTransfer = (txList: ITransfer[]) => txList.filter(tx =>
 
 export const filterInvestmentTransfers = (transfers: ITransfer[]) => filterNoZeroTransfer(filterVaults(transfers))
 
-export const withPriceUSD = async (transfers: ITransfer[], symbolPriceUSDMap: object): Promise<ITransferUSD[]> => {
+export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: object): ITransferUSD[] => {
+  // Get symbols
+  const symbols = getSymbolsFromAddresses(transfers.map(tx => tx.address))
+
   // Attach usd price and return
-  return transfers.map(tx => {
-    const tokenPriceUSD = parseFloat(symbolPriceUSDMap[tx.address].busdPrice)
+  return transfers.map((tx, i) => {
+    const symbol = symbols[i]
+    const tokenPriceUSD = parseFloat(symbolPriceUSDMap[symbol])
     const tokenAmount = stringToFloat(tx.value)
     return ({
       ...tx,
-      symbol: symbolPriceUSDMap[tx.address].symbol,
+      symbol,
       tokenPriceUSD,
       tokenAmount,
       tokenAmountUSD: tokenPriceUSD * tokenAmount,
@@ -104,16 +108,20 @@ export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITra
       targetAddress = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f'.toLowerCase()
     }
 
-    return getPositionIds(targetAddress, parseInt(tx.block_number))
+    return getPositionIds(targetAddress, parseInt(tx.block_number), tx.transaction_hash)
   })
 
   const results = await Promise.all(promises)
 
   return results.map((e, i) => {
-    return {
+    const res = {
       ...transfers[i],
-      positionId: e
+      positionId: e || 'stakes'
     }
+
+    delete res.value
+
+    return res
   })
 }
 
