@@ -82,7 +82,10 @@ export interface IDepositTransferUSDMap {
   [address: string]: ITransferInfo[]
 }
 
-export const fetchUserSummary = async (account: string) => {
+// Will be deprecate?
+// This working but in the end gathering deposit/withdraw from transfer is no efficient due to 
+// It will need knowledge of all address to filter in/out behavior.
+export const fetchUserSummaryFromTransfer = async (account: string) => {
   // TODO : replace with onchain implement
   // 1. Get all active positions
   const positions = await fetchUserPositions(account)
