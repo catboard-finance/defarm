@@ -4,6 +4,7 @@ import TOKENS from './tokens.json'
 import pools_abi from './abi/pools.abi.json'
 import { api } from '@defillama/sdk'
 import { Chain } from '@defillama/sdk/build/general'
+import { ITransfer } from '../type'
 
 export type Token = {
   symbol: string
@@ -42,7 +43,7 @@ export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
 })
 
 const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`${TOKENS[k].toLowerCase()}`]: k })))
-export const getSymbolsFromAddresses = (addresses: string[]) => addresses.map(e => _TOKEN_LOWER_MAP[e])
+export const getSymbolsFromAddresses = (addresses: string[]): string[] => addresses.map(e => _TOKEN_LOWER_MAP[e])
 
 export const getTokenFromPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
 
@@ -140,4 +141,14 @@ export const getLendsByPoolAddresses = async (block = 'latest', chain: Chain = '
     .filter(pool => pool)
 
   return result
+}
+
+// Transfers
+
+export const getAddressesFromTransfers = (transfers: ITransfer[]) => [...Array.from(new Set(transfers.map(tx => tx.address)))]
+
+export const getSymbolsFromTransfers = (transfers: ITransfer[]) => {
+  const tokenAddresses = getAddressesFromTransfers(transfers)
+  const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)
+  return tokenSymbols
 }

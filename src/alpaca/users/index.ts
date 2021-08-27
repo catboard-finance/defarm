@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { getTransfers } from '../../account'
 import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
+import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
 import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
@@ -93,7 +94,8 @@ export const fetchUserSummary = async (account: string) => {
   const investmentTransfers = filterInvestmentTransfers(transfers)
 
   // 3. Prepare price in USD
-  const symbolPriceUSDMap = await fetchPriceUSD()
+  const symbols = getSymbolsFromTransfers(investmentTransfers)
+  const symbolPriceUSDMap = await fetchPriceUSD(symbols)
 
   // 4. Apply price in USD and direction
   const investmentTransferUSDs = withPriceUSD(investmentTransfers, symbolPriceUSDMap)
