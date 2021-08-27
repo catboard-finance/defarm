@@ -49,18 +49,21 @@ export interface IBlockEvent {
 
 // Database Scope
 
+export enum DirectionType {
+  OUT = 'out',
+  IN = 'in',
+}
+
+export interface IEncodedTransfer extends ITransfer {
+  direction: DirectionType
+}
+
 export interface ITransferUSD extends ITransfer {
   tokenPriceUSD: number,
   tokenAmount: number,
   tokenAmountUSD: number,
 }
 
-export enum DirectionType {
-  DEPOSIT = 'deposit',
-  WITHDRAW = 'withdraw',
-  UNKNOWN = 'unknown',
-}
+export interface ITransferInfo extends ITransfer, ITransferUSD, IEncodedTransfer {
 
-export interface ITransferInfo extends ITransfer, ITransferUSD {
-  direction: DirectionType
 }

@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
 import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
-import { DirectionType, ITransfer, ITransferInfo, ITransferUSD } from '../../type';
+import { DirectionType, IEncodedTransfer, ITransfer, ITransferInfo, ITransferUSD } from '../../type';
 import _ from 'lodash'
 import { getSymbolsFromAddresses, IUserPositionUSD } from '..';
 import { getPositionIds } from '../utils/events';
@@ -75,21 +75,31 @@ export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: object):
   })
 }
 
-export const withDirection = (transfers: ITransferUSD[]): ITransferInfo[] => {
+export const withDirection = (account: string, transfers: ITransfer[]): IEncodedTransfer[] => {
   return transfers.map(tx => {
-    const _tx = { ...tx, ...{ direction: DirectionType.UNKNOWN } }
-    if (ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())) {
-      // User → 💎 → Pool
-      _tx.direction = DirectionType.DEPOSIT
-    }
-    else if (ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase())) {
-      // User ← 💎 ← Pool
-      _tx.direction = DirectionType.WITHDRAW
-    }
-
-    return _tx
+    console.log(account === tx.from_address.toLowerCase())
+    return ({
+      ...tx,
+      direction: account === tx.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
+    })
   })
 }
+
+// export const applyDirection = (transfers: ITransfer[]): ITransferInfo[] => {
+//   return transfers.map(tx => {
+//     const _tx = { ...tx, ...{ direction: DirectionType.UNKNOWN } }
+//     if (ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())) {
+//       // User → 💎 → Pool
+//       _tx.direction = DirectionType.DEPOSIT
+//     }
+//     else if (ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase())) {
+//       // User ← 💎 ← Pool
+//       _tx.direction = DirectionType.WITHDRAW
+//     }
+
+//     return _tx
+//   })
+// }
 
 interface ITransferPositionInfo extends ITransferInfo {
   positionId: string
@@ -97,7 +107,7 @@ interface ITransferPositionInfo extends ITransferInfo {
 
 export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITransferPositionInfo[]> => {
   const promises = transfers.map(tx => {
-    let targetAddress = (tx.direction === DirectionType.DEPOSIT) ? tx.to_address : tx.from_address
+    let targetAddress = (tx.direction === DirectionType.OUT) ? tx.to_address : tx.from_address
 
     // poc mapping to vault address
     if (ALPACA_USDT_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {

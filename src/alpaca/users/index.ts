@@ -91,15 +91,15 @@ export const fetchUserSummary = async (account: string) => {
 
   // 2. Get all investment related transactions
   const transfers = await getTransfers(account)
-  const investmentTransfers = filterInvestmentTransfers(transfers)
+  const transferWithDirections = withDirection(account, transfers)
+  const transferObjects = filterInvestmentTransfers(transferWithDirections)
 
   // 3. Prepare price in USD
-  const symbols = getSymbolsFromTransfers(investmentTransfers)
+  const symbols = getSymbolsFromTransfers(transferObjects)
   const symbolPriceUSDMap = await fetchPriceUSD(symbols)
 
-  // 4. Apply price in USD and direction
-  const investmentTransferUSDs = withPriceUSD(investmentTransfers, symbolPriceUSDMap)
-  const investmentTransferInfos = withDirection(investmentTransferUSDs)
+  // 4. Apply price in USD
+  const investmentTransferInfos = withPriceUSD(transferObjects, symbolPriceUSDMap) as ITransferInfo[]
 
   // 5. Get position from event by block number
   const transferInfos = await withPositionInfo(investmentTransferInfos)
