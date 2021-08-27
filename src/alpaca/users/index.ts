@@ -4,7 +4,7 @@ import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
 import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
-import { ITransactionWithMethod, withMethods, withType } from '../utils/transaction'
+import { withMethods, withSymbol, withType } from '../utils/transaction'
 import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
@@ -116,17 +116,18 @@ export const fetchUserSummaryFromTransfer = async (account: string) => {
 
 export const fetchUserSummary = async (account: string) => {
   // Get transactions
-  let transactions = await getTransactions(account)
+  const transactions = await getTransactions(account)
 
   // Decode methods
-  transactions = await withMethods(transactions)
+  let transactionInfos = await withMethods(transactions)
 
   // Separate actions lend/stake/farm by vault address and method
-  transactions = await withType(transactions as ITransactionWithMethod[])
-
-  return transactions
+  transactionInfos = await withType(transactionInfos)
 
   // Add token info by tokens address
+  transactionInfos = withSymbol(transactionInfos)
+
+  return transactions
 
   // Add historical price at contract time
 

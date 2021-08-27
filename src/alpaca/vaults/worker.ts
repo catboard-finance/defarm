@@ -70,7 +70,7 @@ export const parseVaultInput = (data: string) => {
           ...parsed,
           name: WORKER_ADDRESS_MAP[worker],
           positionId: ethers.BigNumber.from(id).toString(),
-          to: worker,
+          workerAddress: worker,
           principalAmount: stringToFloat(principalAmount),
           borrowAmount: stringToFloat(borrowAmount),
           maxReturn: stringToFloat(maxReturn),
