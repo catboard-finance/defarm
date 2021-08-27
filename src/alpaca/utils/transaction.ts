@@ -36,7 +36,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
       case MethodType.approve:
         return {
           ...e,
-          investmentType: null,
+          investmentType: InvestmentTypeObject.none,
         }
       case MethodType.deposit:
         // lends or stake
