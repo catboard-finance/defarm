@@ -49,6 +49,15 @@ export interface IBlockEvent {
 
 // Database Scope
 
+export enum MethodType {
+  deposit = 'deposit',
+  approve = 'approve',
+  work = 'work',
+  transfer = 'transfer',
+  // Pancake
+  swapExactTokensForTokens = 'swapExactTokensForTokens',
+}
+
 export enum DirectionType {
   OUT = 'out',
   IN = 'in',

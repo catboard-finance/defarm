@@ -142,57 +142,6 @@ export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITra
 //   totalWithdrawUSD: number
 // }
 
-/*
-[
-  {
-    positionId: 10121,
-
-    deposits: [
-      {
-        vault: "0x3fc149995021f1d7aec54d015dad3c7abc952bf0",
-        symbol: "ALPACA",
-        amount: 695.245603609934955053,
-        priceUSD: 1042.8684054149,
-        transferredAt: "2021-08-07T14:45:51.000Z",
-      },
-      {
-        vault: "0x7c9e73d4c71dae564d41f78d56439bb4ba87592f",
-        symbol: "BUSD",
-        amount: 504.503765091159716219,
-        priceUSD: 504.503765091159716219,
-        transferredAt: "2021-08-07T14:45:51.000Z",
-      },
-      {
-        vault: "0x3fc149995021f1d7aec54d015dad3c7abc952bf0",
-        symbol: "ALPACA",
-        amount: 577.406596699668932514,
-        priceUSD: 519.6659370297,
-        transferredAt: "2021-08-11T06:37:01.000Z",
-      },
-    ],
-    depositSummary: [
-      {
-        symbol: "CAKE"
-        totalDepositAmount: 123,
-        totalDepositUSD: 1230,
-      },
-      {
-        symbol: "BUSD"
-        totalDepositAmount: 456,
-        totalDepositUSD: 4560,
-      }
-    ]
-
-    withdraws: {...},
-
-    totalDepositUSD,
-    totalWithdrawUSD,
-
-    totalEquityUSD,
-    totalProfit,
-  }
-]
-*/
 export const summaryPositionInfo = (activePositions: IUserPositionUSD[], transferInfos: ITransferPositionInfo[]) => {
   // 1. Remove null
   const _transferInfos = transferInfos.filter(e => e)

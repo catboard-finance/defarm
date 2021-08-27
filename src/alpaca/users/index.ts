@@ -1,9 +1,10 @@
 import _ from 'lodash'
-import { getTransfers } from '../../account'
+import { getTransactions, getTransfers } from '../../account'
 import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
 import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
+import { withMethods } from '../utils/transaction'
 import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
@@ -111,4 +112,39 @@ export const fetchUserSummaryFromTransfer = async (account: string) => {
   const investments = summaryPositionInfo(activePositions, transferInfos)
 
   return investments
+}
+
+export const fetchUserSummary = async (account: string) => {
+  // Get transactions
+  const transactions = await getTransactions(account)
+
+  // Decode methods
+  const transactionMethods = await withMethods(transactions)
+  return transactionMethods
+
+  // Separate actions lend/stake/farm by vault address and method
+
+  // Add token info by tokens address
+
+  // Add historical price at contract time
+
+  // Get position from event by block number
+
+  // Define token ratio (for estimate each token amounts) by tokens numbers in vault
+
+  // Separate deposits/withdraws
+
+  // Summary deposits/withdraws
+
+  // Summary token each lend/stake/farm
+
+  ///////////////////////////////////////////////////////////////////
+
+  // Get equity from chain (or API)
+
+  // Divide current token from equity by farm ratio
+
+  // Summary from lend/stake/farm
+
+  // Summary token from lend/stake/farm
 }
