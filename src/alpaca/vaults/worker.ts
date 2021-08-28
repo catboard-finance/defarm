@@ -75,6 +75,19 @@ export const parseVaultInput = (data: string) => {
           borrowAmount: stringToFloat(borrowAmount),
           maxReturn: stringToFloat(maxReturn),
         }
+
+        // Vault.sol: data = The calldata to pass along to the worker for more working context.
+        if (args[5]) {
+          const [stratAddress, amountByte] = ethers.utils.defaultAbiCoder.decode(["address", "bytes"], args[5])
+          const [stratAmount] = ethers.utils.defaultAbiCoder.decode(["uint256"], amountByte)
+
+          parsed = {
+            ...parsed,
+            stratAddress,
+            stratAmount: stringToFloat(stratAmount),
+          }
+        }
+
         break;
       // Special case for pancake
       case MethodType.swapExactTokensForTokens:
