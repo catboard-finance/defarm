@@ -2,9 +2,10 @@ import _ from 'lodash'
 import { getTransactions, getTransfers } from '../../account'
 import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
-import { getSymbolFromAddress, getSymbolsFromTransfers } from '../core'
+import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
 import { withMethods, withPosition, withSymbol, withType } from '../utils/transaction'
+import { getStratAddressTokenAddressMap } from '../utils/transfer'
 import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
@@ -115,6 +116,9 @@ export const fetchUserSummaryFromTransfer = async (account: string) => {
 }
 
 export const fetchUserSummary = async (account: string) => {
+
+  ////////////////// TRANSACTIONS //////////////////
+
   // Get transactions
   const transactions = await getTransactions(account)
 
@@ -124,23 +128,15 @@ export const fetchUserSummary = async (account: string) => {
   // Separate actions lend/stake/farm by vault address and method
   transactionInfos = await withType(transactionInfos)
 
+  ////////////////// TRANSFERS //////////////////
+
   // Get transfer and gathering symbol
   const transfers = await getTransfers(account)
   let transferInfos = withDirection(account, transfers)
   transferInfos = filterInvestmentTransfers(transferInfos) as ITransferInfo[]
 
-  // Prepare symbols
-  const startAddressTokenAddressMap = Object.assign({},
-    ...Object.keys(transferInfos).map(k => {
-      const transferInfo = transferInfos[k]
-      return {
-        [`${transferInfo.to_address.toLowerCase()}`]: {
-          symbol: getSymbolFromAddress(transferInfo.address),
-          address: transferInfo.address
-        }
-      }
-    })
-  )
+  // Prepare symbol map from transfer
+  const stratAddressTokenAddressMap = getStratAddressTokenAddressMap(transfers)
 
   // const symbolMaps = getSymbolsMapFromAddresses(transferInfos.map(e=>e.to_address))
   // const symbolPriceUSDMap = await fetchPriceUSD(symbols)
@@ -149,7 +145,9 @@ export const fetchUserSummary = async (account: string) => {
   // transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
 
   // Add token info by tokens address
-  transactionInfos = withSymbol(transactionInfos, startAddressTokenAddressMap)
+  transactionInfos = withSymbol(transactionInfos, stratAddressTokenAddressMap)
+
+  ////////////////// POSITIONS //////////////////
 
   // Get position from event by block number
   transactionInfos = await withPosition(transactionInfos)

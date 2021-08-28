@@ -85,12 +85,12 @@ interface IFarmTransaction extends ITransactionInfo {
   maxReturn: number
 }
 
-export const withSymbol = (transactions: ITransactionInfo[], startAddressTokenAddressMap: { [address: string]: IToken }): IFarmTransaction[] => {
+export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken }): IFarmTransaction[] => {
   const res = transactions.map(e => {
     const farmTx = e as IFarmTransaction
     switch (farmTx.investmentType) {
       case InvestmentTypeObject.farms:
-        const stratToken = startAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
+        const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
         const token = getTokenFromPoolAddress(farmTx.to_address)
         return {
           ...farmTx,
