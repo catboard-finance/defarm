@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { getTransactions, getTransfers } from '../../account'
 import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
-import { getSymbolsFromTransfers } from '../core'
+import { getSymbolFromAddress, getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
 import { withMethods, withPosition, withSymbol, withType } from '../utils/transaction'
 import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
@@ -95,18 +95,18 @@ export const fetchUserSummaryFromTransfer = async (account: string) => {
 
   // 2. Get all investment related transactions
   const transfers = await getTransfers(account)
-  const transferWithDirections = withDirection(account, transfers)
-  const transferObjects = filterInvestmentTransfers(transferWithDirections)
+  let transferInfos = withDirection(account, transfers)
+  transferInfos = filterInvestmentTransfers(transferInfos) as ITransferInfo[]
 
   // 3. Prepare price in USD
-  const symbols = getSymbolsFromTransfers(transferObjects)
+  const symbols = getSymbolsFromTransfers(transferInfos)
   const symbolPriceUSDMap = await fetchPriceUSD(symbols)
 
   // 4. Apply price in USD
-  const investmentTransferInfos = withPriceUSD(transferObjects, symbolPriceUSDMap) as ITransferInfo[]
+  transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
 
   // 5. Get position from event by block number
-  const transferInfos = await withPositionInfo(investmentTransferInfos)
+  transferInfos = await withPositionInfo(transferInfos as ITransferInfo[])
 
   // 6. Add equity USD
   const investments = summaryPositionInfo(activePositions, transferInfos)
@@ -124,8 +124,32 @@ export const fetchUserSummary = async (account: string) => {
   // Separate actions lend/stake/farm by vault address and method
   transactionInfos = await withType(transactionInfos)
 
+  // Get transfer and gathering symbol
+  const transfers = await getTransfers(account)
+  let transferInfos = withDirection(account, transfers)
+  transferInfos = filterInvestmentTransfers(transferInfos) as ITransferInfo[]
+
+  // Prepare symbols
+  const startAddressTokenAddressMap = Object.assign({},
+    ...Object.keys(transferInfos).map(k => {
+      const transferInfo = transferInfos[k]
+      return {
+        [`${transferInfo.to_address.toLowerCase()}`]: {
+          symbol: getSymbolFromAddress(transferInfo.address),
+          address: transferInfo.address
+        }
+      }
+    })
+  )
+
+  // const symbolMaps = getSymbolsMapFromAddresses(transferInfos.map(e=>e.to_address))
+  // const symbolPriceUSDMap = await fetchPriceUSD(symbols)
+
+  // // Apply price in USD
+  // transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
+
   // Add token info by tokens address
-  transactionInfos = withSymbol(transactionInfos)
+  transactionInfos = withSymbol(transactionInfos, startAddressTokenAddressMap)
 
   // Get position from event by block number
   transactionInfos = await withPosition(transactionInfos)

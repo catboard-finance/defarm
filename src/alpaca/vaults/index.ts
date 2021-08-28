@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
 import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
-import { DirectionType, IEncodedTransfer, ITransfer, ITransferInfo, ITransferUSD } from '../../type';
+import { DirectionType, ITransfer, ITransferInfo } from '../../type';
 import _ from 'lodash'
 import { getSymbolsFromAddresses, IUserPositionUSD } from '..';
 import { getPositionId } from '../utils/events';
@@ -56,7 +56,7 @@ export const filterNoZeroTransfer = (txList: ITransfer[]) => txList.filter(tx =>
 
 export const filterInvestmentTransfers = (transfers: ITransfer[]) => filterNoZeroTransfer(filterVaults(transfers))
 
-export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: object): ITransferUSD[] => {
+export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: object): ITransferInfo[] => {
   // Get symbols
   const symbols = getSymbolsFromAddresses(transfers.map(tx => tx.address))
 
@@ -71,13 +71,12 @@ export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: object):
       tokenPriceUSD,
       tokenAmount,
       tokenAmountUSD: tokenPriceUSD * tokenAmount,
-    })
+    }) as unknown as ITransferInfo
   })
 }
 
-export const withDirection = (account: string, transfers: ITransfer[]): IEncodedTransfer[] => {
+export const withDirection = (account: string, transfers: ITransfer[]) => {
   return transfers.map(tx => {
-    console.log(account === tx.from_address.toLowerCase())
     return ({
       ...tx,
       direction: account === tx.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
@@ -101,11 +100,7 @@ export const withDirection = (account: string, transfers: ITransfer[]): IEncoded
 //   })
 // }
 
-interface ITransferPositionInfo extends ITransferInfo {
-  positionId: string
-}
-
-export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITransferPositionInfo[]> => {
+export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITransferInfo[]> => {
   const promises = transfers.map(tx => {
     let targetAddress = (tx.direction === DirectionType.OUT) ? tx.to_address : tx.from_address
 
@@ -142,7 +137,7 @@ export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITra
 //   totalWithdrawUSD: number
 // }
 
-export const summaryPositionInfo = (activePositions: IUserPositionUSD[], transferInfos: ITransferPositionInfo[]) => {
+export const summaryPositionInfo = (activePositions: IUserPositionUSD[], transferInfos: ITransfer[]) => {
   // 1. Remove null
   const _transferInfos = transferInfos.filter(e => e)
 

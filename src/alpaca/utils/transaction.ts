@@ -1,4 +1,4 @@
-import { ITransaction, MethodType } from "../../type";
+import { IToken, ITransaction, MethodType } from "../../type";
 import { getTokenFromIBSymbol, getTokenFromPoolAddress } from "../core";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
 import { getWorkEvent } from "../vaults/vaultEvent";
@@ -8,9 +8,9 @@ export interface ITransactionInfo extends ITransaction {
   method: MethodType
   investmentType: InvestmentTypeObject
   vaultAddress: string // "0x3fc149995021f1d7aec54d015dad3c7abc952bf0",
-  tokenSymbol: string // "ALPACA",
-  tokenAddress: string // "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
-  tokenAmount: number //695.245603609934955053,
+  principalSymbol: string // "ALPACA",
+  principalAddress: string // "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
+  principalAmount: number //695.245603609934955053,
   priceUSD: number // 1042.8684054149,
   block_timestamp: string // Date "2021-08-07T14:45:51.000Z",
   block_number: string // "10277278",
@@ -73,23 +73,29 @@ interface IFarmTransaction extends ITransactionInfo {
   name: string
   positionId: string
   workerAddress: string
+
+  principalSymbol: string
   principalAmount: number
+
+  stratAddress: string
+  stratSymbol: string
+  stratAmount: number
+
   borrowAmount: number
   maxReturn: number
 }
 
-export const withSymbol = (transactions: ITransactionInfo[]): IFarmTransaction[] => {
+export const withSymbol = (transactions: ITransactionInfo[], startAddressTokenAddressMap: { [address: string]: IToken }): IFarmTransaction[] => {
   const res = transactions.map(e => {
     const farmTx = e as IFarmTransaction
     switch (farmTx.investmentType) {
       case InvestmentTypeObject.farms:
-        const tokenAddress = farmTx.workerAddress
+        const stratToken = startAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
         const token = getTokenFromPoolAddress(farmTx.to_address)
         return {
           ...farmTx,
-          tokenSymbol: token.unstakingToken,
-          tokenAddress,
-          tokenAmount: farmTx.principalAmount
+          stratSymbol: stratToken?.symbol,
+          principalSymbol: token.unstakingToken,
         }
 
       case InvestmentTypeObject.lends:
@@ -99,7 +105,7 @@ export const withSymbol = (transactions: ITransactionInfo[]): IFarmTransaction[]
     }
   })
 
-  return res
+  return res as unknown as IFarmTransaction[]
 }
 
 export const withPosition = async (transactions: ITransactionInfo[]): Promise<IFarmTransaction[]> => {

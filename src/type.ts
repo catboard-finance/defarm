@@ -47,6 +47,12 @@ export interface IBlockEvent {
   data: any //{"uid":"18243","loan":"0"}
 }
 
+export interface IToken {
+  address: string
+  symbol: string
+  amount: number
+}
+
 // Database Scope
 
 export enum MethodType {
@@ -65,16 +71,10 @@ export enum DirectionType {
   IN = 'in',
 }
 
-export interface IEncodedTransfer extends ITransfer {
+export interface ITransferInfo extends ITransfer {
   direction: DirectionType
-}
-
-export interface ITransferUSD extends ITransfer {
   tokenPriceUSD: number,
   tokenAmount: number,
   tokenAmountUSD: number,
-}
-
-export interface ITransferInfo extends ITransfer, ITransferUSD, IEncodedTransfer {
-
+  positionId: string,
 }

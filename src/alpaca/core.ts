@@ -43,9 +43,10 @@ export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
 })
 
 const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`${TOKENS[k].toLowerCase()}`]: k })))
-export const getSymbolFromAddress = (address: string): string => _TOKEN_LOWER_MAP[address.toLowerCase()]
-export const getSymbolsFromAddresses = (addresses: string[]): string[] => addresses.map(e => getSymbolFromAddress(e))
 
+export const getSymbolFromAddress = (address: string): string => _TOKEN_LOWER_MAP[address.toLowerCase()]
+
+export const getSymbolsFromAddresses = (addresses: string[]): string[] => addresses.map(e => getSymbolFromAddress(e))
 
 export const getTokenFromPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
 
