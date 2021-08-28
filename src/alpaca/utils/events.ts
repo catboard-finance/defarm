@@ -8,13 +8,13 @@ import { getWorkEvent } from "../vaults/vaultEvent";
 const GETBLOCK_API_KEY = process.env.GETBLOCK_API_KEY
 const RPC_URL = `https://bsc.getblock.io/mainnet/?api_key=${GETBLOCK_API_KEY}`
 
-export const getPositionIds = async (address: string, blockNumber: number, transactionHash: string): Promise<any> => {
+export const getPositionId = async (address: string, blockNumber: string, transactionHash: string): Promise<any> => {
   const workEvent = await getWorkEvent(address, blockNumber, transactionHash)
   return workEvent.uid
 }
 
 // 0x98172b
-export const getPositionIdsFromGetBlock = async (address: string, blockNumber: number, block = 'latest', chain: Chain = 'bsc'): Promise<any> => {
+export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, block = 'latest', chain: Chain = 'bsc'): Promise<any> => {
   const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
   const result = await provider.getLogs({
     address,

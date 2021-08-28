@@ -6,7 +6,7 @@ import { stringToFloat } from '../utils/converter';
 import { DirectionType, IEncodedTransfer, ITransfer, ITransferInfo, ITransferUSD } from '../../type';
 import _ from 'lodash'
 import { getSymbolsFromAddresses, IUserPositionUSD } from '..';
-import { getPositionIds } from '../utils/events';
+import { getPositionId } from '../utils/events';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 
@@ -22,14 +22,14 @@ export const getPositions = async (account: string, block = 'latest', chain: Cha
 // TODO list all supported address
 
 // Interest Bearing BUSD
-const ALPACA_BUSD_VAULT_ADDRESSES = [
+export const ALPACA_BUSD_VAULT_ADDRESSES = [
   "0x3fC149995021f1d7AEc54D015Dad3c7Abc952bf0", // Pancakeswap
   "0x61e58dE669d842C2d77288Df629af031b3283c81", // Waultswap
   "0x38912684b1d20Fe9D725e8B39c39458Fac5A4833", // PancakeswapSingleAsset
 ].map(vault => vault.toLowerCase())
 
 // Interest Bearing USDT
-const ALPACA_USDT_VAULT_ADDRESSES = [
+export const ALPACA_USDT_VAULT_ADDRESSES = [
   "0x5f94f61095731b669b30ed1f3f4586BBb51f4001", // Pancakeswap
   "0xcE37fD1Ff0A6cb4A6A59cd46CCf55D5Dc70ec585", // Waultswap
   "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90", // PancakeswapSingleAsset
@@ -118,7 +118,7 @@ export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITra
       targetAddress = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f'.toLowerCase()
     }
 
-    return getPositionIds(targetAddress, parseInt(tx.block_number), tx.transaction_hash)
+    return getPositionId(targetAddress, tx.block_number, tx.transaction_hash)
   })
 
   const results = await Promise.all(promises)

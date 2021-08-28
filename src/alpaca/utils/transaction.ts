@@ -1,5 +1,7 @@
 import { ITransaction, MethodType } from "../../type";
 import { getTokenFromIBSymbol, getTokenFromPoolAddress } from "../core";
+import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
+import { getWorkEvent } from "../vaults/vaultEvent";
 import { parseVaultInput } from "../vaults/worker";
 
 export interface ITransactionInfo extends ITransaction {
@@ -92,10 +94,43 @@ export const withSymbol = (transactions: ITransactionInfo[]): IFarmTransaction[]
 
       case InvestmentTypeObject.lends:
       case InvestmentTypeObject.stakes:
-        return farmTx as IFarmTransaction
       default:
         return farmTx as IFarmTransaction
     }
+  })
+
+  return res
+}
+
+export const withPosition = async (transactions: ITransactionInfo[]): Promise<IFarmTransaction[]> => {
+  const promises = transactions.map(e => {
+    const farmTx = e as IFarmTransaction
+    let targetAddress = e.to_address
+
+    // poc mapping to vault address
+    if (ALPACA_USDT_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
+      targetAddress = '0x158Da805682BdC8ee32d52833aD41E74bb951E59'.toLowerCase()
+    }
+
+    if (ALPACA_BUSD_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
+      targetAddress = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f'.toLowerCase()
+    }
+
+    switch (farmTx.investmentType) {
+      case InvestmentTypeObject.farms:
+        return getWorkEvent(targetAddress, farmTx.block_number, farmTx.hash)
+      default:
+        return null
+    }
+  })
+
+  const results = await Promise.all(promises)
+  const res = transactions.map((e, i) => {
+    const positionId = results[i] ? results[i].uid : null
+    return {
+      ...e,
+      positionId,
+    } as IFarmTransaction
   })
 
   return res

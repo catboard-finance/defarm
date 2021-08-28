@@ -59,10 +59,10 @@ export const getTokenPrices = async (addresses: string[], chain: Chain = 'bsc') 
   return pricesMap
 }
 
-export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: number = null, chain: Chain = 'bsc'): Promise<IBlockEvent[]> => {
+export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: string = null, chain: Chain = 'bsc'): Promise<IBlockEvent[]> => {
   const params = {
-    'from_block': blocknumber.toString(),
-    'to_block': blocknumber.toString(),
+    'from_block': blocknumber,
+    'to_block': blocknumber,
     'topic': topic
   }
 

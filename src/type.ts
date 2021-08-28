@@ -54,6 +54,8 @@ export enum MethodType {
   approve = 'approve',
   work = 'work',
   transfer = 'transfer',
+  reinvest = 'reinvest',
+  claim = 'claim',
   // Pancake
   swapExactTokensForTokens = 'swapExactTokensForTokens',
 }

@@ -6,7 +6,7 @@ export interface IWorkEvent {
   loan: BigNumber
 }
 
-export const getWorkEvent = async (address: string, blockNumber: number, transactionHash: string): Promise<IWorkEvent> => {
+export const getWorkEvent = async (address: string, blockNumber: string, transactionHash: string): Promise<IWorkEvent> => {
   const abi = `{
   "anonymous": false,
   "inputs": [
