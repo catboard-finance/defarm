@@ -148,7 +148,7 @@ export const getLendsByPoolAddresses = async (block = 'latest', chain: Chain = '
 
 // Transfers
 
-export const getAddressesFromTransfers = (transfers: ITransfer[]) => [...Array.from(new Set(transfers.map(tx => tx.address)))]
+export const getAddressesFromTransfers = (transfers: ITransfer[]) => [...Array.from(new Set(transfers.map(e => e.address)))]
 
 export const getSymbolsFromTransfers = (transfers: ITransfer[]) => {
   const tokenAddresses = getAddressesFromTransfers(transfers)

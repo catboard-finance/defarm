@@ -5,7 +5,7 @@ import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
 import { DirectionType, ITransfer, ITransferInfo } from '../../type';
 import _ from 'lodash'
-import { getSymbolsFromAddresses, IUserPositionUSD } from '..';
+import { getSymbolsFromTransfers, IUserPositionUSD } from '..';
 import { getPositionId } from '../utils/events';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
@@ -56,30 +56,31 @@ export const filterNoZeroTransfer = (txList: ITransfer[]) => txList.filter(tx =>
 
 export const filterInvestmentTransfers = (transfers: ITransfer[]) => filterNoZeroTransfer(filterVaults(transfers))
 
-export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: object): ITransferInfo[] => {
+export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: { [symbol: string]: string }): ITransferInfo[] => {
   // Get symbols
-  const symbols = getSymbolsFromAddresses(transfers.map(tx => tx.address))
+  const symbols = getSymbolsFromTransfers(transfers)
 
   // Attach usd price and return
-  return transfers.map((tx, i) => {
+  return transfers.map((transfer, i) => {
     const symbol = symbols[i]
     const tokenPriceUSD = parseFloat(symbolPriceUSDMap[symbol])
-    const tokenAmount = stringToFloat(tx.value)
+    const tokenAmount = stringToFloat(transfer.value)
+    const tokenAmountUSD = tokenPriceUSD * tokenAmount
     return ({
-      ...tx,
+      ...transfer,
       symbol,
       tokenPriceUSD,
       tokenAmount,
-      tokenAmountUSD: tokenPriceUSD * tokenAmount,
+      tokenAmountUSD,
     }) as unknown as ITransferInfo
   })
 }
 
 export const withDirection = (account: string, transfers: ITransfer[]) => {
-  return transfers.map(tx => {
+  return transfers.map(transfer => {
     return ({
-      ...tx,
-      direction: account === tx.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
+      ...transfer,
+      direction: account === transfer.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
     })
   })
 }
@@ -100,7 +101,7 @@ export const withDirection = (account: string, transfers: ITransfer[]) => {
 //   })
 // }
 
-export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITransferInfo[]> => {
+export const deprecated_withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITransferInfo[]> => {
   const promises = transfers.map(tx => {
     let targetAddress = (tx.direction === DirectionType.OUT) ? tx.to_address : tx.from_address
 

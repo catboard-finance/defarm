@@ -4,12 +4,12 @@ import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
 import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
-import { getTransactionInfos } from '../utils/transaction'
-import { withDirection, filterInvestmentTransfers, getPositions, deprecated_summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
+import { withDirection, filterInvestmentTransfers, getPositions, deprecated_summaryPositionInfo, withPriceUSD, deprecated_withPositionInfo } from "../vaults"
+import { getInvestmentInfos, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
-import { getSummaryByPositions } from './summary'
+import { getInvestmentInFarms as getInvestmentPerFarms } from './summary'
 
 export interface IUserPositionUSD extends IUserPosition {
   positionValueUSD: number;
@@ -107,7 +107,7 @@ export const deprecated_fetchUserSummaryFromTransfer = async (account: string) =
   transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
 
   // 5. Get position from event by block number
-  transferInfos = await withPositionInfo(transferInfos as ITransferInfo[])
+  transferInfos = await deprecated_withPositionInfo(transferInfos as ITransferInfo[])
 
   // 6. Add equity USD
   const investments = deprecated_summaryPositionInfo(activePositions, transferInfos)
@@ -118,7 +118,9 @@ export const deprecated_fetchUserSummaryFromTransfer = async (account: string) =
 export const fetchUserSummary = async (account: string) => {
 
   const transactionsInfos = await getTransactionInfos(account)
-  const summaryByPositions = await getSummaryByPositions(transactionsInfos)
+  const transferInfos = await getTransferInfos(account)
+  const investmentInfo = await getInvestmentInfos(transactionsInfos, transferInfos)
+  const summaryByPositions = await getInvestmentPerFarms(investmentInfo)
 
   return { transactionsInfos, summaryByPositions }
 }
