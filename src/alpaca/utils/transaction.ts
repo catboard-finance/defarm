@@ -1,8 +1,10 @@
-import { IToken, ITransaction, MethodType } from "../../type";
+import { getTransactions, getTransfers } from "../../account";
+import { IToken, ITransaction, ITransferInfo, MethodType } from "../../type";
 import { getTokenFromIBSymbol, getTokenFromPoolAddress } from "../core";
-import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
+import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES, filterInvestmentTransfers, withDirection } from "../vaults";
 import { getWorkEvent } from "../vaults/vaultEvent";
 import { parseVaultInput } from "../vaults/worker";
+import { getStratAddressTokenAddressMap } from "./transfer";
 
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
@@ -140,4 +142,43 @@ export const withPosition = async (transactions: ITransactionInfo[]): Promise<IF
   })
 
   return res
+}
+
+export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
+  ////////////////// TRANSACTIONS //////////////////
+
+  // Get transactions
+  const transactions = await getTransactions(account)
+
+  // Decode methods
+  let transactionInfos = await withMethods(transactions)
+
+  // Separate actions lend/stake/farm by vault address and method
+  transactionInfos = await withType(transactionInfos)
+
+  ////////////////// POSITIONS //////////////////
+
+  // Get position from event by block number
+  transactionInfos = await withPosition(transactionInfos)
+
+  ////////////////// TRANSFERS //////////////////
+
+  // Get transfer and gathering symbol
+  const transfers = await getTransfers(account)
+  let transferInfos = withDirection(account, transfers)
+  transferInfos = filterInvestmentTransfers(transferInfos) as ITransferInfo[]
+
+  // Prepare symbol map from transfer
+  const stratAddressTokenAddressMap = getStratAddressTokenAddressMap(transfers)
+
+  // const symbolMaps = getSymbolsMapFromAddresses(transferInfos.map(e=>e.to_address))
+  // const symbolPriceUSDMap = await fetchPriceUSD(symbols)
+
+  // // Apply price in USD
+  // transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
+
+  // Add token info by tokens address
+  transactionInfos = withSymbol(transactionInfos, stratAddressTokenAddressMap)
+
+  return transactionInfos
 }

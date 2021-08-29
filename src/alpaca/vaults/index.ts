@@ -137,7 +137,7 @@ export const withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITra
 //   totalWithdrawUSD: number
 // }
 
-export const summaryPositionInfo = (activePositions: IUserPositionUSD[], transferInfos: ITransfer[]) => {
+export const deprecated_summaryPositionInfo = (activePositions: IUserPositionUSD[], transferInfos: ITransfer[]) => {
   // 1. Remove null
   const _transferInfos = transferInfos.filter(e => e)
 

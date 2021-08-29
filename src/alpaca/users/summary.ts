@@ -161,3 +161,75 @@
   },
 }
 */
+
+import _ from "lodash"
+import { ITransactionInfo } from "../utils/transaction"
+
+interface ISummaryByPosition extends _.Dictionary<ITransactionInfo[]> {
+}
+
+export const getSummaryByPositions = (transactionInfos: ITransactionInfo[]): ISummaryByPosition => {
+  ////////////////// SUMMARY //////////////////
+
+  // Add historical price at contract time
+
+  // Define token ratio (for estimate each token amounts) by tokens numbers in vault
+
+  // Summary deposits/withdraws
+
+  // Summary token each lend/stake/farm
+
+  ///////////////////////////////////////////////////////////////////
+
+  // Get equity from chain (or API)
+
+  // Divide current token from equity by farm ratio
+
+  // Summary from lend/stake/farm
+
+  // Summary token from lend/stake/farm
+
+  // Group by position
+  const transferPositionInfoMap = _.groupBy(transactionInfos, 'positionId')
+
+  // for (let [k, v] of Object.entries(transferPositionInfoMap)) {
+  //   const e = transferPositionInfoMap[k]
+  //   transferPositionInfoMap
+  // }
+
+  return transferPositionInfoMap
+
+  // return activePositions.map(pos => {
+  //   // 1. Group by position
+  //   const transferPositionInfos: ITransferPositionInfo[] = transferInfos.filter(e => parseInt(e.positionId) === pos.positionId)
+  //   if (!transferPositionInfos || transferPositionInfos.length <= 0) {
+  //     console.warn(`Position not found: ${pos.positionId}`)
+  //     return null
+  //   }
+
+  //   // 2. Sum by direction
+  //   const deposits = transferPositionInfos.filter(e => e.direction === DirectionType.DEPOSIT)
+  //   const withdraws = transferPositionInfos.filter(e => e.direction === DirectionType.WITHDRAW)
+
+  //   const positionSummary: IPositionSummary = {
+  //     totalDepositUSD: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmountUSD'),
+  //     totalWithdrawUSD: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmountUSD'),
+  //     totalDeposit: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmount'),
+  //     totalWithdraw: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmount'),
+  //   }
+
+  //   const investedPositionSummaryUSD = positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD
+
+  //   delete pos.positionValueUSDbn
+  //   delete pos.debtValueUSDbn
+
+  //   return {
+  //     ...pos,
+  //     ...positionSummary,
+  //     deposits,
+  //     withdraws,
+  //     investedUSD: positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD,
+  //     profitUSD: pos.equityValueUSD - investedPositionSummaryUSD,
+  //   }
+  // })
+}

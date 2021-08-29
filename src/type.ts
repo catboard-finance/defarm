@@ -62,7 +62,15 @@ export enum MethodType {
   transfer = 'transfer',
   reinvest = 'reinvest',
   claim = 'claim',
+
   // Pancake
+  swapETHForExactTokens = 'swapETHForExactTokens',
+  swapExactETHForTokens = 'swapExactETHForTokens',
+  swapExactETHForTokensSupportingFeeOnTransferTokens = 'swapExactETHForTokensSupportingFeeOnTransferTokens',
+  swapExactTokensForETH = 'swapExactTokensForETH',
+  swapExactTokensForETHSupportingFeeOnTransferTokens = 'swapExactTokensForETHSupportingFeeOnTransferTokens',
+  swapExactTokensForTokensSupportingFeeOnTransferTokens = 'swapExactTokensForTokensSupportingFeeOnTransferTokens',
+  swapTokensForExactETH = 'swapTokensForExactETH',
   swapExactTokensForTokens = 'swapExactTokensForTokens',
 }
 

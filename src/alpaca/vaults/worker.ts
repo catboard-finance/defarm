@@ -17,12 +17,12 @@ const WORKER_ADDRESS_MAP = {
 }
 
 export const parseVaultInput = (data: string) => {
-  const iface = new ethers.utils.Interface([
+  const iface = new ethers.utils.Interface(Array.from(new Set([
     ...ALPACA_VAULT_ABI,
     ...ALPACA_FAIRLAUNCH_ABI,
     ...ALPACA_DEBT_ABI,
     ...PANCAKESWAP_ROUTER_V2_ABI,
-  ]);
+  ])));
 
   const value = parseEther("1.0");
   try {
@@ -90,8 +90,48 @@ export const parseVaultInput = (data: string) => {
 
         break;
       // Special case for pancake
+      case MethodType.swapETHForExactTokens:
+        var { amountOut, path, to, deadline, } = args
+        parsed = {
+          ...parsed,
+          name,
+          amountOut,
+          deadline,
+          tokenAddressIn: path[0],
+          tokenAddressOut: path[1],
+          to,
+        }
+      case MethodType.swapExactETHForTokens:
+      case MethodType.swapExactETHForTokensSupportingFeeOnTransferTokens:
+        var { amountOutMin, path, to, deadline, } = args
+        parsed = {
+          ...parsed,
+          name,
+          amountOutMin,
+          deadline,
+          tokenAddressIn: path[0],
+          tokenAddressOut: path[1],
+          to,
+        }
+        break;
+      case MethodType.swapTokensForExactETH:
+        var { amountOut, amountInMax, path, to, deadline, } = args
+        parsed = {
+          ...parsed,
+          name,
+          amountOut,
+          amountInMax,
+          deadline,
+          tokenAddressIn: path[0],
+          tokenAddressOut: path[1],
+          to,
+        }
+        break;
+      case MethodType.swapExactTokensForTokensSupportingFeeOnTransferTokens:
+      case MethodType.swapExactTokensForETHSupportingFeeOnTransferTokens:
+      case MethodType.swapExactTokensForETH:
       case MethodType.swapExactTokensForTokens:
-        var { amountIn, amountOutMin, deadline, path, to } = args
+        var { amountIn, amountOutMin, path, to, deadline, } = args
         parsed = {
           ...parsed,
           name,

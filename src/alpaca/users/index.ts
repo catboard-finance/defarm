@@ -1,15 +1,15 @@
 import _ from 'lodash'
-import { getTransactions, getTransfers } from '../../account'
+import { getTransfers } from '../../account'
 import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
 import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
-import { withMethods, withPosition, withSymbol, withType } from '../utils/transaction'
-import { getStratAddressTokenAddressMap } from '../utils/transfer'
-import { withDirection, filterInvestmentTransfers, getPositions, summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
+import { getTransactionInfos } from '../utils/transaction'
+import { withDirection, filterInvestmentTransfers, getPositions, deprecated_summaryPositionInfo, withPriceUSD, withPositionInfo } from "../vaults"
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
+import { getSummaryByPositions } from './summary'
 
 export interface IUserPositionUSD extends IUserPosition {
   positionValueUSD: number;
@@ -87,7 +87,7 @@ export interface IDepositTransferUSDMap {
 // Will be deprecate?
 // This working but in the end gathering deposit/withdraw from transfer is no efficient due to 
 // It will need knowledge of all address to filter in/out behavior.
-export const fetchUserSummaryFromTransfer = async (account: string) => {
+export const deprecated_fetchUserSummaryFromTransfer = async (account: string) => {
   // TODO : replace with onchain implement
   // 1. Get all active positions
   const positions = await fetchUserPositions(account)
@@ -110,67 +110,15 @@ export const fetchUserSummaryFromTransfer = async (account: string) => {
   transferInfos = await withPositionInfo(transferInfos as ITransferInfo[])
 
   // 6. Add equity USD
-  const investments = summaryPositionInfo(activePositions, transferInfos)
+  const investments = deprecated_summaryPositionInfo(activePositions, transferInfos)
 
   return investments
 }
 
 export const fetchUserSummary = async (account: string) => {
 
-  ////////////////// TRANSACTIONS //////////////////
+  const transactionsInfos = await getTransactionInfos(account)
+  const summaryByPositions = await getSummaryByPositions(transactionsInfos)
 
-  // Get transactions
-  const transactions = await getTransactions(account)
-
-  // Decode methods
-  let transactionInfos = await withMethods(transactions)
-
-  // Separate actions lend/stake/farm by vault address and method
-  transactionInfos = await withType(transactionInfos)
-
-  ////////////////// TRANSFERS //////////////////
-
-  // Get transfer and gathering symbol
-  const transfers = await getTransfers(account)
-  let transferInfos = withDirection(account, transfers)
-  transferInfos = filterInvestmentTransfers(transferInfos) as ITransferInfo[]
-
-  // Prepare symbol map from transfer
-  const stratAddressTokenAddressMap = getStratAddressTokenAddressMap(transfers)
-
-  // const symbolMaps = getSymbolsMapFromAddresses(transferInfos.map(e=>e.to_address))
-  // const symbolPriceUSDMap = await fetchPriceUSD(symbols)
-
-  // // Apply price in USD
-  // transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
-
-  // Add token info by tokens address
-  transactionInfos = withSymbol(transactionInfos, stratAddressTokenAddressMap)
-
-  ////////////////// POSITIONS //////////////////
-
-  // Get position from event by block number
-  transactionInfos = await withPosition(transactionInfos)
-
-  return transactionInfos
-
-  // Add historical price at contract time
-
-  // Define token ratio (for estimate each token amounts) by tokens numbers in vault
-
-  // Separate deposits/withdraws
-
-  // Summary deposits/withdraws
-
-  // Summary token each lend/stake/farm
-
-  ///////////////////////////////////////////////////////////////////
-
-  // Get equity from chain (or API)
-
-  // Divide current token from equity by farm ratio
-
-  // Summary from lend/stake/farm
-
-  // Summary token from lend/stake/farm
+  return { transactionsInfos, summaryByPositions }
 }
