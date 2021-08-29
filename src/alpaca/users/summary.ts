@@ -11,7 +11,6 @@ const _info = {
       tokenAmount: 695.245603609934955053,
 
       tokenPriceUSD: 1042.8684054149,
-      tokenRecordedPriceUSD: 400,
 
       blockNumber: "10277278",
       blockHash: "0x9673166f4eb5e5f7a224d40ec2d3572777f51badf2e6ce7ed5bfb373b6325e06",
@@ -46,15 +45,10 @@ const _info = {
     {
       positionId: "9967403",
 
-      depositAmount: 100,
-      equityAmount: 100,
-      debtAmount: 10,
-      profitAmount: 90,
-
-      depositPriceUSD: 1000,
-      equityPriceUSD: 1000,
-      debtPriceUSD: 100,
-      profitPriceUSD: 900,
+      depositValueUSD: 1000,
+      equityValueUSD: 1000,
+      debtValueUSD: 100,
+      profitValueUSD: 900,
 
       vaultAddress: "0x158da805682bdc8ee32d52833ad41e74bb951e59",
       vaultTokenSymbol: "USDT",
@@ -66,6 +60,8 @@ const _info = {
 
       borrowAmount: 0,
 
+      positionedAt: "2021-08-07T14:45:51.000Z",
+
       transfers: [
         {
           from: "0x8155430e4860e791aeddb43e4764d15de7e0def1",
@@ -75,7 +71,6 @@ const _info = {
           tokenAddress: "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
           tokenAmount: 1272.6522003096,
           tokenPriceUSD: 1527.12000,
-          tokenRecordedPriceUSD: 1027.12000,
         },
         {
           from: "0x8155430e4860e791aeddb43e4764d15de7e0def1",
@@ -85,11 +80,8 @@ const _info = {
           tokenAddress: "0xe9e7cea3dedca5984780bafc599bd69add087d56",
           tokenAmount: 504.503765091159716219,
           tokenPriceUSD: 504.503765091159716219,
-          tokenRecordedPriceUSD: 404.503765091159716219,
         }
       ],
-
-      positionedAt: "2021-08-07T14:45:51.000Z",
     },
   ],
   lends: [
@@ -180,14 +172,15 @@ const _portfolio = {
 _info; _summary; _portfolio;
 
 import _ from "lodash"
-import { IInvestmentInfo } from "./info";
+import { IUserInvestmentInfo } from "./farms";
 
 interface ISummaryByPosition {
   // farms: ITransactionInfo[]
 }
 
 // farms
-export const getInvestmentInFarms = (transactionInfos: IInvestmentInfo[]): ISummaryByPosition => {
+export const getInvestmentPerFarms = (userFarmInfos: IUserInvestmentInfo[]): ISummaryByPosition => {
+
   ////////////////// SUMMARY //////////////////
 
   // Add historical price at contract time
@@ -210,47 +203,7 @@ export const getInvestmentInFarms = (transactionInfos: IInvestmentInfo[]): ISumm
 
   // Group by position
   const transferPositionInfoMap = {
-    farms: Object.values(_.groupBy(transactionInfos, 'positionId'))
+    farms: Object.values(_.groupBy(userFarmInfos.filter(e => e), 'positionId'))
   }
-
-  // for (let [k, v] of Object.entries(transferPositionInfoMap)) {
-  //   const e = transferPositionInfoMap[k]
-  //   transferPositionInfoMap
-  // }
-
   return transferPositionInfoMap
-
-  // return activePositions.map(pos => {
-  //   // 1. Group by position
-  //   const transferPositionInfos: ITransferPositionInfo[] = transferInfos.filter(e => parseInt(e.positionId) === pos.positionId)
-  //   if (!transferPositionInfos || transferPositionInfos.length <= 0) {
-  //     console.warn(`Position not found: ${pos.positionId}`)
-  //     return null
-  //   }
-
-  //   // 2. Sum by direction
-  //   const deposits = transferPositionInfos.filter(e => e.direction === DirectionType.DEPOSIT)
-  //   const withdraws = transferPositionInfos.filter(e => e.direction === DirectionType.WITHDRAW)
-
-  //   const positionSummary: IPositionSummary = {
-  //     totalDepositUSD: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmountUSD'),
-  //     totalWithdrawUSD: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmountUSD'),
-  //     totalDeposit: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmount'),
-  //     totalWithdraw: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmount'),
-  //   }
-
-  //   const investedPositionSummaryUSD = positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD
-
-  //   delete pos.positionValueUSDbn
-  //   delete pos.debtValueUSDbn
-
-  //   return {
-  //     ...pos,
-  //     ...positionSummary,
-  //     deposits,
-  //     withdraws,
-  //     investedUSD: positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD,
-  //     profitUSD: pos.equityValueUSD - investedPositionSummaryUSD,
-  //   }
-  // })
 }

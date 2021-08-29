@@ -6,6 +6,9 @@ import { api } from '@defillama/sdk'
 import { Chain } from '@defillama/sdk/build/general'
 import { ITransfer } from '../type'
 
+export const VAULT_ADDRESS = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f';
+export const FAIR_LAUNCH_ADDRESS = '0xA625AB01B08ce023B2a342Dbb12a16f2C8489A8F';
+
 export type Token = {
   symbol: string
   decimals: number
@@ -42,9 +45,15 @@ export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
   }
 })
 
+const _TOKEN_POOLS_LOWER_MAP = Object.assign({}, ...Object.keys(POOLS).map(k => ({ [`${POOLS[k].address.toLowerCase()}`]: POOLS[k].stakingToken })))
 const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`${TOKENS[k].toLowerCase()}`]: k })))
 
-export const getSymbolFromAddress = (address: string): string => _TOKEN_LOWER_MAP[address.toLowerCase()]
+const TRANSFER_TOKEN_LOWER_MAP = { ..._TOKEN_POOLS_LOWER_MAP, ..._TOKEN_LOWER_MAP }
+
+export const getSymbolFromAddress = (address: string): string => {
+  const foo = TRANSFER_TOKEN_LOWER_MAP[address.toLowerCase()]
+  return foo
+}
 
 export const getSymbolsFromAddresses = (addresses: string[]): string[] => addresses.map(e => getSymbolFromAddress(e))
 

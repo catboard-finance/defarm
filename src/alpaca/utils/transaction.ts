@@ -7,6 +7,7 @@ import { parseVaultInput } from "../vaults/worker";
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
   investmentType: InvestmentTypeObject
+  positionId: string
   vaultAddress: string // "0x3fc149995021f1d7aec54d015dad3c7abc952bf0",
   principalSymbol: string // "ALPACA",
   principalAddress: string // "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
@@ -17,7 +18,7 @@ export interface ITransactionInfo extends ITransaction {
   block_hash: string // "0x9673166f4eb5e5f7a224d40ec2d3572777f51badf2e6ce7ed5bfb373b6325e06"
 }
 
-enum InvestmentTypeObject {
+export enum InvestmentTypeObject {
   farms = 'farms',
   lends = 'lends',
   stakes = 'stakes',
@@ -69,7 +70,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
   return res
 }
 
-interface IFarmTransaction extends ITransactionInfo {
+export interface IFarmTransaction extends ITransactionInfo {
   name: string
   positionId: string
   workerAddress: string
@@ -85,7 +86,11 @@ interface IFarmTransaction extends ITransactionInfo {
   maxReturn: number
 }
 
-export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken }): IFarmTransaction[] => {
+export interface ILendTransaction extends ITransactionInfo { }
+export interface IStakeTransaction extends ITransactionInfo { }
+
+export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken })
+  : IFarmTransaction[] | IStakeTransaction[] | ILendTransaction[] => {
   const res = transactions.map(e => {
     const farmTx = e as IFarmTransaction
     switch (farmTx.investmentType) {
@@ -99,7 +104,11 @@ export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAd
         }
 
       case InvestmentTypeObject.lends:
+        // TODO
+        return farmTx as ILendTransaction
       case InvestmentTypeObject.stakes:
+        // TODO
+        return farmTx as IStakeTransaction
       default:
         return farmTx as IFarmTransaction
     }

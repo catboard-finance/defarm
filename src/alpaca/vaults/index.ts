@@ -7,6 +7,7 @@ import { DirectionType, ITransfer, ITransferInfo } from '../../type';
 import _ from 'lodash'
 import { getSymbolsFromTransfers, IUserPositionUSD } from '..';
 import { getPositionId } from '../utils/events';
+import { FAIR_LAUNCH_ADDRESS, VAULT_ADDRESS } from '../core';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 
@@ -36,10 +37,12 @@ export const ALPACA_USDT_VAULT_ADDRESSES = [
 ].map(vault => vault.toLowerCase())
 
 const ALPACA_VAULT_ADDRESSES = [
+  FAIR_LAUNCH_ADDRESS,
+  VAULT_ADDRESS,
   ...ALPACA_BUSD_VAULT_ADDRESSES,
   ...ALPACA_USDT_VAULT_ADDRESSES,
   ...alpacaInfo.Vaults.map(vault => vault.address.toLowerCase())
-]
+].map(vault => vault.toLowerCase())
 
 export const filterVaults = (txList: ITransfer[]) => txList.filter(tx =>
   ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase()) ||
@@ -62,16 +65,16 @@ export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: { [symbo
 
   // Attach usd price and return
   return transfers.map((transfer, i) => {
-    const symbol = symbols[i]
-    const tokenPriceUSD = parseFloat(symbolPriceUSDMap[symbol])
+    const tokenSymbol = symbols[i]
+    const tokenPriceUSD = parseFloat(symbolPriceUSDMap[tokenSymbol])
     const tokenAmount = stringToFloat(transfer.value)
-    const tokenAmountUSD = tokenPriceUSD * tokenAmount
+    const tokenValueUSD = tokenPriceUSD * tokenAmount
     return ({
       ...transfer,
-      symbol,
+      tokenSymbol,
       tokenPriceUSD,
       tokenAmount,
-      tokenAmountUSD,
+      tokenValueUSD,
     }) as unknown as ITransferInfo
   })
 }
@@ -122,7 +125,7 @@ export const deprecated_withPositionInfo = async (transfers: ITransferInfo[]): P
   return results.map((e, i) => {
     const res = {
       ...transfers[i],
-      positionId: e || 'stakes'
+      positionId: e || 'unknown'
     }
 
     delete res.value
@@ -165,8 +168,8 @@ export const deprecated_summaryPositionInfo = (activePositions: IUserPositionUSD
   //   const withdraws = transferPositionInfos.filter(e => e.direction === DirectionType.WITHDRAW)
 
   //   const positionSummary: IPositionSummary = {
-  //     totalDepositUSD: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmountUSD'),
-  //     totalWithdrawUSD: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmountUSD'),
+  //     totalDepositUSD: _.sumBy(_.filter(deposits, 'symbol'), 'tokenValueUSD'),
+  //     totalWithdrawUSD: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenValueUSD'),
   //     totalDeposit: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmount'),
   //     totalWithdraw: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmount'),
   //   }

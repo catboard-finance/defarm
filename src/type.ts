@@ -80,9 +80,10 @@ export enum DirectionType {
 }
 
 export interface ITransferInfo extends ITransfer {
-  direction: DirectionType
+  direction: DirectionType,
+  tokenSymbol: string,
   tokenPriceUSD: number,
   tokenAmount: number,
-  tokenAmountUSD: number,
+  tokenValueUSD: number,
   positionId: string,
 }

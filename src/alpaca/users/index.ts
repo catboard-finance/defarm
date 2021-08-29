@@ -5,11 +5,12 @@ import { ITransferInfo } from '../../type'
 import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
 import { withDirection, filterInvestmentTransfers, getPositions, deprecated_summaryPositionInfo, withPriceUSD, deprecated_withPositionInfo } from "../vaults"
-import { getInvestmentInfos, getTransactionInfos, getTransferInfos } from './info'
+import { getUserInvestmentInfos } from './farms'
+import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
-import { getInvestmentInFarms as getInvestmentPerFarms } from './summary'
+import { getInvestmentPerFarms } from './summary'
 
 export interface IUserPositionUSD extends IUserPosition {
   positionValueUSD: number;
@@ -119,8 +120,11 @@ export const fetchUserSummary = async (account: string) => {
 
   const transactionsInfos = await getTransactionInfos(account)
   const transferInfos = await getTransferInfos(account)
-  const investmentInfo = await getInvestmentInfos(transactionsInfos, transferInfos)
-  const summaryByPositions = await getInvestmentPerFarms(investmentInfo)
+  const transactionTransferInfo = await getTransactionTransferInfo(transactionsInfos, transferInfos)
+  const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
 
-  return { transactionsInfos, summaryByPositions }
+  // farms
+  const summaryByPositions = await getInvestmentPerFarms(userInvestmentInfos)
+
+  return summaryByPositions
 }
