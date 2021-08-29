@@ -87,16 +87,23 @@ export interface IFarmTransaction extends ITransactionInfo {
 }
 
 export interface ILendTransaction extends ITransactionInfo { }
-export interface IStakeTransaction extends ITransactionInfo { }
+export interface IStakeTransaction extends ITransactionInfo {
+  fairLaunchAddress: string
+
+  depositTokenSymbol: string
+  depositAmount?: number
+  depositValueUSD?: number
+}
 
 export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken })
   : IFarmTransaction[] | IStakeTransaction[] | ILendTransaction[] => {
   const res = transactions.map(e => {
-    const farmTx = e as IFarmTransaction
-    switch (farmTx.investmentType) {
+
+    switch (e.investmentType) {
       case InvestmentTypeObject.farms:
-        const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
+        const farmTx = e as IFarmTransaction
         const token = getTokenFromPoolAddress(farmTx.to_address)
+        const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
         return {
           ...farmTx,
           stratSymbol: stratToken?.symbol,
@@ -105,12 +112,17 @@ export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAd
 
       case InvestmentTypeObject.lends:
         // TODO
-        return farmTx as ILendTransaction
+        return e as ILendTransaction
       case InvestmentTypeObject.stakes:
         // TODO
-        return farmTx as IStakeTransaction
+        const stakeToken = stratAddressTokenAddressMap[e.to_address.toLowerCase()]
+        return {
+          ...e,
+          fairLaunchAddress: e.to_address,
+          depositTokenSymbol: stakeToken.symbol,
+        } as IStakeTransaction
       default:
-        return farmTx as IFarmTransaction
+        return e as IFarmTransaction
     }
   })
 

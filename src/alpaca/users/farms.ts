@@ -1,6 +1,6 @@
 import _ from "lodash"
 import { ITransferInfo } from "../../type"
-import { IFarmTransaction, InvestmentTypeObject } from "../utils/transaction"
+import { IFarmTransaction, InvestmentTypeObject, IStakeTransaction } from "../utils/transaction"
 
 export interface IUserInvestmentTransfers {
   blockNumber: string
@@ -13,7 +13,7 @@ export interface IUserInvestmentTransfers {
   tokenPriceUSD: number // 1527.12000,
 }
 
-export interface IUserInvestmentInfo {
+export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
   positionId: string // "9967403",
 
   depositValueUSD: number // 1000,
@@ -30,7 +30,18 @@ export interface IUserInvestmentInfo {
   stratAmount: number // 128,
 
   borrowAmount: number // 0,
+}
 
+export interface ILendInvestmentInfo extends IUserInvestmentInfo {
+
+}
+
+export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
+
+}
+
+export interface IUserInvestmentInfo {
+  investmentType: InvestmentTypeObject
   transfers: IUserInvestmentTransfers[],
 
   positionedAt: string // "2021-08-07T14:45:51.000Z",
@@ -41,8 +52,13 @@ export interface ITransactionTransferInfo extends IFarmTransaction {
 }
 
 export const getUserInvestmentInfos = async (transactionTransferInfo: ITransactionTransferInfo[]): Promise<IUserInvestmentInfo[]> => {
+  // only investment related
+  transactionTransferInfo = transactionTransferInfo.filter(e => e.investmentType !== InvestmentTypeObject.none)
 
-  const userInvestmentInfo = transactionTransferInfo.map(e => {
+  // sum each transfers
+  const userInvestmentInfos = transactionTransferInfo.map(e => {
+
+    // parse for view
     const transfers = e.transferInfos
       .filter(e => e)
       .map(transfer => ({
@@ -55,17 +71,26 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         tokenPriceUSD: transfer.tokenPriceUSD,
       }) as IUserInvestmentTransfers)
 
+    let baseInvestment: IUserInvestmentInfo = {
+      investmentType: e.investmentType,
+      positionedAt: e.block_timestamp,
+      transfers,
+    }
+
     switch (e.investmentType) {
       case InvestmentTypeObject.farms:
         const farmTx = e as IFarmTransaction
 
         return {
+          ...baseInvestment,
+
+          investmentType: farmTx.investmentType,
           positionId: farmTx.positionId,
 
-          depositValueUSD: _.sumBy(e.transferInfos, 'tokenPriceUSD'),
-          equityValueUSD: _.sumBy(e.transferInfos, 'equityValueUSD'),
-          debtValueUSD: _.sumBy(e.transferInfos, 'debtValueUSD'),
-          profitValueUSD: _.sumBy(e.transferInfos, 'profitValueUSD'),
+          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+          equityValueUSD: _.sumBy(e.transferInfos, 'equityValueUSD') || 0,
+          debtValueUSD: _.sumBy(e.transferInfos, 'debtValueUSD') || 0,
+          profitValueUSD: _.sumBy(e.transferInfos, 'profitValueUSD') || 0,
 
           vaultAddress: farmTx.vaultAddress,
           vaultTokenSymbol: farmTx.principalSymbol,
@@ -78,17 +103,26 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           borrowAmount: farmTx.borrowAmount,
 
           positionedAt: farmTx.block_timestamp,
-
-          transfers,
-        }
+        } as IFarmInvestmentInfo
       case InvestmentTypeObject.lends:
-      // TODO
+        return {
+          ...baseInvestment,
+        } as ILendInvestmentInfo
       case InvestmentTypeObject.stakes:
-      // TODO
+        const stakeTx = e as unknown as IStakeTransaction
+        return {
+          ...baseInvestment,
+
+          fairLaunchAddress: stakeTx.fairLaunchAddress,
+
+          depositTokenSymbol: stakeTx.depositTokenSymbol,
+          depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
+          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+        } as IStakeInvestmentInfo
       default:
         return null
     }
   })
 
-  return userInvestmentInfo
+  return userInvestmentInfos.filter(e => e)
 }
