@@ -1,5 +1,5 @@
 import { IToken, ITransaction, MethodType } from "../../type";
-import { getTokenFromIBSymbol, getTokenFromPoolAddress } from "../core";
+import { getPoolInfoFromPoolAddress } from "../core";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
 import { getWorkEvent } from "../vaults/vaultEvent";
 import { parseVaultInput } from "../vaults/worker";
@@ -43,7 +43,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
         }
       case MethodType.deposit:
         // lends or stake
-        const ibSymbol = getTokenFromIBSymbol(e.to_address)
+        const ibSymbol = getPoolInfoFromPoolAddress(e.to_address)?.stakingToken
         return {
           ...e,
           investmentType: ibSymbol ? InvestmentTypeObject.lends : InvestmentTypeObject.stakes,
@@ -86,7 +86,14 @@ export interface IFarmTransaction extends ITransactionInfo {
   maxReturn: number
 }
 
-export interface ILendTransaction extends ITransactionInfo { }
+export interface ILendTransaction extends ITransactionInfo {
+  ibPoolAddress: string
+
+  depositTokenSymbol: string
+  depositAmount?: number
+  depositValueUSD?: number
+}
+
 export interface IStakeTransaction extends ITransactionInfo {
   fairLaunchAddress: string
 
@@ -102,20 +109,22 @@ export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAd
     switch (e.investmentType) {
       case InvestmentTypeObject.farms:
         const farmTx = e as IFarmTransaction
-        const token = getTokenFromPoolAddress(farmTx.to_address)
+        const token = getPoolInfoFromPoolAddress(farmTx.to_address)
         const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
         return {
           ...farmTx,
           stratSymbol: stratToken?.symbol,
           principalSymbol: token.unstakingToken,
         }
-
       case InvestmentTypeObject.lends:
-        // TODO
-        return e as ILendTransaction
+        const lendToken = getPoolInfoFromPoolAddress(e.to_address).unstakingToken
+        return {
+          ...e,
+          ibPoolAddress: e.to_address,
+          depositTokenSymbol: lendToken,
+        } as ILendTransaction
       case InvestmentTypeObject.stakes:
-        // TODO
-        const stakeToken = stratAddressTokenAddressMap[e.to_address.toLowerCase()]
+        var stakeToken = stratAddressTokenAddressMap[e.to_address.toLowerCase()]
         return {
           ...e,
           fairLaunchAddress: e.to_address,

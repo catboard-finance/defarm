@@ -1,6 +1,6 @@
 import _ from "lodash"
 import { ITransferInfo } from "../../type"
-import { IFarmTransaction, InvestmentTypeObject, IStakeTransaction } from "../utils/transaction"
+import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction } from "../utils/transaction"
 
 export interface IUserInvestmentTransfers {
   blockNumber: string
@@ -33,11 +33,19 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
 }
 
 export interface ILendInvestmentInfo extends IUserInvestmentInfo {
+  ibPoolAddress: string
 
+  depositTokenSymbol: string
+  depositAmount: number
+  depositValueUSD: number
 }
 
 export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
+  fairLaunchAddress: string
 
+  depositTokenSymbol: string
+  depositAmount: number
+  depositValueUSD: number
 }
 
 export interface IUserInvestmentInfo {
@@ -105,8 +113,15 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           positionedAt: farmTx.block_timestamp,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lends:
+        const lendTx = e as unknown as ILendTransaction
         return {
           ...baseInvestment,
+
+          ibPoolAddress: lendTx.ibPoolAddress,
+
+          depositTokenSymbol: lendTx.depositTokenSymbol,
+          depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
+          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stakes:
         const stakeTx = e as unknown as IStakeTransaction

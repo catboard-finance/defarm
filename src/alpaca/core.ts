@@ -50,14 +50,11 @@ const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`
 
 const TRANSFER_TOKEN_LOWER_MAP = { ..._TOKEN_POOLS_LOWER_MAP, ..._TOKEN_LOWER_MAP }
 
-export const getSymbolFromAddress = (address: string): string => {
-  const foo = TRANSFER_TOKEN_LOWER_MAP[address.toLowerCase()]
-  return foo
-}
+export const getSymbolFromAddress = (address: string): string => TRANSFER_TOKEN_LOWER_MAP[address.toLowerCase()]
 
 export const getSymbolsFromAddresses = (addresses: string[]): string[] => addresses.map(e => getSymbolFromAddress(e))
 
-export const getTokenFromPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
+export const getPoolInfoFromPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
 
 export const getTokenFromIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 

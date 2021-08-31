@@ -47,16 +47,16 @@ export const getTransactionTransferInfo = async (transactionInfos: ITransactionI
 
   // ib?
   const ibSymbols = symbols.filter(symbol => symbol.startsWith('ib'))
-  const ibQuoteSymbols = ibSymbols.map(symbol => symbol.slice(2))
-  const erc20Symbols = symbols.filter(symbol => !symbol.startsWith('ib'))
-  const mixedSymbols = [...Array.from(new Set([...erc20Symbols, ...ibQuoteSymbols]))]
+  const ibPairedSymbols = ibSymbols.map(symbol => symbol.slice(2))
+  const otherSymbols = symbols.filter(symbol => !symbol.startsWith('ib'))
+  const mixedSymbols = [...Array.from(new Set([...otherSymbols, ...ibPairedSymbols]))]
   const symbolPriceUSDMap = await fetchPriceUSD(mixedSymbols)
 
   // Hotfix ib price
   if (ibSymbols.length > 0) {
     // Just use base price for now, TODO : multiply with ib price
     ibSymbols.forEach((symbol, i) => {
-      symbolPriceUSDMap[symbol] = symbolPriceUSDMap[ibQuoteSymbols[i]]
+      symbolPriceUSDMap[symbol] = symbolPriceUSDMap[ibPairedSymbols[i]]
     })
   }
 
