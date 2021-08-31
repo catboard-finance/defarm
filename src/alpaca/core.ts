@@ -48,7 +48,11 @@ export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
 const _TOKEN_POOLS_LOWER_MAP = Object.assign({}, ...Object.keys(POOLS).map(k => ({ [`${POOLS[k].address.toLowerCase()}`]: POOLS[k].stakingToken })))
 const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`${TOKENS[k].toLowerCase()}`]: k })))
 
-const TRANSFER_TOKEN_LOWER_MAP = { ..._TOKEN_POOLS_LOWER_MAP, ..._TOKEN_LOWER_MAP }
+const TRANSFER_TOKEN_LOWER_MAP = {
+  ..._TOKEN_POOLS_LOWER_MAP,
+  ..._TOKEN_LOWER_MAP,
+  FAIR_LAUNCH_ADDRESS: 'ALPACA',
+}
 
 export const getSymbolFromAddress = (address: string): string => TRANSFER_TOKEN_LOWER_MAP[address.toLowerCase()]
 
@@ -154,10 +158,16 @@ export const getLendsByPoolAddresses = async (block = 'latest', chain: Chain = '
 
 // Transfers
 
-export const getAddressesFromTransfers = (transfers: ITransfer[]) => [...Array.from(new Set(transfers.map(e => e.address)))]
+export const getUniqueAddressesFromTransfers = (transfers: ITransfer[]) => [...Array.from(new Set(transfers.map(e => e.address)))]
+
+export const getUniqueSymbolsFromTransfers = (transfers: ITransfer[]) => {
+  const tokenAddresses = getUniqueAddressesFromTransfers(transfers)
+  const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)
+  return tokenSymbols
+}
 
 export const getSymbolsFromTransfers = (transfers: ITransfer[]) => {
-  const tokenAddresses = getAddressesFromTransfers(transfers)
+  const tokenAddresses = transfers.map(e => e.address)
   const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)
   return tokenSymbols
 }

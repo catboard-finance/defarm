@@ -5,8 +5,7 @@ import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
 import { DirectionType, ITransfer, ITransferInfo } from '../../type';
 import _ from 'lodash'
-import { getSymbolsFromTransfers } from '..';
-import { FAIR_LAUNCH_ADDRESS, VAULT_ADDRESS } from '../core';
+import { FAIR_LAUNCH_ADDRESS, getSymbolsFromTransfers, VAULT_ADDRESS } from '../core';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
 

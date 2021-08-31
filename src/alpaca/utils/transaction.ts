@@ -102,19 +102,20 @@ export interface IStakeTransaction extends ITransactionInfo {
   depositValueUSD?: number
 }
 
-export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken })
+export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken })
   : IFarmTransaction[] | IStakeTransaction[] | ILendTransaction[] => {
-  const res = transactions.map(e => {
+  const res = transactionInfos.map(e => {
 
     switch (e.investmentType) {
       case InvestmentTypeObject.farms:
         const farmTx = e as IFarmTransaction
-        const token = getPoolInfoFromPoolAddress(farmTx.to_address)
+        const token = getPoolInfoFromPoolAddress(e.to_address)
         const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
         return {
-          ...farmTx,
+          ...e,
           stratSymbol: stratToken?.symbol,
           principalSymbol: token.unstakingToken,
+          vaultAddress: e.to_address,
         }
       case InvestmentTypeObject.lends:
         const lendToken = getPoolInfoFromPoolAddress(e.to_address).unstakingToken
@@ -138,8 +139,8 @@ export const withSymbol = (transactions: ITransactionInfo[], stratAddressTokenAd
   return res as unknown as IFarmTransaction[]
 }
 
-export const withPosition = async (transactions: ITransactionInfo[]): Promise<IFarmTransaction[]> => {
-  const promises = transactions.map(e => {
+export const withPosition = async (transactionInfos: ITransactionInfo[]): Promise<IFarmTransaction[]> => {
+  const promises = transactionInfos.map(e => {
     const farmTx = e as IFarmTransaction
     let targetAddress = e.to_address
 
@@ -161,7 +162,7 @@ export const withPosition = async (transactions: ITransactionInfo[]): Promise<IF
   })
 
   const results = await Promise.all(promises)
-  const res = transactions.map((e, i) => {
+  const res = transactionInfos.map((e, i) => {
     const positionId = results[i] ? results[i].uid : null
     return {
       ...e,
