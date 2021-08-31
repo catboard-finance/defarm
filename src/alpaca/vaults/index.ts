@@ -5,8 +5,7 @@ import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
 import { DirectionType, ITransfer, ITransferInfo } from '../../type';
 import _ from 'lodash'
-import { getSymbolsFromTransfers, IUserPositionUSD } from '..';
-import { getPositionId } from '../utils/events';
+import { getSymbolsFromTransfers } from '..';
 import { FAIR_LAUNCH_ADDRESS, VAULT_ADDRESS } from '../core';
 
 const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
@@ -86,106 +85,4 @@ export const withDirection = (account: string, transfers: ITransfer[]) => {
       direction: account === transfer.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
     })
   })
-}
-
-// export const applyDirection = (transfers: ITransfer[]): ITransferInfo[] => {
-//   return transfers.map(tx => {
-//     const _tx = { ...tx, ...{ direction: DirectionType.UNKNOWN } }
-//     if (ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())) {
-//       // User → 💎 → Pool
-//       _tx.direction = DirectionType.DEPOSIT
-//     }
-//     else if (ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase())) {
-//       // User ← 💎 ← Pool
-//       _tx.direction = DirectionType.WITHDRAW
-//     }
-
-//     return _tx
-//   })
-// }
-
-export const deprecated_withPositionInfo = async (transfers: ITransferInfo[]): Promise<ITransferInfo[]> => {
-  const promises = transfers.map(tx => {
-    let targetAddress = (tx.direction === DirectionType.OUT) ? tx.to_address : tx.from_address
-
-    // poc mapping to vault address
-    if (ALPACA_USDT_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
-      targetAddress = '0x158Da805682BdC8ee32d52833aD41E74bb951E59'.toLowerCase()
-    }
-
-    if (ALPACA_BUSD_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
-      targetAddress = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f'.toLowerCase()
-    }
-
-    return getPositionId(targetAddress, tx.block_number, tx.transaction_hash)
-  })
-
-  const results = await Promise.all(promises)
-
-  return results.map((e, i) => {
-    const res = {
-      ...transfers[i],
-      positionId: e || 'unknown'
-    }
-
-    delete res.value
-
-    return res
-  })
-}
-
-// interface IPositionSummary {
-//   totalDeposit: number
-//   totalWithdraw: number
-//   totalDepositUSD: number
-//   totalWithdrawUSD: number
-// }
-
-export const deprecated_summaryPositionInfo = (activePositions: IUserPositionUSD[], transferInfos: ITransfer[]) => {
-  // 1. Remove null
-  const _transferInfos = transferInfos.filter(e => e)
-
-  // 3. Group by position
-  const transferPositionInfoMap = _.groupBy(_transferInfos, 'positionId')
-
-  // for (let [k, v] of Object.entries(transferPositionInfoMap)) {
-  //   const e = transferPositionInfoMap[k]
-  //   transferPositionInfoMap
-  // }
-
-  return transferPositionInfoMap
-
-  // return activePositions.map(pos => {
-  //   // 1. Group by position
-  //   const transferPositionInfos: ITransferPositionInfo[] = transferInfos.filter(e => parseInt(e.positionId) === pos.positionId)
-  //   if (!transferPositionInfos || transferPositionInfos.length <= 0) {
-  //     console.warn(`Position not found: ${pos.positionId}`)
-  //     return null
-  //   }
-
-  //   // 2. Sum by direction
-  //   const deposits = transferPositionInfos.filter(e => e.direction === DirectionType.DEPOSIT)
-  //   const withdraws = transferPositionInfos.filter(e => e.direction === DirectionType.WITHDRAW)
-
-  //   const positionSummary: IPositionSummary = {
-  //     totalDepositUSD: _.sumBy(_.filter(deposits, 'symbol'), 'tokenValueUSD'),
-  //     totalWithdrawUSD: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenValueUSD'),
-  //     totalDeposit: _.sumBy(_.filter(deposits, 'symbol'), 'tokenAmount'),
-  //     totalWithdraw: _.sumBy(_.filter(withdraws, 'symbol'), 'tokenAmount'),
-  //   }
-
-  //   const investedPositionSummaryUSD = positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD
-
-  //   delete pos.positionValueUSDbn
-  //   delete pos.debtValueUSDbn
-
-  //   return {
-  //     ...pos,
-  //     ...positionSummary,
-  //     deposits,
-  //     withdraws,
-  //     investedUSD: positionSummary.totalDepositUSD - positionSummary.totalWithdrawUSD,
-  //     profitUSD: pos.equityValueUSD - investedPositionSummaryUSD,
-  //   }
-  // })
 }

@@ -1,10 +1,7 @@
 import _ from 'lodash'
-import { getTransfers } from '../../account'
-import { fetchPriceUSD } from '../../coingecko'
 import { ITransferInfo } from '../../type'
-import { getSymbolsFromTransfers } from '../core'
 import { formatBigNumberToFixed } from '../utils/converter'
-import { withDirection, filterInvestmentTransfers, getPositions, deprecated_summaryPositionInfo, withPriceUSD, deprecated_withPositionInfo } from "../vaults"
+import { getPositions } from "../vaults"
 import { getUserInvestmentInfos } from './farms'
 import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
@@ -83,37 +80,6 @@ export const fetchUserStakes = async (account: string) => {
 
 export interface IDepositTransferUSDMap {
   [address: string]: ITransferInfo[]
-}
-
-// Will be deprecate?
-// This working but in the end gathering deposit/withdraw from transfer is no efficient due to 
-// It will need knowledge of all address to filter in/out behavior.
-export const deprecated_fetchUserSummaryFromTransfer = async (account: string) => {
-  // TODO : replace with onchain implement
-  // 1. Get all active positions
-  const positions = await fetchUserPositions(account)
-  const activePositions = positions.filter(e => e.equityValueUSD > 0)
-  // console.log('activePositions:', activePositions)
-
-  // 2. Get all investment related transactions
-  const transfers = await getTransfers(account)
-  let transferInfos = withDirection(account, transfers)
-  transferInfos = filterInvestmentTransfers(transferInfos) as ITransferInfo[]
-
-  // 3. Prepare price in USD
-  const symbols = getSymbolsFromTransfers(transferInfos)
-  const symbolPriceUSDMap = await fetchPriceUSD(symbols)
-
-  // 4. Apply price in USD
-  transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
-
-  // 5. Get position from event by block number
-  transferInfos = await deprecated_withPositionInfo(transferInfos as ITransferInfo[])
-
-  // 6. Add equity USD
-  const investments = deprecated_summaryPositionInfo(activePositions, transferInfos)
-
-  return investments
 }
 
 export const fetchUserSummary = async (account: string) => {
