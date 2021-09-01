@@ -32,7 +32,7 @@ export interface IIbPool {
   id: number
   address: string
   stakingToken: string
-  earnToken: string
+  rewardToken: string
 }
 
 const IB_ONLY_POOLS = POOLS.filter(pool => pool.stakingToken.startsWith('ib'))
@@ -41,7 +41,7 @@ export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
     id: pool.id,
     address: pool.address,
     stakingToken: pool.stakingToken,
-    earnToken: pool.stakingToken.slice(2),
+    rewardToken: pool.stakingToken.slice(2),
   }
 })
 

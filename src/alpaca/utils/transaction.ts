@@ -114,11 +114,11 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
         return {
           ...e,
           stratSymbol: stratToken?.symbol,
-          principalSymbol: token.earnToken,
+          principalSymbol: token.rewardToken,
           vaultAddress: e.to_address,
         }
       case InvestmentTypeObject.lend:
-        const lendToken = getPoolInfoFromPoolAddress(e.to_address).earnToken
+        const lendToken = getPoolInfoFromPoolAddress(e.to_address).rewardToken
         return {
           ...e,
           ibPoolAddress: e.to_address,

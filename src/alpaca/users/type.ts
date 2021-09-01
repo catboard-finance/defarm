@@ -15,7 +15,7 @@ export interface IUserStake {
   poolId: number
   poolAddress: string; // address;
   stakingToken: string
-  earnToken: string
+  rewardToken: string
 
   amount: BigNumber;
   rewardDebt: BigNumber; // pending reward = (user.amount * pool.accAlpacaPerShare) - user.rewardDebt

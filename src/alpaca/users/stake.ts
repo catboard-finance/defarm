@@ -48,7 +48,7 @@ export const getUserStakes = async (account: string, block = 'latest', chain: Ch
       poolId: pool.id,
       poolAddress: pool.address,
       stakingToken: pool.stakingToken,
-      earnToken: 'ALPACA',
+      rewardToken: 'ALPACA',
 
       amount,
       rewardDebt,

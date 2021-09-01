@@ -6,7 +6,7 @@ import { fetchTokenUSDPricesBySymbols as pancakeswap_fetchTokenUSDPricesBySymbol
 
 export const fetchLendsBySymbols = async (symbols: string[] = null, digit: number = 18, block = 'latest', chain: Chain = 'bsc'): Promise<IBSCAlpacaLends[]> => {
   // Convert to symbol if get ibSymbol as input e.g. ibALPACA → ALPACA
-  const notIBSymbols = [...Array.from(new Set(symbols.map(symbol => getTokenFromIBSymbol(symbol)?.earnToken || symbol)))]
+  const notIBSymbols = [...Array.from(new Set(symbols.map(symbol => getTokenFromIBSymbol(symbol)?.rewardToken || symbol)))]
 
   const lendsAndPrices = Promise.all([
     getLendsBySymbols(notIBSymbols, block, chain),
