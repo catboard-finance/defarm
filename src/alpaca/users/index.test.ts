@@ -29,7 +29,7 @@ describe('User', () => {
 
   it(`can calculate profits`, async () => {
     const profits = await fetchUserInvestments(TEST_ACCOUNT_ADDRESS)
-    console.log('profits:', profits)
+    // console.log('profits:', profits)
 
     expect(profits).toBeDefined
   }, 100000);
