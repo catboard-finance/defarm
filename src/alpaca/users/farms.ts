@@ -43,9 +43,9 @@ export interface ILendInvestmentInfo extends IUserInvestmentInfo {
 export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
   fairLaunchAddress: string
 
-  depositTokenSymbol: string
-  depositAmount: number
-  depositValueUSD: number
+  stakeTokenSymbol: string
+  stakeAmount: number
+  stakeValueUSD: number
 }
 
 export interface IUserInvestmentInfo {
@@ -122,6 +122,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           depositTokenSymbol: lendTx.depositTokenSymbol,
           depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
           depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+
+          depositedAt: lendTx.block_timestamp,
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
@@ -130,9 +132,11 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
 
-          depositTokenSymbol: stakeTx.depositTokenSymbol,
-          depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
-          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+          stakeTokenSymbol: stakeTx.stakeTokenSymbol,
+          stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
+          stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+
+          stakedAt: stakeTx.block_timestamp,
         } as IStakeInvestmentInfo
       default:
         return null

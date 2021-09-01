@@ -84,15 +84,18 @@ export interface IDepositTransferUSDMap {
   [address: string]: ITransferInfo[]
 }
 
-export const fetchUserSummary = async (account: string) => {
-
+export const fetchUserInvestments = async (account: string) => {
   const transactionsInfos = await getTransactionInfos(account)
   const transferInfos = await getTransferInfos(account)
   const transactionTransferInfo = await getTransactionTransferInfo(transactionsInfos, transferInfos)
   const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
 
-  // farms
-  const summaryByPositions = await getInvestmentPerFarms(userInvestmentInfos)
+  return userInvestmentInfos
+}
+
+export const fetchUserSummaryByType = async (account: string) => {
+  const userInvestments = await fetchUserInvestments(account)
+  const summaryByPositions = await getInvestmentPerFarms(userInvestments)
 
   return summaryByPositions
 }

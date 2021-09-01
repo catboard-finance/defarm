@@ -97,9 +97,9 @@ export interface ILendTransaction extends ITransactionInfo {
 export interface IStakeTransaction extends ITransactionInfo {
   fairLaunchAddress: string
 
-  depositTokenSymbol: string
-  depositAmount?: number
-  depositValueUSD?: number
+  stakeTokenSymbol: string
+  stakeAmount?: number
+  stakeValueUSD?: number
 }
 
 export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken })
@@ -129,7 +129,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
         return {
           ...e,
           fairLaunchAddress: e.to_address,
-          depositTokenSymbol: stakeToken.symbol,
+          stakeTokenSymbol: stakeToken.symbol,
         } as IStakeTransaction
       default:
         return e as IFarmTransaction
