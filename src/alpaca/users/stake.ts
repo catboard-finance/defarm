@@ -12,23 +12,36 @@ export const getUserStakes = async (account: string, block = 'latest', chain: Ch
     params: [pool.id, account],
   }))
 
-  const stakeBalances = (
-    await api.abi.multiCall({
+  const stakeBalances =
+    api.abi.multiCall({
       // @ts-ignore
       block,
       calls,
       abi: abi.userInfo,
       chain,
     })
-  ).output
+
+  const pendingBalances =
+    api.abi.multiCall({
+      // @ts-ignore
+      block,
+      calls,
+      abi: abi.pendingAlpaca,
+      chain,
+    })
+
+  const promises = await Promise.all([stakeBalances, pendingBalances])
+  const outputs = promises.map(e => e.output)
 
   //  amount uint256, rewardDebt uint256, bonusDebt uint256, fundedBy address
-  let stakeInfos: IUserStake[] = stakeBalances.map((stakeBalance, i) => {
+  let stakeInfos: IUserStake[] = outputs[0].map((stakeBalance, i) => {
     const pool = IB_POOLS[i]
     const amount = BigNumber.from(stakeBalance.output.amount)
     const rewardDebt = BigNumber.from(stakeBalance.output.rewardDebt)
     const bonusDebt = BigNumber.from(stakeBalance.output.bonusDebt)
     const fundedBy = stakeBalance.output.fundedBy
+
+    const pendingAlpaca = BigNumber.from(outputs[1][i].output)
 
     return {
       fairLaunchPoolAddress: FAIR_LAUNCH_ADDRESS,
@@ -40,7 +53,9 @@ export const getUserStakes = async (account: string, block = 'latest', chain: Ch
       amount,
       rewardDebt,
       bonusDebt,
-      fundedBy
+      fundedBy,
+
+      pendingAlpaca,
     }
   })
 

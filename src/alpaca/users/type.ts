@@ -21,4 +21,6 @@ export interface IUserStake {
   rewardDebt: BigNumber;
   bonusDebt: BigNumber;
   fundedBy: string // address;
+
+  pendingAlpaca: BigNumber;
 }

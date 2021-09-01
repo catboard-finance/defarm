@@ -73,6 +73,8 @@ export const fetchUserStakes = async (account: string) => {
     rewardDebt: parseFloat(formatBigNumberToFixed(stake.rewardDebt)),
     bonusDebt: parseFloat(formatBigNumberToFixed(stake.bonusDebt)),
     fundedBy: stake.fundedBy,
+
+    pendingAlpaca: parseFloat(formatBigNumberToFixed(stake.pendingAlpaca)),
   }))
 
   return parsedStake
