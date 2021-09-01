@@ -2,8 +2,9 @@ import { fetchTokenUSDPricesBySymbols } from ".";
 import { getSupportedUSDSymbols } from "..";
 
 describe('🦙', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
+    jest.spyOn(console, 'log').mockImplementation(() => { });
   });
 
   it('has supported symbol list', async () => {

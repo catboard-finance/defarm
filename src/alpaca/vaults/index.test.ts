@@ -3,7 +3,7 @@ import { parseVaultInput } from "./worker";
 import bar from './transactions.json'
 
 describe('🦙 Vault', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
     jest.spyOn(console, 'log').mockImplementation(() => { });
   });

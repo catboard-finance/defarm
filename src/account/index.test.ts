@@ -5,8 +5,9 @@ import mocked_transfers from './__snapshots__/transfers.json'
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 
 describe('🐈 User', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
+    jest.spyOn(console, 'log').mockImplementation(() => { });
   });
 
   it('can get all account transactions.', async () => {

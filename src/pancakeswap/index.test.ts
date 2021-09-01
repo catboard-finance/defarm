@@ -4,8 +4,9 @@ import { farmsSymbolMap } from "./config/constants/mapper";
 import tokens from "./config/constants/tokens";
 
 describe('🍰 global data', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
+    jest.spyOn(console, 'log').mockImplementation(() => { });
   });
 
   it('has supported symbol list', async () => {

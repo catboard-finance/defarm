@@ -5,8 +5,9 @@ import { farmsSymbolMap } from "./pancakeswap/config/constants/mapper";
 import tokens from "./pancakeswap/config/constants/tokens";
 
 describe('🍰🦙 global data', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
+    jest.spyOn(console, 'log').mockImplementation(() => { });
   });
 
   it('has supported symbol list', async () => {
