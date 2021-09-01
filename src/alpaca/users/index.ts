@@ -66,8 +66,8 @@ export const fetchUserLends = async (account: string) => {
 
 export const fetchUserStakes = async (account: string) => {
   // Raw
-  const lends = await getUserStakes(account)
-  const parsedStake = lends.map(stake => ({
+  const stakes = await getUserStakes(account)
+  const parsedStake = stakes.map(stake => ({
     ...stake,
     amount: parseFloat(formatBigNumberToFixed(stake.amount)),
     rewardDebt: parseFloat(formatBigNumberToFixed(stake.rewardDebt)),
