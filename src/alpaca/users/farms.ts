@@ -86,7 +86,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
     }
 
     switch (e.investmentType) {
-      case InvestmentTypeObject.farms:
+      case InvestmentTypeObject.farm:
         const farmTx = e as IFarmTransaction
 
         return {
@@ -112,7 +112,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           positionedAt: farmTx.block_timestamp,
         } as IFarmInvestmentInfo
-      case InvestmentTypeObject.lends:
+      case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
         return {
           ...baseInvestment,
@@ -123,7 +123,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
           depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
         } as ILendInvestmentInfo
-      case InvestmentTypeObject.stakes:
+      case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
         return {
           ...baseInvestment,
