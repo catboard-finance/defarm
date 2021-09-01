@@ -19,9 +19,9 @@ export interface ITransactionInfo extends ITransaction {
 }
 
 export enum InvestmentTypeObject {
-  farms = 'farms',
-  lends = 'lends',
-  stakes = 'stakes',
+  farm = 'farm',
+  lend = 'lend',
+  stake = 'stake',
   none = 'none',
 }
 
@@ -46,7 +46,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
         const ibSymbol = getPoolInfoFromPoolAddress(e.to_address)?.stakingToken
         return {
           ...e,
-          investmentType: ibSymbol ? InvestmentTypeObject.lends : InvestmentTypeObject.stakes,
+          investmentType: ibSymbol ? InvestmentTypeObject.lend : InvestmentTypeObject.stake,
         }
       case MethodType.transfer:
         return {
@@ -57,7 +57,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
         // farms
         return {
           ...e,
-          investmentType: InvestmentTypeObject.farms,
+          investmentType: InvestmentTypeObject.farm,
         }
       default:
         return {
@@ -107,7 +107,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
   const res = transactionInfos.map(e => {
 
     switch (e.investmentType) {
-      case InvestmentTypeObject.farms:
+      case InvestmentTypeObject.farm:
         const farmTx = e as IFarmTransaction
         const token = getPoolInfoFromPoolAddress(e.to_address)
         const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
@@ -117,14 +117,14 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
           principalSymbol: token.unstakingToken,
           vaultAddress: e.to_address,
         }
-      case InvestmentTypeObject.lends:
+      case InvestmentTypeObject.lend:
         const lendToken = getPoolInfoFromPoolAddress(e.to_address).unstakingToken
         return {
           ...e,
           ibPoolAddress: e.to_address,
           depositTokenSymbol: lendToken,
         } as ILendTransaction
-      case InvestmentTypeObject.stakes:
+      case InvestmentTypeObject.stake:
         var stakeToken = stratAddressTokenAddressMap[e.to_address.toLowerCase()]
         return {
           ...e,
@@ -154,7 +154,7 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
     }
 
     switch (farmTx.investmentType) {
-      case InvestmentTypeObject.farms:
+      case InvestmentTypeObject.farm:
         return getWorkEvent(targetAddress, farmTx.block_number, farmTx.hash)
       default:
         return null
