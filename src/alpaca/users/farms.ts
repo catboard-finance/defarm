@@ -109,8 +109,6 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           stratAmount: farmTx.stratAmount,
 
           borrowAmount: farmTx.borrowAmount,
-
-          investedAt: farmTx.block_timestamp,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
@@ -122,8 +120,6 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           depositTokenSymbol: lendTx.depositTokenSymbol,
           depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
           depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
-
-          depositedAt: lendTx.block_timestamp,
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
@@ -135,8 +131,6 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           stakeTokenSymbol: stakeTx.stakeTokenSymbol,
           stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
           stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
-
-          stakedAt: stakeTx.block_timestamp,
         } as IStakeInvestmentInfo
       default:
         return null
@@ -145,10 +139,3 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
   return userInvestmentInfos.filter(e => e)
 }
-
-// rewardSymbol
-// rewardPriceUSD
-// rewardValueUSD
-// priceUSD
-
-// Account

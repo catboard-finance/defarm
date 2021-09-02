@@ -50,7 +50,6 @@ export const getTransactionTransferInfo = async (transactionInfos: ITransactionI
   const ibPairedSymbols = ibSymbols.map(symbol => symbol.slice(2))
   const otherSymbols = symbols.filter(symbol => !symbol.startsWith('ib'))
   const mixedSymbols = [...Array.from(new Set([...otherSymbols, ...ibPairedSymbols]))]
-  console.log('mixedSymbols:', mixedSymbols)
   const symbolPriceUSDMap = await fetchPriceUSD(mixedSymbols)
 
   // Hotfix ib price

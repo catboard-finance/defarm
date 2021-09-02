@@ -99,3 +99,5 @@ export const fetchUserSummaryByType = async (account: string) => {
 
   return summaryByPositions
 }
+
+// TODO: fetchUserReward
