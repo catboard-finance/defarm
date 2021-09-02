@@ -113,8 +113,8 @@ console.log(results);
 
 ### Get user balance
 ```typescript
-import { fetchUserBalance } from '@undefiorg/defarm'
-const balances = await fetchUserBalance('0x8155430e4860e791aeddb43e4764d15de7e0def1')
+import { alpaca } from '@undefiorg/defarm'
+const balances = await alpaca.fetchUserBalance('0x8155430e4860e791aeddb43e4764d15de7e0def1')
 console.log(results);
 ```
 Result
@@ -147,7 +147,7 @@ Result
 
 ### Get user related farm info
 ```typescript
-import { fetchUserLends, fetchUserStakes } from '@undefiorg/defarm'
-const lends = await fetchUserLends('0x8155430e4860e791aeddb43e4764d15de7e0def1')
-const stakes = await fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de7e0def1')
+import { alpaca } from '@undefiorg/defarm'
+const lends = await alpaca.fetchUserLends('0x8155430e4860e791aeddb43e4764d15de7e0def1')
+const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de7e0def1')
 ```

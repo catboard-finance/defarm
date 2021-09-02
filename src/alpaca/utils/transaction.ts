@@ -1,5 +1,6 @@
 import { IToken, ITransaction, MethodType } from "../../type";
 import { getPoolInfoFromPoolAddress } from "../core";
+import { getUserStakes } from "../users/stake";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
 import { getWorkEvent } from "../vaults/vaultEvent";
 import { parseVaultInput } from "../vaults/worker";
@@ -168,6 +169,36 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
       ...e,
       positionId,
     } as IFarmTransaction
+  })
+
+  return res
+}
+
+// TODO
+export const withReward = async (account: string, transactionInfos: ITransactionInfo[]) => {
+  const promises = transactionInfos.map(e => {
+    // let targetAddress = e.to_address
+    switch (e.investmentType) {
+      case InvestmentTypeObject.stake:
+        return getUserStakes(account, e.block_number)
+      default:
+        return null
+    }
+  })
+
+  const results = await Promise.all(promises)
+  const res = transactionInfos.map((e, i) => {
+    console.info(e)
+    const foo = results[i]
+    console.info(foo)
+    return {
+      ...e,
+    }
+    // const positionId = results[i] ? results[i].uid : null
+    // return {
+    //   ...e,
+    //   positionId,
+    // } as IFarmTransaction
   })
 
   return res

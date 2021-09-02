@@ -48,9 +48,17 @@ export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
   stakeValueUSD: number
 }
 
+export interface IRewardInfo {
+  address: string
+  symbol: string
+  amount: number
+  valueUSD: number
+}
+
 export interface IUserInvestmentInfo {
   investmentType: InvestmentTypeObject
   transfers: IUserInvestmentTransfers[],
+  rewards?: IRewardInfo[]
 
   investedAt: string // "2021-08-07T14:45:51.000Z",
 }

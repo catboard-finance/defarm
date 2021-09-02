@@ -2,13 +2,13 @@ import _ from 'lodash'
 import { getERC20Balance, getNativeBalance } from '../../account'
 import { ITransferInfo } from '../../type'
 import { formatBigNumberToFixed, stringToFloat } from '../utils/converter'
+import { withReward } from '../utils/transaction'
 import { getPositions } from "../vaults"
 import { getUserInvestmentInfos } from './farms'
 import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
-import { getInvestmentPerFarms } from './summary'
 import { IUserBalance } from './type'
 
 // User////////////////////////
@@ -117,15 +117,17 @@ export const fetchUserInvestments = async (account: string) => {
   const transferInfos = await getTransferInfos(account)
   const transactionTransferInfo = await getTransactionTransferInfo(transactionsInfos, transferInfos)
   const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
+  const foo = await withReward(account, transactionTransferInfo)
+  console.log(foo)
 
   return userInvestmentInfos
 }
 
-export const fetchUserSummaryByType = async (account: string) => {
-  const userInvestments = await fetchUserInvestments(account)
-  const summaryByPositions = await getInvestmentPerFarms(userInvestments)
+// export const fetchUserSummaryByType = async (account: string) => {
+//   const userInvestments = await fetchUserInvestments(account)
+//   const summaryByPositions = await getInvestmentPerFarms(userInvestments)
 
-  return summaryByPositions
-}
+//   return summaryByPositions
+// }
 
 // TODO: fetchUserReward
