@@ -10,5 +10,5 @@ export const formatBigNumberToFixed = (number: BigNumber, displayDecimals = 18, 
   return (+formattedString).toFixed(displayDecimals)
 }
 
-export const stringToFixed = (value: string) => formatBigNumberToFixed(ethers.BigNumber.from(value))
-export const stringToFloat = (value: string) => parseFloat(stringToFixed(value))
+export const stringToFixed = (value: string, displayDecimals = 18, decimals = 18) => formatBigNumberToFixed(ethers.BigNumber.from(value), displayDecimals, decimals)
+export const stringToFloat = (value: string, displayDecimals = 18, decimals = 18) => parseFloat(stringToFixed(value, displayDecimals, decimals))

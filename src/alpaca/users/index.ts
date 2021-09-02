@@ -1,6 +1,7 @@
 import _ from 'lodash'
+import { getERC20Balance, getNativeBalance } from '../../account'
 import { ITransferInfo } from '../../type'
-import { formatBigNumberToFixed } from '../utils/converter'
+import { formatBigNumberToFixed, stringToFloat } from '../utils/converter'
 import { getPositions } from "../vaults"
 import { getUserInvestmentInfos } from './farms'
 import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
@@ -8,6 +9,33 @@ import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
 import { getInvestmentPerFarms } from './summary'
+import { IUserBalance } from './type'
+
+// User////////////////////////
+
+export const fetchUserBalance = async (account: string): Promise<IUserBalance[]> => {
+  const [native, erc20] = await Promise.all([
+    getNativeBalance(account),
+    getERC20Balance(account),
+  ])
+
+  const parsedERC20s = erc20.map(e => ({
+    symbol: e.symbol,
+    name: e.name,
+    address: e.token_address,
+    amount: stringToFloat(e.balance, parseInt(e.decimals), parseInt(e.decimals)),
+  }))
+
+  return [
+    {
+      symbol: 'BNB',
+      amount: stringToFloat(native.balance),
+    },
+    ...parsedERC20s,
+  ]
+}
+
+// Farm ////////////////////////
 
 export interface IUserPositionUSD extends IUserPosition {
   positionValueUSD: number;

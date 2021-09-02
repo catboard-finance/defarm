@@ -91,7 +91,7 @@ console.log(results);
 ```
 ---
 
-## Example: Info
+## Example: Farm's info
 
 ### `ALPACA` lend info w/ price
 ```typescript
@@ -105,4 +105,49 @@ console.log(results);
 import { pancakeswap } from '@undefiorg/defarm'
 const results = await pancakeswap.fetchFarmsWithAPRBySymbols(['CAKE-BNB LP']);
 console.log(results);
+```
+
+---
+
+## Example: User's info
+
+### Get user balance
+```typescript
+import { fetchUserBalance } from '@undefiorg/defarm'
+const balances = await fetchUserBalance('0x8155430e4860e791aeddb43e4764d15de7e0def1')
+console.log(results);
+```
+Result
+```js
+[
+  {
+    symbol: "BNB",
+    amount: 0.11599613269895288,
+  },
+  {
+    symbol: "BUSD",
+    name: "BUSD Token",
+    address: "0xe9e7cea3dedca5984780bafc599bd69add087d56",
+    amount: 40,
+  },
+  {
+    symbol: "Cake",
+    name: "PancakeSwap Token",
+    address: "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+    amount: 0.4911554974024814,
+  },
+  {
+    symbol: "ALPACA",
+    name: "AlpacaToken",
+    address: "0x8f0528ce5ef7b51152a59745befdd91d97091d2f",
+    amount: 36.16263249966178,
+  }
+]
+```
+
+### Get user related farm info
+```typescript
+import { fetchUserLends, fetchUserStakes } from '@undefiorg/defarm'
+const lends = await fetchUserLends('0x8155430e4860e791aeddb43e4764d15de7e0def1')
+const stakes = await fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de7e0def1')
 ```

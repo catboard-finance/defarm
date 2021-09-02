@@ -2,11 +2,11 @@ require('dotenv').config()
 
 import fetch from 'node-fetch';
 import { Chain } from "@defillama/sdk/build/general";
-import { ITransaction, ITransfer, IBlockEvent } from '../type';
+import { ITransaction, ITransfer, IBlockEvent, IBalance, IERC20 } from '../type';
 
 const MORALIS_API_URI = `https://deep-index.moralis.io/api/v2`
 
-const _caller = async (account: string, target: string = '', body: any = null, params: URLSearchParams, chain: Chain = 'bsc'): Promise<any[]> => {
+const _caller = async (address: string, target: string = '', body: any = null, params: URLSearchParams, chain: Chain = 'bsc'): Promise<any> => {
   const method = body ? 'POST' : 'GET'
   let requestInit = {
     headers: {
@@ -23,25 +23,36 @@ const _caller = async (account: string, target: string = '', body: any = null, p
   }
 
   let _error: Error
-  const uri = `${MORALIS_API_URI}/${account}${target}?chain=${chain}&${params}`
+  let uri = `${MORALIS_API_URI}/${address}${target}?chain=${chain}`
+  if (params) {
+    uri = `${uri}&${params}`
+  }
   const result = await fetch(uri, requestInit).catch(error => _error = error)
   if (_error) {
     console.error(_error)
     return null
   }
 
-  const { result: data } = await result.json()
+  const data = await result.json()
   if (!data) return null
 
-  return data
+  return data.result || data
 }
 
-export const getTransactions = async (account: string, chain: Chain = 'bsc'): Promise<ITransaction[]> => {
-  return _caller(account, '', null, null, chain)
+export const getNativeBalance = async (address: string, chain: Chain = 'bsc'): Promise<IBalance> => {
+  return _caller(address, '/balance', null, null, chain)
 }
 
-export const getTransfers = async (account: string, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
-  return _caller(account, `/erc20/transfers`, null, null, chain)
+export const getERC20Balance = async (address: string, chain: Chain = 'bsc'): Promise<IERC20[]> => {
+  return _caller(address, '/erc20', null, null, chain)
+}
+
+export const getTransactions = async (address: string, chain: Chain = 'bsc'): Promise<ITransaction[]> => {
+  return _caller(address, '', null, null, chain)
+}
+
+export const getTransfers = async (address: string, chain: Chain = 'bsc'): Promise<ITransfer[]> => {
+  return _caller(address, `/erc20/transfers`, null, null, chain)
 }
 
 export const getTokenPrice = async (address: string, chain: Chain = 'bsc') => {
@@ -49,7 +60,7 @@ export const getTokenPrice = async (address: string, chain: Chain = 'bsc') => {
 }
 
 export const getTokenPrices = async (addresses: string[], chain: Chain = 'bsc') => {
-  const pricePromises = addresses.map(e => getTokenPrice(e))
+  const pricePromises = addresses.map(e => getTokenPrice(e, chain))
   const prices = await Promise.all(pricePromises)
   const pricesMap = {}
   addresses.forEach((e, i) => {
@@ -59,7 +70,7 @@ export const getTokenPrices = async (addresses: string[], chain: Chain = 'bsc') 
   return pricesMap
 }
 
-export const getEventsByBlockNumber = async (account: string, abi: string, topic: string, blocknumber: string = null, chain: Chain = 'bsc'): Promise<IBlockEvent[]> => {
+export const getEventsByBlockNumber = async (address: string, abi: string, topic: string, blocknumber: string = null, chain: Chain = 'bsc'): Promise<IBlockEvent[]> => {
   const params = {
     'from_block': blocknumber,
     'to_block': blocknumber,
@@ -67,5 +78,5 @@ export const getEventsByBlockNumber = async (account: string, abi: string, topic
   }
 
   const searchParams = new URLSearchParams(params)
-  return _caller(account, '/events', abi, searchParams, chain)
+  return _caller(address, '/events', abi, searchParams, chain)
 }

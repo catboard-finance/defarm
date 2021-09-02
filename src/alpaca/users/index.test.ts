@@ -1,4 +1,4 @@
-import { fetchUserPositions, fetchUserLends, fetchUserStakes, fetchUserInvestments } from ".";
+import { fetchUserPositions, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserBalance } from ".";
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 describe('User', () => {
@@ -6,6 +6,12 @@ describe('User', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
     jest.spyOn(console, 'log').mockImplementation(() => { });
   });
+
+  it(`can fetch user balance value`, async () => {
+    const balances = await fetchUserBalance(TEST_ACCOUNT_ADDRESS)
+    console.log('balances:', balances)
+    expect(balances).toBeDefined
+  }, 10000);
 
   it.skip(`can fetch user position value`, async () => {
     const positions = await fetchUserPositions(TEST_ACCOUNT_ADDRESS)

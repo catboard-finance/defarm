@@ -1,5 +1,19 @@
 // Blockchain Scope
 
+export interface IBalance {
+  balance: string // "1234567890"
+}
+
+export interface IERC20 {
+  token_address: string // "0xe9e7cea3dedca5984780bafc599bd69add087d56",
+  name: string // "BUSD Token",
+  symbol: string // "BUSD",
+  logo: string // null,
+  thumbnail: string // null,
+  decimals: string // "18",
+  balance: string // "40000000000000000000"
+}
+
 export interface ITransaction {
   hash: string // "0x5590f91d196f06f8ad23ae26ae11f918805264735550b377fb8c6078d312bc6a",
   nonce: string // "19",

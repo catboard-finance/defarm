@@ -24,3 +24,10 @@ export interface IUserStake {
 
   pendingAlpaca: BigNumber;
 }
+
+export interface IUserBalance {
+  symbol: string,
+  name?: string,
+  address?: string,
+  amount: number,
+}
