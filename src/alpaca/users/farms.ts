@@ -52,7 +52,7 @@ export interface IUserInvestmentInfo {
   investmentType: InvestmentTypeObject
   transfers: IUserInvestmentTransfers[],
 
-  positionedAt: string // "2021-08-07T14:45:51.000Z",
+  investedAt: string // "2021-08-07T14:45:51.000Z",
 }
 
 export interface ITransactionTransferInfo extends IFarmTransaction {
@@ -81,7 +81,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
     let baseInvestment: IUserInvestmentInfo = {
       investmentType: e.investmentType,
-      positionedAt: e.block_timestamp,
+      investedAt: e.block_timestamp,
       transfers,
     }
 
@@ -110,7 +110,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           borrowAmount: farmTx.borrowAmount,
 
-          positionedAt: farmTx.block_timestamp,
+          investedAt: farmTx.block_timestamp,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
@@ -145,3 +145,10 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
   return userInvestmentInfos.filter(e => e)
 }
+
+// rewardSymbol
+// rewardPriceUSD
+// rewardValueUSD
+// priceUSD
+
+// Account
