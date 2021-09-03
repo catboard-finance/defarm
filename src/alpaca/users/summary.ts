@@ -1,5 +1,5 @@
 import _ from "lodash"
-import { IUserInvestmentInfo } from "./farms";
+import { IUserInvestmentInfo } from "./investment";
 
 // farms
 export const getInvestmentPerFarms = (userFarmInfos: IUserInvestmentInfo[]) => {

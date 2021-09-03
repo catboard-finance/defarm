@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { IToken, ITransaction, MethodType } from "../../type";
 import { getPoolByPoolAddress, getAddressFromSymbol } from "../core";
-import { IStakeInvestmentInfo, IUserInvestmentInfo } from "../users/farms";
+import { IStakeInvestmentInfo, IUserInvestmentInfo } from "../users/investment";
 import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";

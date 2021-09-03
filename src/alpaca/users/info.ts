@@ -5,7 +5,7 @@ import { fetchPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
 import { ITransactionInfo, withMethods, withType, withPosition, withSymbol } from "../utils/transaction"
 import { getStratAddressTokenAddressMap } from "../utils/transfer"
-import { ITransactionTransferInfo } from "./farms"
+import { ITransactionTransferInfo } from "./investment"
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
   // Get transactions

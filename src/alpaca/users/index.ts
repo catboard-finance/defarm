@@ -4,7 +4,7 @@ import { ITransferInfo } from '../../type'
 import { formatBigNumberToFixed, stringToFloat } from '../utils/converter'
 import { withReward } from '../utils/transaction'
 import { getPositions } from "../vaults"
-import { getUserInvestmentInfos } from './farms'
+import { getUserInvestmentInfos } from './investment'
 import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
