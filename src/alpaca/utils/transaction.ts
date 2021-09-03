@@ -197,7 +197,6 @@ export const withReward = async (account: string, userInvestmentInfos: IUserInve
         // TODO: rewards from lend
         return e
       case InvestmentTypeObject.stake:
-        // const stakeTx = e as unknown as IUserStake
         const stakeInfo = userStakeMap[(e as IStakeInvestmentInfo).poolId][0] as IUserStake
         return {
           ...e,
