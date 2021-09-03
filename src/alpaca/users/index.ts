@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { getERC20Balance, getNativeBalance } from '../../account'
 import { ITransferInfo } from '../../type'
 import { formatBigNumberToFixed, stringToFloat } from '../utils/converter'
-import { withReward } from '../utils/transaction'
 import { getPositions } from "../vaults"
 import { getUserInvestmentInfos } from './investment'
 import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
@@ -115,10 +114,8 @@ export interface IDepositTransferUSDMap {
 export const fetchUserInvestments = async (account: string) => {
   const transactionsInfos = await getTransactionInfos(account)
   const transferInfos = await getTransferInfos(account)
-  const transactionTransferInfo = await getTransactionTransferInfo(transactionsInfos, transferInfos)
+  const transactionTransferInfo = await getTransactionTransferInfo(account, transactionsInfos, transferInfos)
   const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
-  const foo = await withReward(account, userInvestmentInfos)
-  console.log(foo)
 
   return userInvestmentInfos
 }

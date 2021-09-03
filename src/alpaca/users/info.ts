@@ -3,7 +3,7 @@ import { withDirection, filterInvestmentTransfers, getUniqueSymbolsFromTransfers
 import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
-import { ITransactionInfo, withMethods, withType, withPosition, withSymbol } from "../utils/transaction"
+import { ITransactionInfo, withMethods, withType, withPosition, withSymbol, withReward, withRewardPriceUSD } from "../utils/transaction"
 import { getStratAddressTokenAddressMap } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
@@ -34,12 +34,16 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
   return transferInfos as ITransferInfo[]
 }
 
-export const getTransactionTransferInfo = async (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
+export const getTransactionTransferInfo = async (account: string, transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
   // Prepare symbol map from transfer
   const stratAddressTokenAddressMap = getStratAddressTokenAddressMap(transferInfos)
 
   // Add token info by tokens address
   transactionInfos = withSymbol(transactionInfos, stratAddressTokenAddressMap)
+
+  ////////////////// REWARDS //////////////////
+
+  transactionInfos = await withReward(account, transactionInfos)
 
   ////////////////// PRICES //////////////////
 
@@ -60,11 +64,15 @@ export const getTransactionTransferInfo = async (transactionInfos: ITransactionI
     })
   }
 
-  // Apply price in USD
+  // Apply price in USD to transfers
   transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
 
+  // Apply price in USD to rewards
+  transactionInfos = withRewardPriceUSD(transactionInfos, symbolPriceUSDMap)
+
+  // Group transfers by block number
   const transferGroup = _.groupBy(transferInfos, 'block_number')
-  const transactionTransferInfo = transactionInfos.map(e => ({
+  let transactionTransferInfo = transactionInfos.map(e => ({
     ...e,
     transferInfos: transferGroup[e.block_number]
   })) as unknown as ITransactionTransferInfo[]

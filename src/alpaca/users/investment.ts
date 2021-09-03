@@ -1,7 +1,6 @@
 import _ from "lodash"
 import { ITransferInfo } from "../../type"
-import { getPoolByStakingTokenSymbol } from "../core"
-import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction } from "../utils/transaction"
+import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo } from "../utils/transaction"
 
 export interface IUserInvestmentTransfers {
   blockNumber: string
@@ -61,7 +60,7 @@ export interface IUserInvestmentInfo {
   investedAt: string // "2021-08-07T14:45:51.000Z",
 }
 
-export interface ITransactionTransferInfo extends IFarmTransaction {
+export interface ITransactionTransferInfo extends ITransactionInfo {
   transferInfos: ITransferInfo[]
 }
 
@@ -93,7 +92,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
-        const farmTx = e as IFarmTransaction
+        const farmTx = e as unknown as IFarmTransaction
 
         return {
           ...baseInvestment,
@@ -129,16 +128,19 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
-        const poolId = getPoolByStakingTokenSymbol(stakeTx.stakeTokenSymbol).id
         return {
           ...baseInvestment,
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
-          poolId,
 
           stakeTokenSymbol: stakeTx.stakeTokenSymbol,
           stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
           stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+
+          rewardTokenAddress: stakeTx.rewardTokenAddress,
+          rewardTokenSymbol: stakeTx.rewardTokenSymbol,
+          rewardAmount: stakeTx.rewardAmount,
+          rewardValueUSD: stakeTx.rewardValueUSD,
         } as IStakeInvestmentInfo
       default:
         return null
