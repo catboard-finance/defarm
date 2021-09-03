@@ -4,7 +4,7 @@ import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
 import { ITransactionInfo, withMethods, withType, withPosition, withSymbol, withReward, withRewardPriceUSD } from "../utils/transaction"
-import { getStratAddressTokenAddressMap } from "../utils/transfer"
+import { getTokenInfoFromTransferAddressMap } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
@@ -36,10 +36,10 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
 
 export const getTransactionTransferInfo = async (account: string, transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
   // Prepare symbol map from transfer
-  const stratAddressTokenAddressMap = getStratAddressTokenAddressMap(transferInfos)
+  const tokenInfoFromTransferAddressMap = getTokenInfoFromTransferAddressMap(transferInfos)
 
   // Add token info by tokens address
-  transactionInfos = withSymbol(transactionInfos, stratAddressTokenAddressMap)
+  transactionInfos = withSymbol(transactionInfos, tokenInfoFromTransferAddressMap)
 
   ////////////////// REWARDS //////////////////
 

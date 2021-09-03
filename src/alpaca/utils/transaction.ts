@@ -12,6 +12,7 @@ import { stringToFloat } from "./converter";
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
   investmentType: InvestmentTypeObject
+  name: string
   positionId: string
   vaultAddress: string // "0x3fc149995021f1d7aec54d015dad3c7abc952bf0",
   principalSymbol: string // "ALPACA",
@@ -76,18 +77,22 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
 }
 
 export interface IFarmTransaction extends ITransactionInfo {
-  name: string
+  farmName: string
   positionId: string
   workerAddress: string
 
+  vaultAddress: string
   principalSymbol: string
   principalAmount: number
+  principalValueUSD: number
 
-  stratAddress: string
+  stratAddress: string // 
   stratSymbol: string
   stratAmount: number
+  stratValueUSD: number
 
   borrowAmount: number
+  borrowValueUSD: number
   maxReturn: number
 }
 
@@ -116,18 +121,18 @@ export interface IStakeTransaction extends ITransactionInfo {
   rewardValueUSD: number
 }
 
-export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTokenAddressMap: { [address: string]: IToken })
+export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTransferAddressMap: { [address: string]: IToken })
   : IFarmTransaction[] | IStakeTransaction[] | ILendTransaction[] => {
   const res = transactionInfos.map(e => {
-
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
-        const farmTx = e as IFarmTransaction
+        // const farmTx = e as IFarmTransaction
         const token = getPoolByPoolAddress(e.to_address)
-        const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
+        // Can't get token from stratAddress  e.g. SharedStrategies
+        // const stratToken = tokenInfoFromTransferAddressMap[farmTx.to_address.toLowerCase()]
         return {
           ...e,
-          stratSymbol: stratToken?.symbol,
+          // stratSymbol: stratToken?.symbol,
           principalSymbol: token.rewardToken,
           vaultAddress: e.to_address,
         }
@@ -140,7 +145,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
           withdrawTokenSymbol: pool.stakingToken,
         } as ILendTransaction
       case InvestmentTypeObject.stake:
-        const stakeToken = stratAddressTokenAddressMap[e.to_address.toLowerCase()]
+        const stakeToken = tokenInfoFromTransferAddressMap[e.to_address.toLowerCase()]
         var pool = getPoolByStakingTokenSymbol(stakeToken.symbol)
         return {
           ...e,
@@ -235,8 +240,13 @@ export const withRewardPriceUSD = (transactionInfos: ITransactionInfo[], symbolP
   const res = transactionInfos.map(e => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
-        // TODO
-        return e
+        const farmTx = e as unknown as IFarmTransaction
+        return {
+          ...e,
+          // TOFIX: We can't get correct stratSymbol yet
+          stratValueUSD: farmTx.stratAmount * parseFloat(symbolPriceUSDMap[farmTx.stratSymbol]),
+          principalValueUSD: farmTx.principalAmount * parseFloat(symbolPriceUSDMap[farmTx.principalSymbol]),
+        }
       case InvestmentTypeObject.lend:
         // TODO
         return e
@@ -244,7 +254,7 @@ export const withRewardPriceUSD = (transactionInfos: ITransactionInfo[], symbolP
         const stakeTx = e as unknown as IStakeTransaction
         return {
           ...e,
-          rewardPriceUSD: stakeTx.rewardAmount * parseFloat(symbolPriceUSDMap[stakeTx.rewardTokenSymbol]),
+          rewardValueUSD: stakeTx.rewardAmount * parseFloat(symbolPriceUSDMap[stakeTx.rewardTokenSymbol]),
         }
       default:
         return e

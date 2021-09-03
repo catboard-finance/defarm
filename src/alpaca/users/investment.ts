@@ -14,6 +14,7 @@ export interface IUserInvestmentTransfers {
 }
 
 export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
+  farmName: string // "ALPACA-BUSD"
   positionId: string // "9967403",
 
   depositValueUSD: number // 1000,
@@ -24,11 +25,15 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
   stratAddress: string // "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90",
   stratSymbol: string // "CAKE",
   stratAmount: number // 128,
+  stratValueUSD: number // 2560,
 
   vaultAddress: string // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
   principalSymbol: string // "USDT",
   principalAmount: number // 0,
+  principalValueUSD: number // 0,
+
   borrowAmount: number // 0,
+  borrowValueUSD: number // 0,
 }
 
 export interface ILendInvestmentInfo extends IUserInvestmentInfo {
@@ -97,7 +102,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         return {
           ...baseInvestment,
 
-          investmentType: farmTx.investmentType,
+          farmName: e.name.split(' ')[0],
           positionId: farmTx.positionId,
 
           vaultAddress: farmTx.vaultAddress,

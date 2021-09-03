@@ -1,7 +1,7 @@
 import { getSymbolFromAddress } from ".."
 import { ITransfer } from "../../type"
 
-export const getStratAddressTokenAddressMap = (transferInfos: ITransfer[]) => {
+export const getTokenInfoFromTransferAddressMap = (transferInfos: ITransfer[]) => {
   return Object.assign({},
     ...Object.keys(transferInfos).map(k => {
       const transferInfo = transferInfos[k]
