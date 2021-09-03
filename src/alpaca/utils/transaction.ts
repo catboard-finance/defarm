@@ -129,7 +129,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
           depositTokenSymbol: lendToken,
         } as ILendTransaction
       case InvestmentTypeObject.stake:
-        var stakeToken = stratAddressTokenAddressMap[e.to_address.toLowerCase()]
+        const stakeToken = stratAddressTokenAddressMap[e.to_address.toLowerCase()]
         return {
           ...e,
           fairLaunchAddress: e.to_address,
