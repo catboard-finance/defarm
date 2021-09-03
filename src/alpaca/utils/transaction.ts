@@ -1,6 +1,9 @@
+import _ from "lodash";
 import { IToken, ITransaction, MethodType } from "../../type";
-import { getPoolInfoFromPoolAddress } from "../core";
-import { getUserStakes } from "../users/stake";
+import { getPoolByPoolAddress, getAddressFromSymbol } from "../core";
+import { IStakeInvestmentInfo, IUserInvestmentInfo } from "../users/farms";
+import { getUserStakesByPoolIds } from "../users/stake";
+import { IUserStake } from "../users/type";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
 import { getWorkEvent } from "../vaults/vaultEvent";
 import { parseVaultInput } from "../vaults/worker";
@@ -44,7 +47,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
         }
       case MethodType.deposit:
         // lends or stake
-        const ibSymbol = getPoolInfoFromPoolAddress(e.to_address)?.stakingToken
+        const ibSymbol = getPoolByPoolAddress(e.to_address)?.stakingToken
         return {
           ...e,
           investmentType: ibSymbol ? InvestmentTypeObject.lend : InvestmentTypeObject.stake,
@@ -110,7 +113,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as IFarmTransaction
-        const token = getPoolInfoFromPoolAddress(e.to_address)
+        const token = getPoolByPoolAddress(e.to_address)
         const stratToken = stratAddressTokenAddressMap[farmTx.stratAddress.toLowerCase()]
         return {
           ...e,
@@ -119,7 +122,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], stratAddressTok
           vaultAddress: e.to_address,
         }
       case InvestmentTypeObject.lend:
-        const lendToken = getPoolInfoFromPoolAddress(e.to_address).rewardToken
+        const lendToken = getPoolByPoolAddress(e.to_address).rewardToken
         return {
           ...e,
           ibPoolAddress: e.to_address,
@@ -174,32 +177,54 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
   return res
 }
 
-// TODO
-export const withReward = async (account: string, transactionInfos: ITransactionInfo[]) => {
-  const promises = transactionInfos.map(e => {
-    // let targetAddress = e.to_address
-    switch (e.investmentType) {
-      case InvestmentTypeObject.stake:
-        return getUserStakes(account, e.block_number)
-      default:
-        return null
-    }
-  })
+// TODO: move to somewhere this belongs
+export const withReward = async (account: string, userInvestmentInfos: IUserInvestmentInfo[]) => {
+  // Find stake pools from transaction
+  const poolIds = userInvestmentInfos
+    .filter(e => e.investmentType === InvestmentTypeObject.stake)
+    .map(e => (e as IStakeInvestmentInfo).poolId)
 
-  const results = await Promise.all(promises)
-  const res = transactionInfos.map((e, i) => {
-    console.info(e)
-    const foo = results[i]
-    console.info(foo)
-    return {
-      ...e,
+  const userStakes = await getUserStakesByPoolIds(account, poolIds)
+  const userStakeMap = _.groupBy(userStakes, 'poolId')
+
+  const res = userInvestmentInfos.map(e => {
+
+    switch (e.investmentType) {
+      case InvestmentTypeObject.farm:
+        // TODO: rewards from farm
+        return e
+      case InvestmentTypeObject.lend:
+        // TODO: rewards from lend
+        return e
+      case InvestmentTypeObject.stake:
+        // const stakeTx = e as unknown as IUserStake
+        const stakeInfo = userStakeMap[(e as IStakeInvestmentInfo).poolId][0] as IUserStake
+        return {
+          ...e,
+          rewardTokenAddress: getAddressFromSymbol(stakeInfo.rewardToken), // TODO: reward as ib?
+          rewardTokenSymbol: stakeInfo.rewardToken,
+          rewardAmount: stakeInfo.pendingAlpaca,
+        }
+      default:
+        return e
     }
-    // const positionId = results[i] ? results[i].uid : null
-    // return {
-    //   ...e,
-    //   positionId,
-    // } as IFarmTransaction
   })
 
   return res
+  // const results = await Promise.all(promises)
+  // const res = transactionInfos.map((e, i) => {
+  //   console.info(e)
+  //   const foo = results[i]
+  //   console.info(foo)
+  //   return {
+  //     ...e,
+  //   }
+  //   // const positionId = results[i] ? results[i].uid : null
+  //   // return {
+  //   //   ...e,
+  //   //   positionId,
+  //   // } as IFarmTransaction
+  // })
+
+  // return res
 }

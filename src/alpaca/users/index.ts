@@ -117,7 +117,7 @@ export const fetchUserInvestments = async (account: string) => {
   const transferInfos = await getTransferInfos(account)
   const transactionTransferInfo = await getTransactionTransferInfo(transactionsInfos, transferInfos)
   const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
-  const foo = await withReward(account, transactionTransferInfo)
+  const foo = await withReward(account, userInvestmentInfos)
   console.log(foo)
 
   return userInvestmentInfos

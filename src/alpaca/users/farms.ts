@@ -1,5 +1,6 @@
 import _ from "lodash"
 import { ITransferInfo } from "../../type"
+import { getPoolByStakingTokenSymbol } from "../core"
 import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction } from "../utils/transaction"
 
 export interface IUserInvestmentTransfers {
@@ -21,14 +22,13 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
   debtValueUSD: number // 100,
   profitValueUSD: number // 900,
 
-  vaultAddress: string // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
-  vaultTokenSymbol: string // "USDT",
-  principalAmount: number // 0,
-
   stratAddress: string // "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90",
-  stratTokenSymbol: string // "CAKE",
+  stratSymbol: string // "CAKE",
   stratAmount: number // 128,
 
+  vaultAddress: string // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
+  principalSymbol: string // "USDT",
+  principalAmount: number // 0,
   borrowAmount: number // 0,
 }
 
@@ -42,23 +42,21 @@ export interface ILendInvestmentInfo extends IUserInvestmentInfo {
 
 export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
   fairLaunchAddress: string
+  poolId: number
 
   stakeTokenSymbol: string
   stakeAmount: number
   stakeValueUSD: number
-}
 
-export interface IRewardInfo {
-  address: string
-  symbol: string
-  amount: number
-  valueUSD: number
+  rewardTokenAddress: string
+  rewardTokenSymbol: string
+  rewardAmount: number
+  rewardValueUSD: number
 }
 
 export interface IUserInvestmentInfo {
   investmentType: InvestmentTypeObject
   transfers: IUserInvestmentTransfers[],
-  rewards?: IRewardInfo[]
 
   investedAt: string // "2021-08-07T14:45:51.000Z",
 }
@@ -103,20 +101,20 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           investmentType: farmTx.investmentType,
           positionId: farmTx.positionId,
 
+          vaultAddress: farmTx.vaultAddress,
+          principalSymbol: farmTx.principalSymbol,
+          principalAmount: farmTx.principalAmount,
+
+          stratAddress: farmTx.stratAddress,
+          stratSymbol: farmTx.stratSymbol,
+          stratAmount: farmTx.stratAmount,
+
+          borrowAmount: farmTx.borrowAmount,
+
           depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
           equityValueUSD: _.sumBy(e.transferInfos, 'equityValueUSD') || 0,
           debtValueUSD: _.sumBy(e.transferInfos, 'debtValueUSD') || 0,
           profitValueUSD: _.sumBy(e.transferInfos, 'profitValueUSD') || 0,
-
-          vaultAddress: farmTx.vaultAddress,
-          vaultTokenSymbol: farmTx.principalSymbol,
-          principalAmount: farmTx.principalAmount,
-
-          stratAddress: farmTx.stratAddress,
-          stratTokenSymbol: farmTx.stratSymbol,
-          stratAmount: farmTx.stratAmount,
-
-          borrowAmount: farmTx.borrowAmount,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
@@ -131,10 +129,12 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
+        const poolId = getPoolByStakingTokenSymbol(stakeTx.stakeTokenSymbol).id
         return {
           ...baseInvestment,
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
+          poolId,
 
           stakeTokenSymbol: stakeTx.stakeTokenSymbol,
           stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,

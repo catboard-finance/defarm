@@ -54,13 +54,19 @@ const TRANSFER_TOKEN_LOWER_MAP = {
   FAIR_LAUNCH_ADDRESS: 'ALPACA',
 }
 
+export const getAddressFromSymbol = (symbol: string): string => TOKENS[symbol]
+
 export const getSymbolFromAddress = (address: string): string => TRANSFER_TOKEN_LOWER_MAP[address.toLowerCase()]
 
 export const getSymbolsFromAddresses = (addresses: string[]): string[] => addresses.map(e => getSymbolFromAddress(e))
 
-export const getPoolInfoFromPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
+export const getPoolByPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
 
-export const getTokenFromIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
+export const getPoolByPoolId = (id: number) => IB_POOLS.find(pool => pool.id === id)
+
+export const getPoolByStakingTokenSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
+
+export const getPoolByIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 
 export const getSupportedUSDSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
 
