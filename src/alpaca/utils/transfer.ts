@@ -6,7 +6,7 @@ export const getTokenInfoFromTransferAddressMap = (transferInfos: ITransfer[]) =
     ...Object.keys(transferInfos).map(k => {
       const transferInfo = transferInfos[k]
       return {
-        [`${transferInfo.to_address.toLowerCase()}`]: {
+        [transferInfo.to_address.toLowerCase()]: {
           symbol: getSymbolFromAddress(transferInfo.address),
           address: transferInfo.address
         }
