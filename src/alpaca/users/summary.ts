@@ -25,8 +25,15 @@ export const getInvestmentPerFarms = (userFarmInfos: IUserInvestmentInfo[]) => {
   // Summary token from lend/stake/farm
 
   // Group by position
-  const transferPositionInfoMap = {
-    farms: Object.values(_.groupBy(userFarmInfos.filter(e => e), 'positionId'))
-  }
+  // const transferPositionInfoMap = {
+  //   farms: Object.values(_.groupBy(userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.farm), 'positionId')),
+  //   lend: Object.values(_.groupBy(userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.lend), 'poolId')),
+  // }
+
+  const transferPositionInfoMap = _.groupBy(userFarmInfos, 'investmentType') as any
+  transferPositionInfoMap.farm = _.groupBy(transferPositionInfoMap.farm, 'positionId');
+  transferPositionInfoMap.lend = _.groupBy(transferPositionInfoMap.lend, 'poolName');
+  transferPositionInfoMap.stake = _.groupBy(transferPositionInfoMap.stake, 'poolName');
+
   return transferPositionInfoMap
 }

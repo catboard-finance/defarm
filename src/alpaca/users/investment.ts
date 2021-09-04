@@ -1,5 +1,6 @@
 import _ from "lodash"
 import { ITransferInfo } from "../../type"
+import { getPoolByPoolAddress, getPoolByPoolId } from "../core"
 import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo } from "../utils/transaction"
 
 export interface IUserInvestmentTransfers {
@@ -37,7 +38,9 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
 }
 
 export interface ILendInvestmentInfo extends IUserInvestmentInfo {
-  ibPoolAddress: string
+  poolId: number
+  poolName: string
+  poolAddress: string
 
   depositTokenSymbol: string
   depositAmount: number
@@ -46,7 +49,10 @@ export interface ILendInvestmentInfo extends IUserInvestmentInfo {
 
 export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
   fairLaunchAddress: string
+
   poolId: number
+  poolName: string
+  poolAddress: string
 
   stakeTokenSymbol: string
   stakeAmount: number
@@ -122,10 +128,13 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
+        var pool = getPoolByPoolAddress(lendTx.poolAddress)
         return {
           ...baseInvestment,
 
-          ibPoolAddress: lendTx.ibPoolAddress,
+          poolId: pool.id,
+          poolName: `${pool.stakingToken}-${pool.rewardToken}`,
+          poolAddress: lendTx.poolAddress,
 
           depositTokenSymbol: lendTx.depositTokenSymbol,
           depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
@@ -133,8 +142,13 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
+        var pool = getPoolByPoolId(stakeTx.poolId)
         return {
           ...baseInvestment,
+
+          poolId: pool.id,
+          poolName: `${pool.stakingToken}-${pool.rewardToken}`,
+          poolAddress: getPoolByPoolId(stakeTx.poolId),
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
 
@@ -146,7 +160,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           rewardTokenSymbol: stakeTx.rewardTokenSymbol,
           rewardAmount: stakeTx.rewardAmount,
           rewardValueUSD: stakeTx.rewardValueUSD,
-        } as IStakeInvestmentInfo
+        } as unknown as IStakeInvestmentInfo
       default:
         return null
     }

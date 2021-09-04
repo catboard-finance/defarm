@@ -97,7 +97,8 @@ export interface IFarmTransaction extends ITransactionInfo {
 }
 
 export interface ILendTransaction extends ITransactionInfo {
-  ibPoolAddress: string
+  poolName: string
+  poolAddress: string
 
   depositTokenSymbol: string
   depositAmount?: number
@@ -110,6 +111,7 @@ export interface IStakeTransaction extends ITransactionInfo {
   fairLaunchAddress: string
 
   poolId: number
+  poolName: string
 
   stakeTokenSymbol: string
   stakeAmount?: number
@@ -140,7 +142,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
         var pool = getPoolByPoolAddress(e.to_address)
         return {
           ...e,
-          ibPoolAddress: e.to_address,
+          poolAddress: e.to_address,
           depositTokenSymbol: pool.rewardToken,
           withdrawTokenSymbol: pool.stakingToken,
         } as ILendTransaction

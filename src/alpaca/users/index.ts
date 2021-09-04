@@ -9,6 +9,7 @@ import { getUserLends } from './lend'
 import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
 import { IUserBalance } from './type'
+import { getInvestmentPerFarms } from './summary'
 
 // User////////////////////////
 
@@ -120,11 +121,11 @@ export const fetchUserInvestments = async (account: string) => {
   return userInvestmentInfos
 }
 
-// export const fetchUserSummaryByType = async (account: string) => {
-//   const userInvestments = await fetchUserInvestments(account)
-//   const summaryByPositions = await getInvestmentPerFarms(userInvestments)
+export const fetchUserInvestmentSummary = async (account: string) => {
+  const userInvestments = await fetchUserInvestments(account)
+  const summaryByPositions = await getInvestmentPerFarms(userInvestments)
 
-//   return summaryByPositions
-// }
+  return summaryByPositions
+}
 
 // TODO: fetchUserReward
