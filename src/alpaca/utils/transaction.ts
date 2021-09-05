@@ -79,6 +79,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
 export interface IFarmTransaction extends ITransactionInfo {
   farmName: string
   positionId: number
+  debtValue: number
   workerAddress: string
 
   vaultAddress: string
@@ -192,9 +193,11 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
   const results = await Promise.all(promises)
   const res = transactionInfos.map((e, i) => {
     const positionId = results[i] ? parseInt(results[i].uid) : null
+    const debtValue = results[i] ? stringToFloat(results[i].loan.toString()) : null
     return {
       ...e,
       positionId,
+      debtValue,
     } as IFarmTransaction
   })
 

@@ -5,10 +5,9 @@ import { Chain } from "@defillama/sdk/build/general"
 import { BigNumber } from "ethers"
 import _ from "lodash"
 import { stringToFloat } from "../utils/converter"
-import { ITransactionInfo } from "../utils/transaction"
 import abi from './userDebt.abi.json'
 
-interface IGetDebtParams {
+export interface IGetDebtParams {
   vaultAddress: string,
   positionId: number
 }
@@ -44,23 +43,11 @@ export const getDebt = async (params: IGetDebtParams[], block = 'latest', chain:
   return encodedPositions
 }
 
-export const withDebt = async (transactionInfos: ITransactionInfo[]) => {
-  const debtParams = transactionInfos.map(e => ({
-    positionId: e.positionId,
-    vaultAddress: e.to_address,
-  }))
+export const withDebt = async (debtParams: IGetDebtParams[]) => {
+  const debts = await getDebt(debtParams)
 
-  const related = _.uniqBy(debtParams.filter(e => e.positionId > 0), 'positionId')
-
-  const debts = await getDebt(related)
-
-  const res = transactionInfos.map(e => {
-    if (isNaN(e.positionId)) return e
-
-    const debt = debts.find(f => e.positionId === f.positionId)
-    if (!debt) return e
+  const res = debts.map(debt => {
     return {
-      ...e,
       positionId: debt.positionId,
       vaultAddress: debt.vaultAddress,
       positionValueUSD: stringToFloat(debt.positionValueUSDbn.toString()),

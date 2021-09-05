@@ -13,7 +13,6 @@ export const getPositionId = async (address: string, blockNumber: string, transa
   return workEvent.uid
 }
 
-// 0x98172b
 export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, block = 'latest', chain: Chain = 'bsc'): Promise<any> => {
   const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
   const result = await provider.getLogs({

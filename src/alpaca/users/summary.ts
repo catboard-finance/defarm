@@ -1,8 +1,9 @@
 import _ from "lodash"
-import { IUserInvestmentInfo } from "./investment";
+import { withDebt } from "../vaults/debt";
+import { IFarmInvestmentInfo, IUserInvestmentInfo } from "./investment";
 
 // farms
-export const getInvestmentSummary = (userFarmInfos: IUserInvestmentInfo[]) => {
+export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[]) => {
 
   ////////////////// SUMMARY //////////////////
 
@@ -10,9 +11,24 @@ export const getInvestmentSummary = (userFarmInfos: IUserInvestmentInfo[]) => {
 
   // Separate by position and pool
   const transferPositionInfoMap = _.groupBy(userFarmInfos, 'investmentType') as any
-  transferPositionInfoMap.farm = _.groupBy(transferPositionInfoMap.farm, 'positionId');
-  transferPositionInfoMap.lend = _.groupBy(transferPositionInfoMap.lend, 'poolName');
-  transferPositionInfoMap.stake = _.groupBy(transferPositionInfoMap.stake, 'poolName');
+  const recordedFarmGroup = _.groupBy(transferPositionInfoMap.farm, 'positionId') as unknown as IFarmInvestmentInfo[]
+  // const lendPoolGroup = _.groupBy(transferPositionInfoMap.lend, 'poolName');
+  // const stakePoolGroup = _.groupBy(transferPositionInfoMap.stake, 'poolName');
+
+  // Get current position info
+  const farms = Object.values(recordedFarmGroup)
+  const farmPositions = farms.map(farmInfos => ({
+    vaultAddress: farmInfos[0].vaultAddress,
+    positionId: farmInfos[0].positionId,
+  }))
+
+  const aggregatedFarms = await withDebt(farmPositions)
+  // const aggregatedFarmGroup = _.groupBy(transferPositionInfoMap.farm, 'positionId')
+  const res = {
+    userFarmInfos,
+    recordedFarms: transferPositionInfoMap.farm,
+    aggregatedFarms,
+  }
 
   // Summary lend/stake/farm
   // const summary = {
@@ -26,5 +42,5 @@ export const getInvestmentSummary = (userFarmInfos: IUserInvestmentInfo[]) => {
   //   }),
   // }
 
-  return transferPositionInfoMap
+  return res
 }
