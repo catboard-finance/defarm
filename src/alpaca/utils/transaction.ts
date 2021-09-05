@@ -130,13 +130,13 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as IFarmTransaction
-        const token = getPoolByPoolAddress(e.to_address)
+        var pool = getPoolByPoolAddress(e.to_address)
         // Can't get token from stratAddress  e.g. SharedStrategies
         const stratToken = tokenInfoFromTransferAddressMap[farmTx.stratAddress.toLowerCase()]
         return {
           ...e,
           stratSymbol: stratToken?.symbol,
-          principalSymbol: token.rewardToken,
+          principalSymbol: pool.rewardToken,
           vaultAddress: e.to_address,
 
           rewardTokenSymbol: pool.rewardToken,
