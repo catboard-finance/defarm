@@ -79,7 +79,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
 export interface IFarmTransaction extends ITransactionInfo {
   farmName: string
   positionId: number
-  debtValueUSD: number
+  loanValueUSD: number
   workerAddress: string
 
   vaultAddress: string
@@ -168,7 +168,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
   return res as unknown as IFarmTransaction[]
 }
 
-export const withPosition = async (transactionInfos: ITransactionInfo[]): Promise<IFarmTransaction[]> => {
+export const withPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransaction[]> => {
   const promises = transactionInfos.map(e => {
     const farmTx = e as IFarmTransaction
     let targetAddress = e.to_address
@@ -192,13 +192,18 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
 
   const results = await Promise.all(promises)
   const res = transactionInfos.map((e, i) => {
-    const positionId = results[i] ? results[i].id : null
-    const debtValueUSD = results[i] ? stringToFloat(results[i].loan.toString()) : null
-    return {
-      ...e,
-      positionId,
-      debtValueUSD,
-    } as IFarmTransaction
+    switch (e.investmentType) {
+      case InvestmentTypeObject.farm:
+        const positionId = results[i] ? results[i].id : null
+        const loanValueUSD = results[i] ? stringToFloat(results[i].loan.toString()) : null
+        return {
+          ...e,
+          positionId,
+          loanValueUSD,
+        } as IFarmTransaction
+      default:
+        return e
+    }
   })
 
   return res

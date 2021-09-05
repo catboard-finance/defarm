@@ -21,7 +21,6 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
 
   depositValueUSD: number // 1000,
   equityValueUSD: number // 1000,
-  debtValueUSD: number // 100,
   profitValueUSD: number // 900,
 
   stratAddress: string // "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90",
@@ -125,7 +124,6 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
           equityValueUSD: _.sumBy(e.transferInfos, 'equityValueUSD') ?? 0,
-          debtValueUSD: farmTx.debtValueUSD ?? 0,
           profitValueUSD: _.sumBy(e.transferInfos, 'profitValueUSD') ?? 0,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
