@@ -99,5 +99,5 @@ export interface ITransferInfo extends ITransfer {
   tokenPriceUSD: number,
   tokenAmount: number,
   tokenValueUSD: number,
-  positionId: string,
+  positionId: number,
 }

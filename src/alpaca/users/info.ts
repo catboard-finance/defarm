@@ -5,6 +5,7 @@ import { fetchPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
 import { ITransactionInfo, withMethods, withType, withPosition, withSymbol, withReward, withRewardPriceUSD } from "../utils/transaction"
 import { getTokenInfoFromTransferAddressMap } from "../utils/transfer"
+import { withDebt } from "../vaults/debt"
 import { ITransactionTransferInfo } from "./investment"
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
@@ -21,6 +22,9 @@ export const getTransactionInfos = async (account: string): Promise<ITransaction
 
   // Get position from event by block number
   transactionInfos = await withPosition(transactionInfos)
+
+  // Get debt/collateral from position
+  transactionInfos = await withDebt(transactionInfos)
 
   return transactionInfos
 }

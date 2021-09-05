@@ -13,7 +13,7 @@ export interface ITransactionInfo extends ITransaction {
   method: MethodType
   investmentType: InvestmentTypeObject
   name: string
-  positionId: string
+  positionId: number
   vaultAddress: string // "0x3fc149995021f1d7aec54d015dad3c7abc952bf0",
   principalSymbol: string // "ALPACA",
   principalAddress: string // "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
@@ -78,7 +78,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
 
 export interface IFarmTransaction extends ITransactionInfo {
   farmName: string
-  positionId: string
+  positionId: number
   workerAddress: string
 
   vaultAddress: string
@@ -191,7 +191,7 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
 
   const results = await Promise.all(promises)
   const res = transactionInfos.map((e, i) => {
-    const positionId = results[i] ? results[i].uid : null
+    const positionId = results[i] ? parseInt(results[i].uid) : null
     return {
       ...e,
       positionId,

@@ -13,7 +13,7 @@ describe('User', () => {
     expect(balances).toBeDefined
   }, 10000);
 
-  it.skip(`can fetch user position value`, async () => {
+  it(`can fetch user position value`, async () => {
     const positions = await fetchUserPositions(TEST_ACCOUNT_ADDRESS)
     // console.log('positions:', positions)
 
@@ -34,13 +34,12 @@ describe('User', () => {
     expect(stakes).toBeDefined
   }, 10000)
 
-  it(`can calculate profits`, async () => {
-    const profits = await fetchUserInvestments(TEST_ACCOUNT_ADDRESS)
-    // console.log('profits:', profits)
+  it(`can fetch invested history`, async () => {
+    const investments = await fetchUserInvestments(TEST_ACCOUNT_ADDRESS)
+    // console.log('investments:', investments)
 
-    expect(profits).toBeDefined
+    expect(investments).toBeDefined
   }, 100000);
-
 
   it(`can calculate profits summary`, async () => {
     const profits = await fetchUserInvestmentSummary(TEST_ACCOUNT_ADDRESS)

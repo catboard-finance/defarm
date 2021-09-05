@@ -17,7 +17,7 @@ export interface IUserInvestmentTransfers {
 
 export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
   farmName: string // "ALPACA-BUSD"
-  positionId: string // "9967403",
+  positionId: number // 9967403,
 
   depositValueUSD: number // 1000,
   equityValueUSD: number // 1000,
