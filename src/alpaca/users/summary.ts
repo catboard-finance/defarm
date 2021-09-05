@@ -1,14 +1,9 @@
 import _ from "lodash"
-import { withDebt } from "../vaults/debt";
+import { withPosition } from "../vaults/debt";
 import { IFarmInvestmentInfo, IUserInvestmentInfo } from "./investment";
 
 // farms
 export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[]) => {
-
-  ////////////////// SUMMARY //////////////////
-
-  // Add historical price at contract time
-
   // Separate by position and pool
   const transferPositionInfoMap = _.groupBy(userFarmInfos, 'investmentType') as any
   const recordedFarmGroup = _.groupBy(transferPositionInfoMap.farm, 'positionId') as unknown as IFarmInvestmentInfo[]
@@ -22,25 +17,20 @@ export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[])
     positionId: farmInfos[0].positionId,
   }))
 
-  const aggregatedFarms = await withDebt(farmPositions)
-  // const aggregatedFarmGroup = _.groupBy(transferPositionInfoMap.farm, 'positionId')
-  const res = {
-    userFarmInfos,
-    recordedFarms: transferPositionInfoMap.farm,
-    aggregatedFarms,
-  }
+  const aggregatedFarms = await withPosition(farmPositions)
 
-  // Summary lend/stake/farm
-  // const summary = {
-  //   farms: Object.keys(transferPositionInfoMap.farm).map(e => {
-  //     const farm = transferPositionInfoMap.farm[e]
-  //     const symbolGroup = _.groupBy(farm.transfers, 'tokenSymbol')
-  //     return {
-  //       positionId: e,
-  //       symbolGroup,
-  //     }
-  //   }),
-  // }
+  const res = {
+    history: {
+      farms: transferPositionInfoMap.farm,
+      lends: transferPositionInfoMap.lend,
+      stakes: transferPositionInfoMap.stake,
+    },
+    total: {
+      farms: aggregatedFarms,
+      lends: null, // TODO: fetch lend
+      stakes: null, // TODO: fetch stake
+    }
+  }
 
   return res
 }

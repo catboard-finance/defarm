@@ -7,17 +7,17 @@ import _ from "lodash"
 import { stringToFloat } from "../utils/converter"
 import abi from './userDebt.abi.json'
 
-export interface IGetDebtParams {
+export interface IGetPositionParams {
   vaultAddress: string,
   positionId: number
 }
 
-interface IEncodedUserPosition extends IGetDebtParams {
+interface IEncodedUserPosition extends IGetPositionParams {
   positionValueUSDbn: BigNumber // BigNumber
   debtValueUSDbn: BigNumber // BigNumber
 }
 
-export const getDebt = async (params: IGetDebtParams[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedUserPosition[]> => {
+export const getPosition = async (params: IGetPositionParams[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedUserPosition[]> => {
   // Call positionInfo for positionValue, debtValue
   const calls = params.map(e => ({
     target: e.vaultAddress,
@@ -43,8 +43,8 @@ export const getDebt = async (params: IGetDebtParams[], block = 'latest', chain:
   return encodedPositions
 }
 
-export const withDebt = async (debtParams: IGetDebtParams[]) => {
-  const debts = await getDebt(debtParams)
+export const withPosition = async (debtParams: IGetPositionParams[]) => {
+  const debts = await getPosition(debtParams)
 
   const res = debts.map(debt => {
     return {
