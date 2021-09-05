@@ -168,7 +168,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
   return res as unknown as IFarmTransaction[]
 }
 
-export const withPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransaction[]> => {
+export const withPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
   const promises = transactionInfos.map(e => {
     const farmTx = e as IFarmTransaction
     let targetAddress = e.to_address

@@ -33,7 +33,6 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
   principalAmount: number // 0,
   principalValueUSD: number // 0,
 
-  borrowAmount: number // 0,
   borrowValueUSD: number // 0,
 }
 
@@ -120,7 +119,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           stratSymbol: farmTx.stratSymbol,
           stratAmount: farmTx.stratAmount,
 
-          borrowAmount: farmTx.borrowAmount,
+          borrowValueUSD: farmTx.borrowAmount,
 
           depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
           equityValueUSD: _.sumBy(e.transferInfos, 'equityValueUSD') ?? 0,
