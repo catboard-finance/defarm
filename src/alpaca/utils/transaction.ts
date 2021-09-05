@@ -31,7 +31,7 @@ export enum InvestmentTypeObject {
   none = 'none',
 }
 
-export const withMethods = async (transactions: ITransaction[]): Promise<ITransactionInfo[]> => {
+export const withMethod = async (transactions: ITransaction[]): Promise<ITransactionInfo[]> => {
   const res = transactions.map(e => {
     const parsed = parseVaultInput(e.input)
     return { ...e, ...parsed }

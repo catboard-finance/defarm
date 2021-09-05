@@ -3,7 +3,7 @@ import { withDirection, filterInvestmentTransfers, getUniqueSymbolsFromTransfers
 import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
-import { ITransactionInfo, withMethods, withType, withPosition, withSymbol, withReward, withRewardPriceUSD } from "../utils/transaction"
+import { ITransactionInfo, withMethod, withType, withPosition, withSymbol, withReward, withRewardPriceUSD } from "../utils/transaction"
 import { getTokenInfoFromTransferAddressMap } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
@@ -12,7 +12,7 @@ export const getTransactionInfos = async (account: string): Promise<ITransaction
   const transactions = await getTransactions(account)
 
   // Decode methods
-  let transactionInfos = await withMethods(transactions)
+  let transactionInfos = await withMethod(transactions)
 
   // Separate actions lend/stake/farm by vault address and method
   transactionInfos = await withType(transactionInfos)
