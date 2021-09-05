@@ -2,38 +2,29 @@ import _ from "lodash"
 import { IUserInvestmentInfo } from "./investment";
 
 // farms
-export const getInvestmentPerFarms = (userFarmInfos: IUserInvestmentInfo[]) => {
+export const getInvestmentSummary = (userFarmInfos: IUserInvestmentInfo[]) => {
 
   ////////////////// SUMMARY //////////////////
 
   // Add historical price at contract time
 
-  // Define token ratio (for estimate each token amounts) by tokens numbers in vault
-
-  // Summary deposits/withdraws
-
-  // Summary token each lend/stake/farm
-
-  ///////////////////////////////////////////////////////////////////
-
-  // Get equity from chain (or API)
-
-  // Divide current token from equity by farm ratio
-
-  // Summary from lend/stake/farm
-
-  // Summary token from lend/stake/farm
-
-  // Group by position
-  // const transferPositionInfoMap = {
-  //   farms: Object.values(_.groupBy(userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.farm), 'positionId')),
-  //   lend: Object.values(_.groupBy(userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.lend), 'poolId')),
-  // }
-
+  // Separate by position and pool
   const transferPositionInfoMap = _.groupBy(userFarmInfos, 'investmentType') as any
   transferPositionInfoMap.farm = _.groupBy(transferPositionInfoMap.farm, 'positionId');
   transferPositionInfoMap.lend = _.groupBy(transferPositionInfoMap.lend, 'poolName');
   transferPositionInfoMap.stake = _.groupBy(transferPositionInfoMap.stake, 'poolName');
+
+  // Summary lend/stake/farm
+  // const summary = {
+  //   farms: Object.keys(transferPositionInfoMap.farm).map(e => {
+  //     const farm = transferPositionInfoMap.farm[e]
+  //     const symbolGroup = _.groupBy(farm.transfers, 'tokenSymbol')
+  //     return {
+  //       positionId: e,
+  //       symbolGroup,
+  //     }
+  //   }),
+  // }
 
   return transferPositionInfoMap
 }

@@ -11,7 +11,8 @@ export interface IUserInvestmentTransfers {
   tokenSymbol: string // "CAKE",
   tokenAddress: string // "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
   tokenAmount: number // 1272.6522003096,
-  tokenPriceUSD: number // 1527.12000,
+  tokenPriceUSD: number // 22.1,
+  tokenValueUSD: number // 1527.12000,
 }
 
 export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
@@ -93,6 +94,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         tokenAddress: transfer.address,
         tokenAmount: transfer.tokenAmount,
         tokenPriceUSD: transfer.tokenPriceUSD,
+        tokenValueUSD: transfer.tokenValueUSD,
       }) as IUserInvestmentTransfers)
 
     let baseInvestment: IUserInvestmentInfo = {
