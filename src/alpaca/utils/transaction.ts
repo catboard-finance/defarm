@@ -138,6 +138,9 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           stratSymbol: stratToken?.symbol,
           principalSymbol: token.rewardToken,
           vaultAddress: e.to_address,
+
+          rewardTokenSymbol: pool.rewardToken,
+          rewardTokenAddress: getAddressFromSymbol(pool.rewardToken),
         }
       case InvestmentTypeObject.lend:
         var pool = getPoolByPoolAddress(e.to_address)
@@ -158,7 +161,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           poolId: pool.id,
 
           rewardTokenSymbol: pool.rewardToken,
-          rewardTokenAddress: getAddressFromSymbol(pool.rewardToken), // TODO: reward as ib?
+          rewardTokenAddress: getAddressFromSymbol(pool.rewardToken),
         } as IStakeTransaction
       default:
         return e as IFarmTransaction
