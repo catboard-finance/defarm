@@ -7,7 +7,7 @@ import { IUserStake } from "../users/type";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
 import { parseVaultInput } from "../vaults/worker";
 import { stringToFloat } from "./converter";
-import { getPositionInfo } from "./events";
+import { getPositionRecordFromWorkEvent } from "./events";
 
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
@@ -187,7 +187,7 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
 
     switch (farmTx.investmentType) {
       case InvestmentTypeObject.farm:
-        return getPositionInfo(targetAddress, farmTx.block_number, farmTx.hash)
+        return getPositionRecordFromWorkEvent(targetAddress, farmTx.block_number, farmTx.hash)
       default:
         return null
     }
