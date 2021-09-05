@@ -27,7 +27,7 @@ export interface IUserPosition extends IEncodedUserPosition {
 }
 
 export const getUserPositions = async (positions: IApiPosition[], block = 'latest', chain: Chain = 'bsc'): Promise<IUserPosition[]> => {
-  // Call shares(positionId) for shareAmount
+  // Call positionInfo for positionValue, debtValue
   let calls: ICall[] = positions.map(position => ({
     target: position.vault,
     params: [position.positionId],
@@ -42,12 +42,6 @@ export const getUserPositions = async (positions: IApiPosition[], block = 'lates
       chain,
     })
   ).output
-
-  // Call positionInfo for positionValue, debtValue
-  calls = positionInfos.map((positionInfo, i) => ({
-    target: positions[i].vault,
-    params: [positionInfo.positionId],
-  }))
 
   let encodedPositions: IEncodedUserPosition[] = positions.map((position, i) => ({
     ...position,
