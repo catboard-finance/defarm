@@ -5,9 +5,9 @@ import { getPoolByPoolAddress, getAddressFromSymbol, getPoolByStakingTokenSymbol
 import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
-import { getWorkEvent } from "../vaults/vaultEvent";
 import { parseVaultInput } from "../vaults/worker";
 import { stringToFloat } from "./converter";
+import { getPositionInfo } from "./events";
 
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
@@ -184,7 +184,7 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
 
     switch (farmTx.investmentType) {
       case InvestmentTypeObject.farm:
-        return getWorkEvent(targetAddress, farmTx.block_number, farmTx.hash)
+        return getPositionInfo(targetAddress, farmTx.block_number, farmTx.hash)
       default:
         return null
     }
@@ -192,7 +192,7 @@ export const withPosition = async (transactionInfos: ITransactionInfo[]): Promis
 
   const results = await Promise.all(promises)
   const res = transactionInfos.map((e, i) => {
-    const positionId = results[i] ? parseInt(results[i].uid) : null
+    const positionId = results[i] ? results[i].id : null
     const debtValue = results[i] ? stringToFloat(results[i].loan.toString()) : null
     return {
       ...e,

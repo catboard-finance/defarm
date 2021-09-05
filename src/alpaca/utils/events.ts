@@ -1,16 +1,19 @@
 require('dotenv').config()
 
 import { Chain } from "@defillama/sdk/build/general";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Interface } from "ethers/lib/utils";
 import { getWorkEvent } from "../vaults/vaultEvent";
 
 const GETBLOCK_API_KEY = process.env.GETBLOCK_API_KEY
 const RPC_URL = `https://bsc.getblock.io/mainnet/?api_key=${GETBLOCK_API_KEY}`
 
-export const getPositionId = async (address: string, blockNumber: string, transactionHash: string): Promise<any> => {
+export const getPositionInfo = async (address: string, blockNumber: string, transactionHash: string): Promise<{ id: number, loan: BigNumber }> => {
   const workEvent = await getWorkEvent(address, blockNumber, transactionHash)
-  return workEvent.uid
+  return {
+    id: parseInt(workEvent.uid),
+    loan: workEvent.loan,
+  }
 }
 
 export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, block = 'latest', chain: Chain = 'bsc'): Promise<any> => {
