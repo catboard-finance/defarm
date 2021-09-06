@@ -1,4 +1,4 @@
-import { fetchUserPositions, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserBalance, fetchUserInvestmentSummary } from ".";
+import { fetchUserPositions, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserBalance, fetchUserInvestmentSummary, fetchUserFarmEarns } from ".";
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 describe('User', () => {
@@ -20,18 +20,25 @@ describe('User', () => {
     expect(positions).toBeDefined
   }, 10000);
 
-  it(`can fetch balance from lend`, async () => {
+  it(`can fetch balance from lends`, async () => {
     const lends = await fetchUserLends(TEST_ACCOUNT_ADDRESS)
     // console.log('lends:', lends)
 
     expect(lends).toBeDefined
   }, 10000)
 
-  it(`can fetch user info from stake`, async () => {
+  it(`can fetch user info from stakes`, async () => {
     const stakes = await fetchUserStakes(TEST_ACCOUNT_ADDRESS)
     // console.log('stakes:', stakes)
 
     expect(stakes).toBeDefined
+  }, 10000)
+
+  it(`can fetch user earn from pools`, async () => {
+    const earns = await fetchUserFarmEarns(TEST_ACCOUNT_ADDRESS)
+    // console.log('earns:', earns)
+
+    expect(earns).toBeDefined
   }, 10000)
 
   it(`can fetch invested history`, async () => {

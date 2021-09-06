@@ -25,6 +25,14 @@ export interface IUserStake {
   pendingAlpaca: BigNumber;
 }
 
+export interface IUserEarn {
+  fairLaunchPoolAddress: string
+  poolId: number
+  poolAddress: string; // address;
+
+  pendingAlpaca: BigNumber;
+}
+
 export interface IUserBalance {
   symbol: string,
   name?: string,

@@ -35,8 +35,7 @@ export interface IIbPool {
   rewardToken: string
 }
 
-const IB_ONLY_POOLS = POOLS.filter(pool => pool.stakingToken.startsWith('ib'))
-export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
+export const ALL_POOLS: IIbPool[] = POOLS.map((pool) => {
   return {
     id: pool.id,
     address: pool.address,
@@ -44,6 +43,9 @@ export const IB_POOLS: IIbPool[] = IB_ONLY_POOLS.map((pool) => {
     rewardToken: pool.stakingToken.slice(2),
   }
 })
+
+export const IB_POOLS = ALL_POOLS.filter(pool => pool.stakingToken.startsWith('ib'))
+export const DEBT_POOLS = ALL_POOLS.filter(pool => pool.stakingToken.startsWith('debt'))
 
 const _TOKEN_POOLS_LOWER_MAP = Object.assign({}, ...Object.keys(POOLS).map(k => ({ [`${POOLS[k].address.toLowerCase()}`]: POOLS[k].stakingToken })))
 const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`${TOKENS[k].toLowerCase()}`]: k })))
@@ -60,15 +62,15 @@ export const getSymbolFromAddress = (address: string): string => TRANSFER_TOKEN_
 
 export const getSymbolsFromAddresses = (addresses: string[]): string[] => addresses.map(e => getSymbolFromAddress(e))
 
-export const getPoolByPoolAddress = (address: string) => IB_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
+export const getPoolByPoolAddress = (address: string) => ALL_POOLS.find(pool => pool.address.toLowerCase() === address.toLowerCase())
 
-export const getPoolByPoolId = (id: number) => IB_POOLS.find(pool => pool.id === id)
+export const getPoolByPoolId = (id: number) => ALL_POOLS.find(pool => pool.id === id)
 
-export const getPoolByStakingTokenSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
+export const getIBPoolByStakingTokenSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 
-export const getPoolByIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
+export const getIBPoolByIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 
-export const getSupportedUSDSymbols = () => IB_ONLY_POOLS.map(pool => pool.stakingToken)
+export const getSupportedUSDSymbols = () => IB_POOLS.map(pool => pool.stakingToken)
 
 export const filterSupportedSymbols = (symbols: string[] = null) => {
   return symbols ? POOLS.filter(pool => symbols.includes(pool.stakingToken.slice(2))) : POOLS

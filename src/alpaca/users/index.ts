@@ -10,6 +10,7 @@ import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
 import { IUserBalance } from './type'
 import { getInvestmentSummary } from './summary'
+import { getUserEarns } from './earn'
 
 // User////////////////////////
 
@@ -84,18 +85,18 @@ export const fetchUserPositions = async (account: string): Promise<IUserPosition
 export const fetchUserLends = async (account: string) => {
   // Raw
   const lends = await getUserLends(account)
-  const parsedLend = lends.map(lend => ({
+  const parsedLends = lends.map(lend => ({
     ...lend,
     amount: parseFloat(formatBigNumberToFixed(lend.amount))
   }))
 
-  return parsedLend
+  return parsedLends
 }
 
 export const fetchUserStakes = async (account: string) => {
   // Raw
   const stakes = await getUserStakes(account)
-  const parsedStake = stakes.map(stake => ({
+  const parsedStakes = stakes.map(stake => ({
     ...stake,
     amount: parseFloat(formatBigNumberToFixed(stake.amount)),
     rewardDebt: parseFloat(formatBigNumberToFixed(stake.rewardDebt)),
@@ -105,8 +106,20 @@ export const fetchUserStakes = async (account: string) => {
     pendingAlpaca: parseFloat(formatBigNumberToFixed(stake.pendingAlpaca)),
   }))
 
-  return parsedStake
+  return parsedStakes
 }
+
+export const fetchUserFarmEarns = async (account: string) => {
+  // Raw
+  const earns = await getUserEarns(account)
+  const parsedEarns = earns.map(earn => ({
+    ...earn,
+    pendingAlpaca: parseFloat(formatBigNumberToFixed(earn.pendingAlpaca)),
+  }))
+
+  return parsedEarns
+}
+
 
 export interface IDepositTransferUSDMap {
   [address: string]: ITransferInfo[]

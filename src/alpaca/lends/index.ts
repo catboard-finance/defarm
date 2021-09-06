@@ -1,12 +1,12 @@
 
 import { Chain } from "@defillama/sdk/build/general";
-import { getLendsBySymbols, IBSCAlpacaLends, getPoolByIBSymbol, Token } from "../core";
+import { getLendsBySymbols, IBSCAlpacaLends, getIBPoolByIBSymbol, Token } from "../core";
 import BigNumber from "bignumber.js";
 import { fetchTokenUSDPricesBySymbols as pancakeswap_fetchTokenUSDPricesBySymbols } from "../../pancakeswap";
 
 export const fetchLendsBySymbols = async (symbols: string[] = null, digit: number = 18, block = 'latest', chain: Chain = 'bsc'): Promise<IBSCAlpacaLends[]> => {
   // Convert to symbol if get ibSymbol as input e.g. ibALPACA → ALPACA
-  const notIBSymbols = [...Array.from(new Set(symbols.map(symbol => getPoolByIBSymbol(symbol)?.rewardToken || symbol)))]
+  const notIBSymbols = [...Array.from(new Set(symbols.map(symbol => getIBPoolByIBSymbol(symbol)?.rewardToken || symbol)))]
 
   const lendsAndPrices = Promise.all([
     getLendsBySymbols(notIBSymbols, block, chain),

@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import _ from "lodash";
 import { IToken, ITransaction, MethodType } from "../../type";
-import { getPoolByPoolAddress, getAddressFromSymbol, getPoolByStakingTokenSymbol } from "../core";
+import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol } from "../core";
 import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
@@ -150,7 +150,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
         } as ILendTransaction
       case InvestmentTypeObject.stake:
         const stakeToken = tokenInfoFromTransferAddressMap[e.to_address.toLowerCase()]
-        var pool = getPoolByStakingTokenSymbol(stakeToken.symbol)
+        var pool = getIBPoolByStakingTokenSymbol(stakeToken.symbol)
         return {
           ...e,
           fairLaunchAddress: e.to_address,
@@ -231,7 +231,7 @@ export const withReward = async (account: string, transactionInfos: ITransaction
         return e
       case InvestmentTypeObject.stake:
         const stakeTx = e as IStakeTransaction
-        const poolId = getPoolByStakingTokenSymbol(stakeTx.stakeTokenSymbol).id
+        const poolId = getIBPoolByStakingTokenSymbol(stakeTx.stakeTokenSymbol).id
         const stakeInfo = userStakeMap[poolId][0] as IUserStake
         return {
           ...e,
