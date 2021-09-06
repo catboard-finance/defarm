@@ -29,6 +29,7 @@ export enum InvestmentTypeObject {
   lend = 'lend',
   stake = 'stake',
   none = 'none',
+  harvest = 'harvest',
 }
 
 export const withMethod = async (transactions: ITransaction[]): Promise<ITransactionInfo[]> => {
@@ -42,11 +43,6 @@ export const withMethod = async (transactions: ITransaction[]): Promise<ITransac
 export const withType = async (transactions: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
   const res = transactions.map(e => {
     switch (e.method) {
-      case MethodType.approve:
-        return {
-          ...e,
-          investmentType: InvestmentTypeObject.none,
-        }
       case MethodType.deposit:
         // lends or stake
         const ibSymbol = getPoolByPoolAddress(e.to_address)?.stakingToken
@@ -54,17 +50,19 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
           ...e,
           investmentType: ibSymbol ? InvestmentTypeObject.lend : InvestmentTypeObject.stake,
         }
-      case MethodType.transfer:
-        return {
-          ...e,
-          investmentType: InvestmentTypeObject.none,
-        }
       case MethodType.work:
         // farms
         return {
           ...e,
           investmentType: InvestmentTypeObject.farm,
         }
+      case MethodType.harvest:
+        return {
+          ...e,
+          investmentType: InvestmentTypeObject.harvest,
+        }
+      case MethodType.approve:
+      case MethodType.transfer:
       default:
         return {
           ...e,
@@ -229,7 +227,7 @@ export const withReward = async (account: string, transactionInfos: ITransaction
         // TODO: rewards from farm
         return e
       case InvestmentTypeObject.lend:
-        // TODO: rewards from lend
+        // TODO: rewards from lend?
         return e
       case InvestmentTypeObject.stake:
         const stakeTx = e as IStakeTransaction
