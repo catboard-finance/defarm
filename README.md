@@ -9,7 +9,7 @@ Decode Defi Farm for human readable.
 - [x] `CAKE`: `USER` fetchPoolReward
 
 ## TODO
-- [ ] `ALPACA`: `USER` Get account tx to get investment information.
+- [x] `ALPACA`: `USER` Get account tx to get investment information.
 - [ ] `ALPACA`: `USER` Monitor account for tx.
 - [ ] Indexing user from `ALPACA` position from [Vault](https://bscscan.com/address/0x158da805682bdc8ee32d52833ad41e74bb951e59#readProxyContract).
 - [ ] Try typechain.
