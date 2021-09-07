@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import _ from "lodash";
 import { IToken, ITransaction, MethodType } from "../../type";
-import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol } from "../core";
+import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol, REWARD_TOKEN_SYMBOL } from "../core";
 import { getUserEarnsByPoolIds } from "../users/earn";
 import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
@@ -94,6 +94,10 @@ export interface IFarmTransaction extends ITransactionInfo {
   borrowAmount: number
   borrowValueUSD: number
   maxReturn: number
+
+  rewardTokenSymbol: string
+  rewardAmount: number
+  rewardValueUSD: number
 }
 
 export interface ILendTransaction extends ITransactionInfo {
@@ -238,6 +242,7 @@ export const withReward = async (account: string, transactionInfos: ITransaction
         const farmEarning = userFarmEarnings.find(e => e.poolId)
         return {
           ...e,
+          rewardTokenSymbol: REWARD_TOKEN_SYMBOL,
           rewardAmount: stringToFloat(BigNumber.from(farmEarning?.pendingAlpaca ?? 0).toString()),
         }
       case InvestmentTypeObject.lend:
@@ -245,13 +250,13 @@ export const withReward = async (account: string, transactionInfos: ITransaction
         return e
       case InvestmentTypeObject.stake:
         const stakeTx = e as IStakeTransaction
-        const poolId = getIBPoolByStakingTokenSymbol(stakeTx.stakeTokenSymbol).id
-        const stakeInfo = userStakeMap[poolId][0] as IUserStake
+        const poolId = getIBPoolByStakingTokenSymbol(stakeTx.stakeTokenSymbol)?.id
+        const stakeInfo = (userStakeMap[poolId] || [])[0] as IUserStake
         return {
           ...e,
           // rewardTokenAddress: getAddressFromSymbol(stakeInfo.rewardToken), // TODO: reward as ib?
-          // rewardTokenSymbol: stakeInfo.rewardToken,
-          rewardAmount: stringToFloat(BigNumber.from(stakeInfo.pendingAlpaca).toString()),
+          rewardTokenSymbol: stakeInfo?.rewardToken,
+          rewardAmount: stringToFloat(BigNumber.from(stakeInfo?.pendingAlpaca ?? 0).toString()),
         }
       default:
         return e
@@ -271,6 +276,8 @@ export const withRewardPriceUSD = (transactionInfos: ITransactionInfo[], symbolP
           // TOFIX: We can't get correct stratSymbol yet
           stratValueUSD: farmTx.stratAmount * parseFloat(symbolPriceUSDMap[farmTx.stratSymbol]),
           principalValueUSD: farmTx.principalAmount * parseFloat(symbolPriceUSDMap[farmTx.principalSymbol]),
+
+          rewardValueUSD: farmTx.rewardAmount * parseFloat(symbolPriceUSDMap[farmTx.rewardTokenSymbol]),
         }
       case InvestmentTypeObject.lend:
         // TODO

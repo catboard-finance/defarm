@@ -1,5 +1,5 @@
 import _ from "lodash"
-import { withPosition } from "./position";
+import { withCurrentPosition } from "./position";
 import { IFarmInvestmentInfo, ILendInvestmentInfo, IStakeInvestmentInfo, IUserInvestmentInfo } from "./investment";
 import { InvestmentTypeObject } from "../utils/transaction";
 
@@ -28,7 +28,7 @@ export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[])
     positionId: farmInfos[0].positionId,
   }))
 
-  const farmCurrents = await withPosition(farmPositions)
+  const farmCurrents = await withCurrentPosition(farmPositions)
 
   ///////// LEND /////////
 

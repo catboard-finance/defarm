@@ -15,7 +15,7 @@ interface IEncodedUserPosition extends IGetPositionParams {
   debtValueUSDbn: BigNumber // BigNumber
 }
 
-export const getPositions = async (positions: IGetPositionParams[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedUserPosition[]> => {
+export const getCurrentPositions = async (positions: IGetPositionParams[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedUserPosition[]> => {
   // Call positionInfo for positionValue, debtValue
   const calls = positions.map(position => ({
     target: position.vaultAddress,
@@ -41,8 +41,8 @@ export const getPositions = async (positions: IGetPositionParams[], block = 'lat
   return encodedPositions
 }
 
-export const withPosition = async (positionParams: IGetPositionParams[]) => {
-  const positions = await getPositions(positionParams)
+export const withCurrentPosition = async (positionParams: IGetPositionParams[]) => {
+  const positions = await getCurrentPositions(positionParams)
 
   const res = positions.map(position => {
     return {
