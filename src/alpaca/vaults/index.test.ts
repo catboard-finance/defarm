@@ -1,6 +1,6 @@
-import { getPositions } from ".";
+import { _fetchUserPositionWithAPIs } from "../api";
 import { parseVaultInput } from "./worker";
-import bar from './transactions.json'
+import mockedTransactions from './__snapshots__/transactions.json'
 
 describe('🦙 Vault', () => {
   beforeAll(() => {
@@ -9,14 +9,14 @@ describe('🦙 Vault', () => {
   });
 
   it('can get positions', async () => {
-    const positions = await getPositions('0x8155430e4860e791aeddb43e4764d15de7e0def1')
+    const positions = await _fetchUserPositionWithAPIs('0x8155430e4860e791aeddb43e4764d15de7e0def1')
 
     expect(positions).toBeDefined()
   }, 100000);
 
   it('can get parseVaultInput', async () => {
 
-    let foos = bar.result.map(e => {
+    let res = mockedTransactions.result.map(e => {
       if (e.from_address !== '0x8155430e4860e791aeddb43e4764d15de7e0def1') return null
 
       return {
@@ -28,6 +28,6 @@ describe('🦙 Vault', () => {
       }
     }).filter(e => e)
 
-    expect(foos).toBeDefined()
+    expect(res).toBeDefined()
   }, 100000);
 })

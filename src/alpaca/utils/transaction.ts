@@ -2,6 +2,7 @@ import { BigNumber } from "ethers";
 import _ from "lodash";
 import { IToken, ITransaction, MethodType } from "../../type";
 import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol } from "../core";
+import { getUserEarnsByPoolIds } from "../users/earn";
 import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
@@ -196,7 +197,7 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const positionId = results[i] ? results[i].id : null
-        const loanValueUSD = results[i] ? stringToFloat(results[i].loan.toString()) : null
+        const loanValueUSD = results[i] ? stringToFloat(results[i].loan?.toString() ?? '0') : null
         return {
           ...e,
           positionId,
@@ -210,22 +211,35 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
   return res
 }
 
-// TODO: move to somewhere this belongs
-export const withReward = async (account: string, transactionInfos: ITransactionInfo[]) => {
-  // Find stake pools from transaction
+const getPoolIDsByInvestmentType = (transactionInfos: ITransactionInfo[], type: InvestmentTypeObject) => {
   const poolIds = transactionInfos
-    .filter(e => e.investmentType === InvestmentTypeObject.stake)
+    .filter(e => e.investmentType === type)
     .map(e => (e as IStakeTransaction).poolId)
+    .filter(e => e)
 
-  const userStakes = await getUserStakesByPoolIds(account, poolIds)
+  return poolIds
+}
+
+export const withReward = async (account: string, transactionInfos: ITransactionInfo[]) => {
+  // Farm
+  const farmPoolIds = getPoolIDsByInvestmentType(transactionInfos, InvestmentTypeObject.farm)
+  const userFarmEarnings = await getUserEarnsByPoolIds(account, farmPoolIds)
+
+  // Stake
+  const stakePoolIds = getPoolIDsByInvestmentType(transactionInfos, InvestmentTypeObject.stake)
+  const userStakes = await getUserStakesByPoolIds(account, stakePoolIds)
   const userStakeMap = _.groupBy(userStakes, 'poolId')
 
   const res = transactionInfos.map(e => {
 
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
-        // TODO: rewards from farm
-        return e
+        // Reward from leveraged position
+        const farmEarning = userFarmEarnings.find(e => e.poolId)
+        return {
+          ...e,
+          rewardAmount: stringToFloat(BigNumber.from(farmEarning?.pendingAlpaca ?? 0).toString()),
+        }
       case InvestmentTypeObject.lend:
         // TODO: rewards from lend?
         return e

@@ -1,10 +1,10 @@
 import _ from "lodash"
-import { withDirection, filterInvestmentTransfers, getUniqueSymbolsFromTransfers, withPriceUSD } from ".."
+import { filterInvestmentTransfers, getUniqueSymbolsFromTransfers } from ".."
 import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
 import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withReward, withRewardPriceUSD } from "../utils/transaction"
-import { getTokenInfoFromTransferAddressMap } from "../utils/transfer"
+import { getTokenInfoFromTransferAddressMap, withDirection, withPriceUSD } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
@@ -34,7 +34,7 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
   return transferInfos as ITransferInfo[]
 }
 
-export const getTransactionTransferInfo = async (account: string, transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
+export const getTransactionTransferInfos = async (account: string, transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
   // Prepare symbol map from transfer
   const tokenInfoFromTransferAddressMap = getTokenInfoFromTransferAddressMap(transferInfos)
 

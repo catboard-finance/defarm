@@ -136,8 +136,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           poolAddress: lendTx.poolAddress,
 
           depositTokenSymbol: lendTx.depositTokenSymbol,
-          depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
-          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+          depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') ?? 0,
+          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
@@ -152,8 +152,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           fairLaunchAddress: stakeTx.fairLaunchAddress,
 
           stakeTokenSymbol: stakeTx.stakeTokenSymbol,
-          stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
-          stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+          stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') ?? 0,
+          stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
 
           rewardTokenAddress: stakeTx.rewardTokenAddress,
           rewardTokenSymbol: stakeTx.rewardTokenSymbol,

@@ -1,4 +1,4 @@
-import { fetchUserPositions, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserBalance, fetchUserInvestmentSummary, fetchUserFarmEarns } from ".";
+import { fetchUserPositionWithAPIs, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserBalance, fetchUserInvestmentSummary, fetchUserFarmEarns } from ".";
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 describe('User', () => {
@@ -14,7 +14,7 @@ describe('User', () => {
   }, 10000);
 
   it(`can fetch user position value`, async () => {
-    const positions = await fetchUserPositions(TEST_ACCOUNT_ADDRESS)
+    const positions = await fetchUserPositionWithAPIs(TEST_ACCOUNT_ADDRESS)
     // console.log('positions:', positions)
 
     expect(positions).toBeDefined

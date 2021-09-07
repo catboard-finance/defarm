@@ -1,34 +1,56 @@
 import _ from "lodash"
-import { withPosition } from "../vaults/debt";
-import { IFarmInvestmentInfo, IUserInvestmentInfo } from "./investment";
+import { withPosition } from "./position";
+import { IFarmInvestmentInfo, ILendInvestmentInfo, IStakeInvestmentInfo, IUserInvestmentInfo } from "./investment";
+import { InvestmentTypeObject } from "../utils/transaction";
 
-// farms
+const sumLendEarning = (lends: ILendInvestmentInfo[]) => {
+  return {
+    depositValueUSD: _.sumBy(lends, "depositValueUSD"),
+    rewardValueUSD: _.sumBy(lends, "rewardValueUSD"),
+  }
+}
+
+const sumStakeEarning = (stakes: IStakeInvestmentInfo[]) => {
+  return {
+    stakeValueUSD: _.sumBy(stakes, "stakeValueUSD"),
+    rewardValueUSD: _.sumBy(stakes, "rewardValueUSD"),
+  }
+}
+
 export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[]) => {
-  // Separate by position and pool
-  const transferPositionInfoMap = _.groupBy(userFarmInfos, 'investmentType') as any
-  const recordedFarmGroup = _.groupBy(transferPositionInfoMap.farm, 'positionId') as unknown as IFarmInvestmentInfo[]
-  // const lendPoolGroup = _.groupBy(transferPositionInfoMap.lend, 'poolName');
-  // const stakePoolGroup = _.groupBy(transferPositionInfoMap.stake, 'poolName');
 
-  // Get current position info
-  const farms = Object.values(recordedFarmGroup)
-  const farmPositions = farms.map(farmInfos => ({
+  ///////// FARM /////////
+
+  const farms = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as ILendInvestmentInfo[]
+  const recordedFarmGroup = _.groupBy(farms, 'positionId') as unknown as IFarmInvestmentInfo[]
+  const farmPositions = Object.values(recordedFarmGroup).map(farmInfos => ({
     vaultAddress: farmInfos[0].vaultAddress,
     positionId: farmInfos[0].positionId,
   }))
 
-  const aggregatedFarms = await withPosition(farmPositions)
+  const farmSummaries = await withPosition(farmPositions)
 
+  ///////// LEND /////////
+
+  const lends = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.lend) as ILendInvestmentInfo[]
+  const lendSummaries = sumLendEarning(lends)
+
+  ///////// POOL /////////
+
+  const stakes = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.stake) as IStakeInvestmentInfo[]
+  const stakeSummaries = sumStakeEarning(stakes)
+
+  // Get total summary
   const res = {
-    history: {
-      farms: transferPositionInfoMap.farm,
-      lends: transferPositionInfoMap.lend,
-      stakes: transferPositionInfoMap.stake,
+    record: {
+      farms,
+      lends,
+      stakes,
     },
     total: {
-      farms: aggregatedFarms,
-      lends: null, // TODO: fetch lend
-      stakes: null, // TODO: fetch stake
+      farms: farmSummaries,
+      lends: lendSummaries,
+      stakes: stakeSummaries,
     }
   }
 

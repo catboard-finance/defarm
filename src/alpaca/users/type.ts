@@ -39,3 +39,16 @@ export interface IUserBalance {
   address?: string,
   amount: number,
 }
+
+export interface IUserPositionUSD {
+  positionValueUSD: number;
+  debtValueUSD: number;
+  vaultSymbol: string;
+  equityValueUSD: number;
+  debtRatio: number;
+  safetyBuffer: number;
+
+  farmSymbol: string // symbol
+  // farmTokenAmount: number;
+  // quoteTokenAmount: number;
+}

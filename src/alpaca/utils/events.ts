@@ -16,7 +16,7 @@ export const getPositionRecordFromWorkEvent = async (address: string, blockNumbe
   }
 }
 
-export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, block = 'latest', chain: Chain = 'bsc'): Promise<any> => {
+export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, chain: Chain = 'bsc'): Promise<number> => {
   const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
   const result = await provider.getLogs({
     address,

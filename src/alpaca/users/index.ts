@@ -2,15 +2,15 @@ import _ from 'lodash'
 import { getERC20Balance, getNativeBalance } from '../../account'
 import { ITransferInfo } from '../../type'
 import { formatBigNumberToFixed, stringToFloat } from '../utils/converter'
-import { getPositions } from "../vaults"
+import { _fetchUserPositionWithAPIs } from "../api"
 import { getUserInvestmentInfos } from './investment'
-import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
+import { getTransactionTransferInfos, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
-import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
-import { IUserBalance } from './type'
+import { IUserBalance, IUserPositionUSD } from './type'
 import { getInvestmentSummary } from './summary'
 import { getUserEarns } from './earn'
+import { getUserPositionWithAPIs } from './positionWithAPI'
 
 // User////////////////////////
 
@@ -36,23 +36,10 @@ export const fetchUserBalance = async (account: string): Promise<IUserBalance[]>
   ]
 }
 
-// Farm ////////////////////////
-
-export interface IUserPositionUSD extends IUserPosition {
-  positionValueUSD: number;
-  debtValueUSD: number;
-  vaultSymbol: string;
-  equityValueUSD: number;
-  debtRatio: number;
-  safetyBuffer: number;
-  // farmTokenAmount: number;
-  // quoteTokenAmount: number;
-}
-
-export const fetchUserPositions = async (account: string): Promise<IUserPositionUSD[]> => {
+export const fetchUserPositionWithAPIs = async (account: string): Promise<IUserPositionUSD[]> => {
   // Raw
-  const positions = await getPositions(account)
-  const userPositions = await getUserPositions(positions)
+  const positions = await _fetchUserPositionWithAPIs(account)
+  const userPositions = await getUserPositionWithAPIs(positions)
 
   // Parsed
   const parsedUserPositions = userPositions.map(userPosition => {
@@ -128,7 +115,7 @@ export interface IDepositTransferUSDMap {
 export const fetchUserInvestments = async (account: string) => {
   const transactionsInfos = await getTransactionInfos(account)
   const transferInfos = await getTransferInfos(account)
-  const transactionTransferInfo = await getTransactionTransferInfo(account, transactionsInfos, transferInfos)
+  const transactionTransferInfo = await getTransactionTransferInfos(account, transactionsInfos, transferInfos)
   const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
 
   return userInvestmentInfos
@@ -140,5 +127,3 @@ export const fetchUserInvestmentSummary = async (account: string) => {
 
   return summaryByPositions
 }
-
-// TODO: fetchUserReward

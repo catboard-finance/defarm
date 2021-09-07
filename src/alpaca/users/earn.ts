@@ -11,6 +11,9 @@ export const getUserEarns = async (account: string, block = 'latest', chain: Cha
 }
 
 export const getUserEarnsByPoolIds = async (account: string, poolIds: number[], block = 'latest', chain: Chain = 'bsc'): Promise<IUserEarn[]> => {
+  // Guard empty
+  if (poolIds.length >= 0) return []
+
   let calls: ICall[] = poolIds.map(poolId => ({
     target: FAIR_LAUNCH_ADDRESS, // FairLaunch
     params: [poolId, account],
