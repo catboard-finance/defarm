@@ -21,36 +21,37 @@ export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[])
 
   ///////// FARM /////////
 
-  const farms = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as ILendInvestmentInfo[]
-  const recordedFarmGroup = _.groupBy(farms, 'positionId') as unknown as IFarmInvestmentInfo[]
+  const farmHistories = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as ILendInvestmentInfo[]
+  const recordedFarmGroup = _.groupBy(farmHistories, 'positionId') as unknown as IFarmInvestmentInfo[]
   const farmPositions = Object.values(recordedFarmGroup).map(farmInfos => ({
     vaultAddress: farmInfos[0].vaultAddress,
     positionId: farmInfos[0].positionId,
   }))
 
-  const farmSummaries = await withPosition(farmPositions)
+  const farmCurrents = await withPosition(farmPositions)
 
   ///////// LEND /////////
 
-  const lends = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.lend) as ILendInvestmentInfo[]
-  const lendSummaries = sumLendEarning(lends)
+  const lendHistories = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.lend) as ILendInvestmentInfo[]
+  const lendCurrents = sumLendEarning(lendHistories)
 
   ///////// POOL /////////
 
-  const stakes = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.stake) as IStakeInvestmentInfo[]
-  const stakeSummaries = sumStakeEarning(stakes)
+  const stakeHistories = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.stake) as IStakeInvestmentInfo[]
+  const stakeCurrents = sumStakeEarning(stakeHistories)
 
-  // Get total summary
+  ///////// SUMMARY /////////
+
   const res = {
-    record: {
-      farms,
-      lends,
-      stakes,
+    history: {
+      farms: farmHistories,
+      lends: lendHistories,
+      stakes: stakeHistories,
     },
-    total: {
-      farms: farmSummaries,
-      lends: lendSummaries,
-      stakes: stakeSummaries,
+    current: {
+      farms: farmCurrents,
+      lends: lendCurrents,
+      stakes: stakeCurrents,
     }
   }
 
