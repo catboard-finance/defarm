@@ -95,7 +95,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         tokenValueUSD: transfer.tokenValueUSD,
       }) as IUserInvestmentTransfers)
 
-    let baseInvestment: IUserInvestmentInfo = {
+    const baseInvestment: IUserInvestmentInfo = {
       investmentType: e.investmentType,
       investedAt: e.block_timestamp,
       transfers,
