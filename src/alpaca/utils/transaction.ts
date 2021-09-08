@@ -8,7 +8,7 @@ import { IUserStake } from "../users/type";
 import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
 import { parseVaultInput } from "../vaults/worker";
 import { stringToFloat } from "./converter";
-import { getPositionRecordFromWorkEvent } from "./events";
+import { getPositionIdFromGetBlock } from "./events";
 
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
@@ -124,6 +124,7 @@ export interface IStakeTransaction extends ITransactionInfo {
 
   unstakingTokenSymbol: string
 
+  rewardPoolAddress: string
   rewardTokenAddress: string
   rewardTokenSymbol: string
   rewardAmount: number
@@ -163,6 +164,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           ...e,
           fairLaunchAddress: e.to_address,
           stakeTokenSymbol: stakeToken.symbol,
+          unstakingTokenSymbol: pool.unstakingToken,
 
           poolId: pool.id,
 
@@ -193,7 +195,7 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
 
     switch (farmTx.investmentType) {
       case InvestmentTypeObject.farm:
-        return getPositionRecordFromWorkEvent(targetAddress, farmTx.block_number, farmTx.hash)
+        return getPositionIdFromGetBlock(targetAddress, farmTx.block_number)
       default:
         return null
     }

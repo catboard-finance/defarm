@@ -2,12 +2,20 @@ import { fetchPriceUSD } from "../../coingecko"
 import { getPoolByPoolId, REWARD_TOKEN_SYMBOL } from "../core"
 import { IFarmTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo, withCurrentReward, withRewardPriceUSD } from "../utils/transaction"
 
-interface ICurrentPositionInfo {
+export interface ICurrentBalanceInfo {
   investmentType: InvestmentTypeObject,
   aggregatedAt: string // Date
+
+  positionId?: string
+  poolId?: string
+
+  rewardPoolAddress?: string
+  rewardTokenSymbol?: string
+  rewardAmount?: number
+  rewardValueUSD?: number
 }
 
-export const getCurrentBalanceInfos = async (account: string, transactionInfos: ITransactionInfo[]) => {
+export const getCurrentBalanceInfos = async (account: string, transactionInfos: ITransactionInfo[]): Promise<ICurrentBalanceInfo[]> => {
   // Get current reward from chain
   let currentBalanceInfos = await withCurrentReward(account, transactionInfos)
 
@@ -22,7 +30,7 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
   const userInvestmentInfos = currentBalanceInfos.map(e => {
 
     // parse for view
-    const baseInvestment: ICurrentPositionInfo = {
+    const baseInvestment: ICurrentBalanceInfo = {
       investmentType: e.investmentType,
       aggregatedAt: new Date().toISOString(),
     }
@@ -33,6 +41,7 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
         return {
           ...baseInvestment,
 
+          // Group by
           positionId: farmTx.positionId,
 
           rewardPoolAddress: farmTx.rewardPoolAddress,
@@ -48,8 +57,10 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
         return {
           ...baseInvestment,
 
+          // Group by
           poolId: pool.id,
 
+          rewardPoolAddress: stakeTx.rewardPoolAddress,
           rewardTokenSymbol: stakeTx.rewardTokenSymbol,
           rewardAmount: stakeTx.rewardAmount,
           rewardValueUSD: stakeTx.rewardValueUSD,
@@ -59,5 +70,5 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
     }
   })
 
-  return userInvestmentInfos.filter(e => e)
+  return userInvestmentInfos.filter(e => e) as ICurrentBalanceInfo[]
 }

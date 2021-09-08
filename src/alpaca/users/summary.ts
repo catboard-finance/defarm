@@ -2,6 +2,7 @@ import _ from "lodash"
 import { withCurrentPosition } from "./position";
 import { IFarmInvestmentInfo, ILendInvestmentInfo, IStakeInvestmentInfo, IUserInvestmentInfo } from "./investment";
 import { InvestmentTypeObject } from "../utils/transaction";
+import { ICurrentBalanceInfo } from "./current";
 
 // const sumFarmEarning = (farms: IFarmInvestmentInfo[]) => {
 //   return {
@@ -34,7 +35,21 @@ const getInvestedPositions = (farmHistories: IFarmInvestmentInfo[]) => {
   return farmPositions
 }
 
-export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentInfo[], userCurrentBalances: any[]) => {
+const getEarnCurrentFarms = (userCurrentBalances: ICurrentBalanceInfo[]) => {
+  const earnCurrentFarms = userCurrentBalances
+    .filter(e => e.investmentType === InvestmentTypeObject.farm)
+  const earnCurrents = [...new Set(Object.values(_.groupBy(earnCurrentFarms, 'rewardPoolAddress')))]
+    .map(e => ({
+      rewardPoolAddress: e[0].rewardPoolAddress,
+      rewardTokenSymbol: e[0].rewardTokenSymbol,
+      rewardAmount: e[0].rewardAmount,
+      rewardValueUSD: e[0].rewardValueUSD,
+    }))
+
+  return earnCurrents
+}
+
+export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentInfo[], userCurrentBalances: ICurrentBalanceInfo[]) => {
 
   ///////// FARM /////////
 
@@ -45,7 +60,7 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
 
   // TODO: Gathering from claim history?
   // const earnHistories = userInvestmentInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as IFarmInvestmentInfo[]
-  const earnCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.farm)
+  const earnCurrents = getEarnCurrentFarms(userCurrentBalances)
 
   ///////// LEND /////////
 
