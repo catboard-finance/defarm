@@ -2,14 +2,16 @@ import _ from 'lodash'
 import { getERC20Balance, getNativeBalance } from '../../account'
 import { ITransferInfo } from '../../type'
 import { formatBigNumberToFixed, stringToFloat } from '../utils/converter'
-import { getPositions } from "../vaults"
-import { getUserInvestmentInfos } from './farms'
-import { getTransactionTransferInfo, getTransactionInfos, getTransferInfos } from './info'
+import { _fetchUserPositionWithAPIs } from "../api"
+import { getUserInvestmentInfos } from './investment'
+import { getTransactionTransferInfos, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
-import { getUserPositions as getUserPositions, IUserPosition } from "./position"
 import { getUserStakes } from './stake'
-import { getInvestmentPerFarms } from './summary'
-import { IUserBalance } from './type'
+import { IUserBalance, IUserPositionUSD } from './type'
+import { getInvestmentSummary } from './summary'
+import { getUserEarns } from './earn'
+import { getUserPositionWithAPIs } from './positionWithAPI'
+import { getCurrentBalanceInfos } from './current'
 
 // User////////////////////////
 
@@ -35,23 +37,10 @@ export const fetchUserBalance = async (account: string): Promise<IUserBalance[]>
   ]
 }
 
-// Farm ////////////////////////
-
-export interface IUserPositionUSD extends IUserPosition {
-  positionValueUSD: number;
-  debtValueUSD: number;
-  vaultSymbol: string;
-  equityValueUSD: number;
-  debtRatio: number;
-  safetyBuffer: number;
-  // farmTokenAmount: number;
-  // quoteTokenAmount: number;
-}
-
-export const fetchUserPositions = async (account: string): Promise<IUserPositionUSD[]> => {
+export const fetchUserPositionWithAPIs = async (account: string): Promise<IUserPositionUSD[]> => {
   // Raw
-  const positions = await getPositions(account)
-  const userPositions = await getUserPositions(positions)
+  const positions = await _fetchUserPositionWithAPIs(account)
+  const userPositions = await getUserPositionWithAPIs(positions)
 
   // Parsed
   const parsedUserPositions = userPositions.map(userPosition => {
@@ -84,18 +73,18 @@ export const fetchUserPositions = async (account: string): Promise<IUserPosition
 export const fetchUserLends = async (account: string) => {
   // Raw
   const lends = await getUserLends(account)
-  const parsedLend = lends.map(lend => ({
+  const parsedLends = lends.map(lend => ({
     ...lend,
     amount: parseFloat(formatBigNumberToFixed(lend.amount))
   }))
 
-  return parsedLend
+  return parsedLends
 }
 
 export const fetchUserStakes = async (account: string) => {
   // Raw
   const stakes = await getUserStakes(account)
-  const parsedStake = stakes.map(stake => ({
+  const parsedStakes = stakes.map(stake => ({
     ...stake,
     amount: parseFloat(formatBigNumberToFixed(stake.amount)),
     rewardDebt: parseFloat(formatBigNumberToFixed(stake.rewardDebt)),
@@ -105,27 +94,52 @@ export const fetchUserStakes = async (account: string) => {
     pendingAlpaca: parseFloat(formatBigNumberToFixed(stake.pendingAlpaca)),
   }))
 
-  return parsedStake
+  return parsedStakes
 }
+
+export const fetchUserFarmEarns = async (account: string) => {
+  // Raw
+  const earns = await getUserEarns(account)
+  const parsedEarns = earns.map(earn => ({
+    ...earn,
+    pendingAlpaca: parseFloat(formatBigNumberToFixed(earn.pendingAlpaca)),
+  }))
+
+  return parsedEarns
+}
+
 
 export interface IDepositTransferUSDMap {
   [address: string]: ITransferInfo[]
 }
 
+/**
+ * Investment per account
+ * @param account 
+ * @returns 
+ */
 export const fetchUserInvestments = async (account: string) => {
   const transactionsInfos = await getTransactionInfos(account)
   const transferInfos = await getTransferInfos(account)
-  const transactionTransferInfo = await getTransactionTransferInfo(transactionsInfos, transferInfos)
-  const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
 
-  return userInvestmentInfos
+  // Aggregated transactions and tra
+  const transactionTransferInfos = await getTransactionTransferInfos(transactionsInfos, transferInfos)
+
+  // Sum recorded value
+  const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfos)
+
+  return { userInvestmentInfos, transactionTransferInfos }
 }
 
-export const fetchUserSummaryByType = async (account: string) => {
-  const userInvestments = await fetchUserInvestments(account)
-  const summaryByPositions = await getInvestmentPerFarms(userInvestments)
+export const fetchUserInvestmentSummary = async (account: string) => {
+  // Get history
+  const { userInvestmentInfos, transactionTransferInfos } = await fetchUserInvestments(account)
 
-  return summaryByPositions
+  // Get current
+  const userCurrentBalanceInfos = await getCurrentBalanceInfos(account, transactionTransferInfos)
+
+  // Aggregate
+  const summary = await getInvestmentSummary(userInvestmentInfos, userCurrentBalanceInfos)
+
+  return summary
 }
-
-// TODO: fetchUserReward

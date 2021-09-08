@@ -51,11 +51,11 @@ const _info = {
       profitValueUSD: 900,
 
       vaultAddress: "0x158da805682bdc8ee32d52833ad41e74bb951e59",
-      vaultTokenSymbol: "USDT",
+      principalSymbol: "USDT",
       principalAmount: 0,
 
       stratAddress: "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90",
-      stratTokenSymbol: "CAKE",
+      stratSymbol: "CAKE",
       stratAmount: 128,
 
       borrowAmount: 0,

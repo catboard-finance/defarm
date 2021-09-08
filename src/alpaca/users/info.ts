@@ -1,26 +1,26 @@
 import _ from "lodash"
-import { withDirection, filterInvestmentTransfers, getUniqueSymbolsFromTransfers, withPriceUSD } from ".."
+import { filterInvestmentTransfers, getUniqueSymbolsFromTransfers } from ".."
 import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
-import { ITransactionInfo, withMethods, withType, withPosition, withSymbol } from "../utils/transaction"
-import { getStratAddressTokenAddressMap } from "../utils/transfer"
-import { ITransactionTransferInfo } from "./farms"
+import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol } from "../utils/transaction"
+import { getTokenInfoFromTransferAddressMap, withDirection, withPriceUSD } from "../utils/transfer"
+import { ITransactionTransferInfo } from "./investment"
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
   // Get transactions
   const transactions = await getTransactions(account)
 
   // Decode methods
-  let transactionInfos = await withMethods(transactions)
+  let transactionInfos = await withMethod(transactions)
 
   // Separate actions lend/stake/farm by vault address and method
   transactionInfos = await withType(transactionInfos)
 
   ////////////////// POSITIONS //////////////////
 
-  // Get position from event by block number
-  transactionInfos = await withPosition(transactionInfos)
+  // Get position/debt from event by block number
+  transactionInfos = await withRecordedPosition(transactionInfos)
 
   return transactionInfos
 }
@@ -34,12 +34,13 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
   return transferInfos as ITransferInfo[]
 }
 
-export const getTransactionTransferInfo = async (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
+export const getTransactionTransferInfos = async (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
+
   // Prepare symbol map from transfer
-  const stratAddressTokenAddressMap = getStratAddressTokenAddressMap(transferInfos)
+  const tokenInfoFromTransferAddressMap = getTokenInfoFromTransferAddressMap(transferInfos)
 
   // Add token info by tokens address
-  transactionInfos = withSymbol(transactionInfos, stratAddressTokenAddressMap)
+  transactionInfos = withSymbol(transactionInfos, tokenInfoFromTransferAddressMap)
 
   ////////////////// PRICES //////////////////
 
@@ -60,14 +61,15 @@ export const getTransactionTransferInfo = async (transactionInfos: ITransactionI
     })
   }
 
-  // Apply price in USD
+  // Apply price in USD to transfers
   transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap) as ITransferInfo[]
 
+  // Group transfers by block number
   const transferGroup = _.groupBy(transferInfos, 'block_number')
-  const transactionTransferInfo = transactionInfos.map(e => ({
+  let transactionTransferInfos = transactionInfos.map(e => ({
     ...e,
     transferInfos: transferGroup[e.block_number]
   })) as unknown as ITransactionTransferInfo[]
 
-  return transactionTransferInfo
+  return transactionTransferInfos
 }

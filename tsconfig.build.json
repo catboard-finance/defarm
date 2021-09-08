@@ -3,19 +3,19 @@
   "compilerOptions": {
     // Transpilation settings.
     "module": "commonjs",
-    "target": "ES5",
-
+    "target": "esnext",
     // Output settings.
     "charset": "utf-8",
     "newLine": "LF",
     "sourceMap": true,
-
     // Type declaration settings.
     "declaration": true,
     "declarationMap": true,
-
     // outdir
     "outDir": "lib",
   },
-  "exclude": ["node_modules","test/**/*"],
+  "exclude": [
+    "node_modules",
+    "test/**/*"
+  ],
 }

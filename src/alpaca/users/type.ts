@@ -25,9 +25,30 @@ export interface IUserStake {
   pendingAlpaca: BigNumber;
 }
 
+export interface IUserEarn {
+  fairLaunchPoolAddress: string
+  poolId: number
+  poolAddress: string; // address;
+
+  pendingAlpaca: BigNumber;
+}
+
 export interface IUserBalance {
   symbol: string,
   name?: string,
   address?: string,
   amount: number,
+}
+
+export interface IUserPositionUSD {
+  positionValueUSD: number;
+  debtValueUSD: number;
+  vaultSymbol: string;
+  equityValueUSD: number;
+  debtRatio: number;
+  safetyBuffer: number;
+
+  farmSymbol: string // symbol
+  // farmTokenAmount: number;
+  // quoteTokenAmount: number;
 }

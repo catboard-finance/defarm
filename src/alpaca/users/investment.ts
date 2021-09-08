@@ -1,6 +1,7 @@
 import _ from "lodash"
 import { ITransferInfo } from "../../type"
-import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction } from "../utils/transaction"
+import { getPoolByPoolAddress, getPoolByPoolId } from "../core"
+import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo } from "../utils/transaction"
 
 export interface IUserInvestmentTransfers {
   blockNumber: string
@@ -10,30 +11,35 @@ export interface IUserInvestmentTransfers {
   tokenSymbol: string // "CAKE",
   tokenAddress: string // "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
   tokenAmount: number // 1272.6522003096,
-  tokenPriceUSD: number // 1527.12000,
+  tokenPriceUSD: number // 22.1,
+  tokenValueUSD: number // 1527.12000,
 }
 
 export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
-  positionId: string // "9967403",
+  farmName: string // "ALPACA-BUSD"
+  positionId: number // 9967403,
 
   depositValueUSD: number // 1000,
   equityValueUSD: number // 1000,
-  debtValueUSD: number // 100,
   profitValueUSD: number // 900,
 
-  vaultAddress: string // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
-  vaultTokenSymbol: string // "USDT",
-  principalAmount: number // 0,
-
   stratAddress: string // "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90",
-  stratTokenSymbol: string // "CAKE",
+  stratSymbol: string // "CAKE",
   stratAmount: number // 128,
+  stratValueUSD: number // 2560,
 
-  borrowAmount: number // 0,
+  vaultAddress: string // "0x158da805682bdc8ee32d52833ad41e74bb951e59",
+  principalSymbol: string // "USDT",
+  principalAmount: number // 0,
+  principalValueUSD: number // 0,
+
+  borrowValueUSD: number // 0,
 }
 
 export interface ILendInvestmentInfo extends IUserInvestmentInfo {
-  ibPoolAddress: string
+  poolId: number
+  poolName: string
+  poolAddress: string
 
   depositTokenSymbol: string
   depositAmount: number
@@ -43,9 +49,18 @@ export interface ILendInvestmentInfo extends IUserInvestmentInfo {
 export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
   fairLaunchAddress: string
 
+  poolId: number
+  poolName: string
+  poolAddress: string
+
   stakeTokenSymbol: string
   stakeAmount: number
   stakeValueUSD: number
+
+  rewardTokenAddress: string
+  rewardTokenSymbol: string
+  rewardAmount: number
+  rewardValueUSD: number
 }
 
 export interface IUserInvestmentInfo {
@@ -55,7 +70,7 @@ export interface IUserInvestmentInfo {
   investedAt: string // "2021-08-07T14:45:51.000Z",
 }
 
-export interface ITransactionTransferInfo extends IFarmTransaction {
+export interface ITransactionTransferInfo extends ITransactionInfo {
   transferInfos: ITransferInfo[]
 }
 
@@ -77,9 +92,10 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         tokenAddress: transfer.address,
         tokenAmount: transfer.tokenAmount,
         tokenPriceUSD: transfer.tokenPriceUSD,
+        tokenValueUSD: transfer.tokenValueUSD,
       }) as IUserInvestmentTransfers)
 
-    let baseInvestment: IUserInvestmentInfo = {
+    const baseInvestment: IUserInvestmentInfo = {
       investmentType: e.investmentType,
       investedAt: e.block_timestamp,
       transfers,
@@ -87,51 +103,60 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
-        const farmTx = e as IFarmTransaction
+        const farmTx = e as unknown as IFarmTransaction
 
         return {
           ...baseInvestment,
 
-          investmentType: farmTx.investmentType,
+          farmName: e.name.split(' ')[0],
           positionId: farmTx.positionId,
 
-          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
-          equityValueUSD: _.sumBy(e.transferInfos, 'equityValueUSD') || 0,
-          debtValueUSD: _.sumBy(e.transferInfos, 'debtValueUSD') || 0,
-          profitValueUSD: _.sumBy(e.transferInfos, 'profitValueUSD') || 0,
-
           vaultAddress: farmTx.vaultAddress,
-          vaultTokenSymbol: farmTx.principalSymbol,
+          principalSymbol: farmTx.principalSymbol,
           principalAmount: farmTx.principalAmount,
 
           stratAddress: farmTx.stratAddress,
-          stratTokenSymbol: farmTx.stratSymbol,
+          stratSymbol: farmTx.stratSymbol,
           stratAmount: farmTx.stratAmount,
 
-          borrowAmount: farmTx.borrowAmount,
+          borrowValueUSD: farmTx.borrowAmount,
+
+          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
+          equityValueUSD: _.sumBy(e.transferInfos, 'equityValueUSD') ?? 0,
+          profitValueUSD: _.sumBy(e.transferInfos, 'profitValueUSD') ?? 0,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
+        var pool = getPoolByPoolAddress(lendTx.poolAddress)
         return {
           ...baseInvestment,
 
-          ibPoolAddress: lendTx.ibPoolAddress,
+          poolId: pool.id,
+          poolName: `${pool.stakingToken}-${pool.unstakingToken}`,
+          poolAddress: lendTx.poolAddress,
 
           depositTokenSymbol: lendTx.depositTokenSymbol,
-          depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
-          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
+          depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') ?? 0,
+          depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
+        var pool = getPoolByPoolId(stakeTx.poolId)
         return {
           ...baseInvestment,
+
+          poolId: pool.id,
+          poolName: `${pool.stakingToken}-${pool.unstakingToken}`,
+          poolAddress: pool.address,
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
 
           stakeTokenSymbol: stakeTx.stakeTokenSymbol,
-          stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') || 0,
-          stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') || 0,
-        } as IStakeInvestmentInfo
+          stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') ?? 0,
+          stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
+
+          unstakingTokenSymbol: stakeTx.stakeTokenSymbol,
+        } as unknown as IStakeInvestmentInfo
       default:
         return null
     }

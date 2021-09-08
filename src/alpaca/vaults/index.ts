@@ -1,22 +1,9 @@
 require('dotenv').config()
-import fetch from 'node-fetch';
-import { Chain } from "@defillama/sdk/build/general";
 import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
-import { DirectionType, ITransfer, ITransferInfo } from '../../type';
+import { ITransfer } from '../../type';
 import _ from 'lodash'
-import { FAIR_LAUNCH_ADDRESS, getSymbolsFromTransfers, VAULT_ADDRESS } from '../core';
-
-const ALPACA_URI = 'https://api.alpacafinance.org/v1/positions'
-
-export const getPositions = async (account: string, block = 'latest', chain: Chain = 'bsc'): Promise<any> => {
-  const result = await fetch(`${ALPACA_URI}?owner=${account}`)
-  const { data } = await result.json()
-
-  if (!data) return null
-
-  return data.positions
-}
+import { FAIR_LAUNCH_ADDRESS, VAULT_ADDRESS } from '../core';
 
 // TODO list all supported address
 
@@ -56,32 +43,3 @@ export const filterNoZeroTransfer = (txList: ITransfer[]) => txList.filter(tx =>
 )
 
 export const filterInvestmentTransfers = (transfers: ITransfer[]) => filterNoZeroTransfer(filterVaults(transfers))
-
-export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: { [symbol: string]: string }): ITransferInfo[] => {
-  // Get symbols
-  const symbols = getSymbolsFromTransfers(transfers)
-
-  // Attach usd price and return
-  return transfers.map((transfer, i) => {
-    const tokenSymbol = symbols[i]
-    const tokenPriceUSD = parseFloat(symbolPriceUSDMap[tokenSymbol])
-    const tokenAmount = stringToFloat(transfer.value)
-    const tokenValueUSD = tokenPriceUSD * tokenAmount
-    return ({
-      ...transfer,
-      tokenSymbol,
-      tokenPriceUSD,
-      tokenAmount,
-      tokenValueUSD,
-    }) as unknown as ITransferInfo
-  })
-}
-
-export const withDirection = (account: string, transfers: ITransfer[]) => {
-  return transfers.map(transfer => {
-    return ({
-      ...transfer,
-      direction: account === transfer.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
-    })
-  })
-}

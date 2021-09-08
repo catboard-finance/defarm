@@ -2,12 +2,12 @@
 
 exports[`🦙 has supported symbol list 1`] = `
 Array [
-  "ibWBNB",
-  "ibBUSD",
-  "ibETH",
-  "ibALPACA",
-  "ibUSDT",
-  "ibBTCB",
   "ibTUSD",
+  "ibBTCB",
+  "ibUSDT",
+  "ibALPACA",
+  "ibETH",
+  "ibBUSD",
+  "ibWBNB",
 ]
 `;
