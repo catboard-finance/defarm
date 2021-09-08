@@ -3,42 +3,59 @@ import { withCurrentPosition } from "./position";
 import { IFarmInvestmentInfo, ILendInvestmentInfo, IStakeInvestmentInfo, IUserInvestmentInfo } from "./investment";
 import { InvestmentTypeObject } from "../utils/transaction";
 
-const sumLendEarning = (lends: ILendInvestmentInfo[]) => {
-  return {
-    depositValueUSD: _.sumBy(lends, "depositValueUSD"),
-    rewardValueUSD: _.sumBy(lends, "rewardValueUSD"),
-  }
-}
+// const sumFarmEarning = (farms: IFarmInvestmentInfo[]) => {
+//   return {
+//     spendValueUSD: _.sumBy(farms, "principalValueUSD"),
+//     returnValueUSD: _.sumBy(farms, "rewardValueUSD"),
+//   }
+// }
 
-const sumStakeEarning = (stakes: IStakeInvestmentInfo[]) => {
-  return {
-    stakeValueUSD: _.sumBy(stakes, "stakeValueUSD"),
-    rewardValueUSD: _.sumBy(stakes, "rewardValueUSD"),
-  }
-}
+// const sumLendEarning = (lends: ILendInvestmentInfo[]) => {
+//   return {
+//     depositValueUSD: _.sumBy(lends, "depositValueUSD"),
+//     rewardValueUSD: _.sumBy(lends, "rewardValueUSD"),
+//   }
+// }
 
-export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[]) => {
+// const sumStakeEarning = (stakes: IStakeInvestmentInfo[]) => {
+//   return {
+//     stakeValueUSD: _.sumBy(stakes, "stakeValueUSD"),
+//     rewardValueUSD: _.sumBy(stakes, "rewardValueUSD"),
+//   }
+// }
 
-  ///////// FARM /////////
-
-  const farmHistories = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as ILendInvestmentInfo[]
+const getInvestedPositions = (farmHistories: IFarmInvestmentInfo[]) => {
   const recordedFarmGroup = _.groupBy(farmHistories, 'positionId') as unknown as IFarmInvestmentInfo[]
   const farmPositions = Object.values(recordedFarmGroup).map(farmInfos => ({
     vaultAddress: farmInfos[0].vaultAddress,
     positionId: farmInfos[0].positionId,
   }))
 
-  const farmCurrents = await withCurrentPosition(farmPositions)
+  return farmPositions
+}
+
+export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentInfo[], userCurrentBalances: any[]) => {
+
+  ///////// FARM /////////
+
+  const farmHistories = userInvestmentInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as IFarmInvestmentInfo[]
+  const farmCurrents = await withCurrentPosition(getInvestedPositions(farmHistories))
+
+  ///////// EARN /////////
+
+  // TODO: Gathering from claim history?
+  // const earnHistories = userInvestmentInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as IFarmInvestmentInfo[]
+  const earnCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.farm)
 
   ///////// LEND /////////
 
-  const lendHistories = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.lend) as ILendInvestmentInfo[]
-  const lendCurrents = sumLendEarning(lendHistories)
+  const lendHistories = userInvestmentInfos.filter(e => e.investmentType === InvestmentTypeObject.lend) as ILendInvestmentInfo[]
+  const lendCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.lend)
 
   ///////// POOL /////////
 
-  const stakeHistories = userFarmInfos.filter(e => e.investmentType === InvestmentTypeObject.stake) as IStakeInvestmentInfo[]
-  const stakeCurrents = sumStakeEarning(stakeHistories)
+  const stakeHistories = userInvestmentInfos.filter(e => e.investmentType === InvestmentTypeObject.stake) as IStakeInvestmentInfo[]
+  const stakeCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.stake)
 
   ///////// SUMMARY /////////
 
@@ -50,6 +67,7 @@ export const getInvestmentSummary = async (userFarmInfos: IUserInvestmentInfo[])
     },
     current: {
       farms: farmCurrents,
+      earns: earnCurrents,
       lends: lendCurrents,
       stakes: stakeCurrents,
     }

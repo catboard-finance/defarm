@@ -3,7 +3,7 @@ import { Chain } from "@defillama/sdk/build/general";
 import { BigNumber } from "ethers";
 import abi from './userStake.abi.json'
 import { ICall, IUserStake } from "./type";
-import { FAIR_LAUNCH_ADDRESS, getPoolByPoolId, IB_POOLS } from '../core'
+import { FAIR_LAUNCH_ADDRESS, getPoolByPoolId, IB_POOLS, REWARD_TOKEN_SYMBOL } from '../core'
 
 export const getUserStakes = async (account: string, block = 'latest', chain: Chain = 'bsc'): Promise<IUserStake[]> => {
   const poolIds = IB_POOLS.map(e => e.id)
@@ -58,7 +58,8 @@ export const getUserStakesByPoolIds = async (account: string, poolIds: number[],
       poolId: pool.id,
       poolAddress: pool.address,
       stakingToken: pool.stakingToken,
-      rewardToken: 'ALPACA',
+      unstakingToken: pool.unstakingToken,
+      rewardToken: REWARD_TOKEN_SYMBOL,
 
       amount,
       rewardDebt,

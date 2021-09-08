@@ -11,6 +11,7 @@ import { IUserBalance, IUserPositionUSD } from './type'
 import { getInvestmentSummary } from './summary'
 import { getUserEarns } from './earn'
 import { getUserPositionWithAPIs } from './positionWithAPI'
+import { getCurrentBalanceInfos } from './current'
 
 // User////////////////////////
 
@@ -112,18 +113,33 @@ export interface IDepositTransferUSDMap {
   [address: string]: ITransferInfo[]
 }
 
+/**
+ * Investment per account
+ * @param account 
+ * @returns 
+ */
 export const fetchUserInvestments = async (account: string) => {
   const transactionsInfos = await getTransactionInfos(account)
   const transferInfos = await getTransferInfos(account)
-  const transactionTransferInfo = await getTransactionTransferInfos(account, transactionsInfos, transferInfos)
-  const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfo)
 
-  return userInvestmentInfos
+  // Aggregated transactions and tra
+  const transactionTransferInfos = await getTransactionTransferInfos(transactionsInfos, transferInfos)
+
+  // Sum recorded value
+  const userInvestmentInfos = await getUserInvestmentInfos(transactionTransferInfos)
+
+  return { userInvestmentInfos, transactionTransferInfos }
 }
 
 export const fetchUserInvestmentSummary = async (account: string) => {
-  const userInvestments = await fetchUserInvestments(account)
-  const summaryByPositions = await getInvestmentSummary(userInvestments)
+  // Get history
+  const { userInvestmentInfos, transactionTransferInfos } = await fetchUserInvestments(account)
 
-  return summaryByPositions
+  // Get current
+  const userCurrentBalanceInfos = await getCurrentBalanceInfos(account, transactionTransferInfos)
+
+  // Aggregate
+  const summary = await getInvestmentSummary(userInvestmentInfos, userCurrentBalanceInfos)
+
+  return summary
 }

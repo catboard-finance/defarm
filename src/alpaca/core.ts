@@ -30,6 +30,7 @@ export interface IIbPool {
   id: number
   address: string
   stakingToken: string
+  unstakingToken: string
   rewardToken: string
 }
 
@@ -38,9 +39,10 @@ export const ALL_POOLS: IIbPool[] = POOLS.map((pool) => {
     id: pool.id,
     address: pool.address,
     stakingToken: pool.stakingToken,
-    rewardToken: pool.stakingToken.slice(2),
+    unstakingToken: pool.stakingToken.slice(2),
+    rewardToken: REWARD_TOKEN_SYMBOL,
   }
-})
+}).reverse()
 
 export const IB_POOLS = ALL_POOLS.filter(pool => pool.stakingToken.startsWith('ib'))
 export const DEBT_POOLS = ALL_POOLS.filter(pool => pool.stakingToken.startsWith('debt'))
@@ -51,7 +53,7 @@ const _TOKEN_LOWER_MAP = Object.assign({}, ...Object.keys(TOKENS).map(k => ({ [`
 const TRANSFER_TOKEN_LOWER_MAP = {
   ..._TOKEN_POOLS_LOWER_MAP,
   ..._TOKEN_LOWER_MAP,
-  [FAIR_LAUNCH_ADDRESS.toLowerCase()]: 'ALPACA',
+  [FAIR_LAUNCH_ADDRESS.toLowerCase()]: REWARD_TOKEN_SYMBOL,
 }
 
 export const getAddressFromSymbol = (symbol: string): string => TOKENS[symbol]
@@ -65,6 +67,8 @@ export const getPoolByPoolAddress = (address: string) => ALL_POOLS.find(pool => 
 export const getPoolByPoolId = (id: number) => ALL_POOLS.find(pool => pool.id === id)
 
 export const getIBPoolByStakingTokenSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
+
+export const getDebtPoolBySymbol = (symbol: string) => ALL_POOLS.find(pool => pool.stakingToken.toUpperCase().startsWith(`debtib${symbol}`.toUpperCase()))
 
 export const getIBPoolByIBSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 
