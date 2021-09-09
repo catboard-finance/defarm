@@ -1,11 +1,10 @@
 import { BigNumber } from "ethers";
 import _ from "lodash";
 import { IToken, ITransaction, MethodType } from "../../type";
-import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol, getDebtPoolBySymbol, VAULT_ADDRESS } from "../core";
+import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol, getDebtPoolBySymbol } from "../core";
 import { getUserEarnsByPoolIds } from "../users/earn";
 import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
-import { ALPACA_BUSD_VAULT_ADDRESSES, ALPACA_USDT_VAULT_ADDRESSES } from "../vaults";
 import { parseVaultInput } from "../vaults/worker";
 import { stringToFloat } from "./converter";
 import { getPositionIdFromGetBlock } from "./events";
@@ -189,32 +188,17 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
 
 export const withRecordedPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
   const promises = transactionInfos.map(e => {
-    const farmTx = e as IFarmTransaction
-    let targetAddress = e.to_address
-
-    // poc mapping to vault address
-    if (ALPACA_USDT_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
-      targetAddress = '0x158Da805682BdC8ee32d52833aD41E74bb951E59'.toLowerCase()
-    }
-
-    if (ALPACA_BUSD_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
-      targetAddress = VAULT_ADDRESS.toLowerCase()
-    }
-
-    switch (farmTx.investmentType) {
-      case InvestmentTypeObject.farm:
-        return getPositionIdFromGetBlock(targetAddress, farmTx.block_number)
-      default:
-        return null
-    }
+    if (e.investmentType !== InvestmentTypeObject.farm) return null
+    return getPositionIdFromGetBlock(e.to_address, e.block_number)
   })
 
   const results = await Promise.all(promises)
   const res = transactionInfos.map((e, i) => {
+    const result = results[i]
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
-        const positionId = results[i] ? results[i].id : null
-        const loanValueUSD = results[i] ? stringToFloat(results[i].loan?.toString() ?? '0') : null
+        const positionId = result ? result.id : null
+        const loanValueUSD = result ? stringToFloat(result.loan?.toString() ?? '0') : null
         return {
           ...e,
           positionId,
