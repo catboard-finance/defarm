@@ -102,6 +102,7 @@ export interface IFarmTransaction extends ITransactionInfo {
 }
 
 export interface ILendTransaction extends ITransactionInfo {
+  poolId: number
   poolName: string
   poolAddress: string
 
@@ -117,6 +118,7 @@ export interface IStakeTransaction extends ITransactionInfo {
 
   poolId: number
   poolName: string
+  poolAddress: string
 
   stakeTokenSymbol: string
   stakeAmount?: number
@@ -167,6 +169,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           unstakingTokenSymbol: pool.unstakingToken,
 
           poolId: pool.id,
+          poolAddress: pool.address,
 
           rewardTokenSymbol: pool.unstakingToken,
           rewardTokenAddress: getAddressFromSymbol(pool.unstakingToken),

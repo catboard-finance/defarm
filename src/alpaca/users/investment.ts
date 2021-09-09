@@ -147,7 +147,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           poolId: pool.id,
           poolName: `${pool.stakingToken}-${pool.unstakingToken}`,
-          poolAddress: pool.address,
+          poolAddress: stakeTx.poolAddress,
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
 

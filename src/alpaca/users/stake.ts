@@ -55,10 +55,13 @@ export const getUserStakesByPoolIds = async (account: string, poolIds: number[],
 
     return {
       fairLaunchPoolAddress: FAIR_LAUNCH_ADDRESS,
+
       poolId: pool.id,
       poolAddress: pool.address,
+
       stakingToken: pool.stakingToken,
       unstakingToken: pool.unstakingToken,
+
       rewardToken: REWARD_TOKEN_SYMBOL,
 
       amount,
