@@ -48,10 +48,10 @@ describe('User', () => {
     expect(investments).toBeDefined
   }, 100000);
 
-  it(`can calculate profits summary`, async () => {
-    const profits = await fetchUserInvestmentSummary(TEST_ACCOUNT_ADDRESS)
-    // console.log('profits:', profits)
+  it(`can calculate summary summary`, async () => {
+    const summary = await fetchUserInvestmentSummary(TEST_ACCOUNT_ADDRESS)
+    // console.log('summary:', summary)
 
-    expect(profits).toBeDefined
+    expect(summary).toBeDefined
   }, 100000);
 })
