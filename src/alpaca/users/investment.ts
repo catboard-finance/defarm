@@ -132,7 +132,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           ...baseInvestment,
 
           poolId: pool.id,
-          poolName: `${pool.stakingToken}-${pool.unstakingToken}`,
+          poolName: `${pool.stakingToken}-${pool.unstakeToken}`,
           poolAddress: lendTx.poolAddress,
 
           depositTokenSymbol: lendTx.depositTokenSymbol,
@@ -146,7 +146,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           ...baseInvestment,
 
           poolId: pool.id,
-          poolName: `${pool.stakingToken}-${pool.unstakingToken}`,
+          poolName: `${pool.stakingToken}-${pool.unstakeToken}`,
           poolAddress: stakeTx.poolAddress,
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
@@ -155,7 +155,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') ?? 0,
           stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
 
-          unstakingTokenSymbol: stakeTx.stakeTokenSymbol,
+          unstakeTokenSymbol: stakeTx.stakeTokenSymbol,
         } as unknown as IStakeInvestmentInfo
       default:
         return null

@@ -123,7 +123,7 @@ export interface IStakeTransaction extends ITransactionInfo {
   stakeAmount?: number
   stakeValueUSD?: number
 
-  unstakingTokenSymbol: string
+  unstakeTokenSymbol: string
 
   rewardPoolAddress: string
   rewardTokenAddress: string
@@ -145,7 +145,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           ...e,
 
           stratSymbol: stratToken?.symbol,
-          principalSymbol: pool.unstakingToken,
+          principalSymbol: pool.unstakeToken,
           vaultAddress: e.to_address,
 
           rewardTokenSymbol: pool.rewardToken,
@@ -159,7 +159,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           poolId: pool.id,
           poolAddress: e.to_address,
 
-          depositTokenSymbol: pool.unstakingToken,
+          depositTokenSymbol: pool.unstakeToken,
           withdrawTokenSymbol: pool.stakingToken,
         } as ILendTransaction
       case InvestmentTypeObject.stake:
@@ -170,13 +170,13 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
 
           fairLaunchAddress: e.to_address,
           stakeTokenSymbol: stakeToken.symbol,
-          unstakingTokenSymbol: pool.unstakingToken,
+          unstakeTokenSymbol: pool.unstakeToken,
 
           poolId: pool.id,
           poolAddress: pool.address,
 
-          rewardTokenSymbol: pool.unstakingToken,
-          rewardTokenAddress: getAddressFromSymbol(pool.unstakingToken),
+          rewardTokenSymbol: pool.unstakeToken,
+          rewardTokenAddress: getAddressFromSymbol(pool.unstakeToken),
         } as IStakeTransaction
       default:
         return e as IFarmTransaction

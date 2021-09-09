@@ -60,7 +60,7 @@ export const getUserStakesByPoolIds = async (account: string, poolIds: number[],
       poolAddress: pool.address,
 
       stakingToken: pool.stakingToken,
-      unstakingToken: pool.unstakingToken,
+      unstakeToken: pool.unstakeToken,
 
       rewardToken: REWARD_TOKEN_SYMBOL,
 

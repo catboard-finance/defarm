@@ -30,7 +30,7 @@ export interface IIbPool {
   id: number
   address: string
   stakingToken: string
-  unstakingToken: string
+  unstakeToken: string
   rewardToken: string
 }
 
@@ -39,7 +39,7 @@ export const ALL_POOLS: IIbPool[] = POOLS.map((pool) => {
     id: pool.id,
     address: pool.address,
     stakingToken: pool.stakingToken,
-    unstakingToken: pool.stakingToken.slice(2),
+    unstakeToken: pool.stakingToken.slice(2),
     rewardToken: REWARD_TOKEN_SYMBOL,
   }
 }).reverse()
