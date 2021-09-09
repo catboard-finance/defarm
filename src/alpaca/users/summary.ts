@@ -40,6 +40,7 @@ const getEarnCurrentFarms = (userCurrentBalances: ICurrentBalanceInfo[]) => {
     .filter(e => e.investmentType === InvestmentTypeObject.farm)
   const earnCurrents = [...new Set(Object.values(_.groupBy(earnCurrentFarms, 'rewardPoolAddress')))]
     .map(e => ({
+      rewardPoolName: e[0].rewardPoolName,
       rewardPoolAddress: e[0].rewardPoolAddress,
       rewardSymbol: e[0].rewardSymbol,
       rewardAmount: e[0].rewardAmount,

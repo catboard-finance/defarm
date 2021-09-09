@@ -94,6 +94,7 @@ export interface IFarmTransaction extends ITransactionInfo {
   borrowValueUSD: number
   maxReturn: number
 
+  rewardPoolName: string
   rewardPoolAddress: string
   rewardSymbol: string
   rewardAmount: number
@@ -125,6 +126,7 @@ export interface IStakeTransaction extends ITransactionInfo {
 
   unstakeSymbol: string
 
+  rewardPoolName: string
   rewardPoolAddress: string
   rewardTokenAddress: string
   rewardSymbol: string
@@ -148,6 +150,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           principalSymbol: pool.unstakeToken,
           vaultAddress: e.to_address,
 
+          rewardPoolName: `${pool.stakingToken}-${pool.unstakeToken}`,
           rewardSymbol: pool.rewardToken,
           rewardTokenAddress: getAddressFromSymbol(pool.rewardToken),
         }
@@ -158,6 +161,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
 
           poolId: pool.id,
           poolAddress: e.to_address,
+          poolName: `${pool.stakingToken}-${pool.unstakeToken}`,
 
           depositSymbol: pool.unstakeToken,
           withdrawSymbol: pool.stakingToken,
@@ -174,7 +178,9 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
 
           poolId: pool.id,
           poolAddress: pool.address,
+          poolName: `${pool.stakingToken}-${pool.unstakeToken}`,
 
+          rewardPoolName: `${pool.stakingToken}-${pool.unstakeToken}`,
           rewardSymbol: pool.unstakeToken,
           rewardTokenAddress: getAddressFromSymbol(pool.unstakeToken),
         } as IStakeTransaction
