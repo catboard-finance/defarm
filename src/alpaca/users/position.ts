@@ -7,6 +7,7 @@ import abi from './userPosition.abi.json'
 
 export interface IGetPositionParams {
   vaultAddress: string,
+  farmName: string,
   positionId: number
 }
 
@@ -47,6 +48,7 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]) 
   const res = positions.map(position => {
     return {
       positionId: position.positionId,
+      farmName: position.farmName,
       vaultAddress: position.vaultAddress,
       positionValueUSD: stringToFloat(position.positionValueUSDbn.toString()),
       debtValueUSD: stringToFloat(position.debtValueUSDbn.toString()),

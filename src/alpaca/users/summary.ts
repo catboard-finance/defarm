@@ -28,6 +28,7 @@ import { ICurrentBalanceInfo } from "./current";
 const getInvestedPositions = (farmHistories: IFarmInvestmentInfo[]) => {
   const recordedFarmGroup = _.groupBy(farmHistories, 'positionId') as unknown as IFarmInvestmentInfo[]
   const farmPositions = Object.values(recordedFarmGroup).map(farmInfos => ({
+    farmName: farmInfos[0].farmName,
     vaultAddress: farmInfos[0].vaultAddress,
     positionId: farmInfos[0].positionId,
   }))

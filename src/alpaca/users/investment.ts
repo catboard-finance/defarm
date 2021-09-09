@@ -105,10 +105,13 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
       case InvestmentTypeObject.farm:
         const farmTx = e as unknown as IFarmTransaction
 
+        const farmNames = e.name.split(' ')
+        const farmName = farmNames[1] === 'CakeMaxiWorker' ? `CAKE+${farmNames[0]}` : farmNames[0]
+
         return {
           ...baseInvestment,
 
-          farmName: e.name.split(' ')[0],
+          farmName,
           positionId: farmTx.positionId,
 
           vaultAddress: farmTx.vaultAddress,
