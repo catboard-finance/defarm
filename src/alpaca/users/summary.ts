@@ -35,7 +35,7 @@ const getInvestedPositions = (farmHistories: IFarmInvestmentInfo[]) => {
   return farmPositions
 }
 
-const getEarnCurrentFarms = (userCurrentBalances: ICurrentBalanceInfo[]) => {
+const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
   const earnCurrentFarms = userCurrentBalances
     .filter(e => e.investmentType === InvestmentTypeObject.farm)
   const earnCurrents = [...new Set(Object.values(_.groupBy(earnCurrentFarms, 'rewardPoolAddress')))]
@@ -61,7 +61,7 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
 
   // TODO: Gathering from claim history?
   // const earnHistories = userInvestmentInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as IFarmInvestmentInfo[]
-  const earnCurrents = getEarnCurrentFarms(userCurrentBalances)
+  const earnCurrents = getCurrentFarmEarns(userCurrentBalances)
 
   ///////// LEND /////////
 
