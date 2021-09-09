@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 import { Chain } from "@defillama/sdk/build/general";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import { Interface } from "ethers/lib/utils";
 import { getWorkEvent } from "../vaults/vaultEvent";
 
@@ -18,12 +18,13 @@ export const getPositionRecordFromWorkEvent = async (address: string, blockNumbe
 
 export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, chain: Chain = 'bsc'): Promise<{ id: number, loan: BigNumber }> => {
   const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+  const topic = 'Work(uint256,uint256)'
   const result = await provider.getLogs({
     address,
     fromBlock: parseInt(blockNumber),
     toBlock: parseInt(blockNumber),
     topics: [
-      '0x73c4ef442856bea52a6b34a83f35484ee65828010254ec27766c5a8c13db6c84',
+      utils.id(topic),
     ]
   });
 
