@@ -66,7 +66,7 @@ export const getPoolByPoolAddress = (address: string) => ALL_POOLS.find(pool => 
 
 export const getPoolByPoolId = (id: number) => ALL_POOLS.find(pool => pool.id === id)
 
-export const getIBPoolByStakingTokenSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
+export const getIBPoolByStakingSymbol = (symbol: string) => IB_POOLS.find(pool => pool.stakingToken.toUpperCase() === symbol.toUpperCase())
 
 export const getDebtPoolBySymbol = (symbol: string) => ALL_POOLS.find(pool => pool.stakingToken.toUpperCase().startsWith(`debtib${symbol}`.toUpperCase()))
 

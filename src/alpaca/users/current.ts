@@ -10,7 +10,7 @@ export interface ICurrentBalanceInfo {
   poolId?: string
 
   rewardPoolAddress?: string
-  rewardTokenSymbol?: string
+  rewardSymbol?: string
   rewardAmount?: number
   rewardValueUSD?: number
 }
@@ -45,7 +45,7 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
           positionId: farmTx.positionId,
 
           rewardPoolAddress: farmTx.rewardPoolAddress,
-          rewardTokenSymbol: farmTx.rewardTokenSymbol,
+          rewardSymbol: farmTx.rewardSymbol,
           rewardAmount: farmTx.rewardAmount,
           rewardValueUSD: farmTx.rewardValueUSD,
         }
@@ -61,7 +61,7 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
           poolId: pool.id,
 
           rewardPoolAddress: stakeTx.rewardPoolAddress,
-          rewardTokenSymbol: stakeTx.rewardTokenSymbol,
+          rewardSymbol: stakeTx.rewardSymbol,
           rewardAmount: stakeTx.rewardAmount,
           rewardValueUSD: stakeTx.rewardValueUSD,
         }

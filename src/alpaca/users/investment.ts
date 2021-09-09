@@ -41,7 +41,7 @@ export interface ILendInvestmentInfo extends IUserInvestmentInfo {
   poolName: string
   poolAddress: string
 
-  depositTokenSymbol: string
+  depositSymbol: string
   depositAmount: number
   depositValueUSD: number
 }
@@ -53,12 +53,12 @@ export interface IStakeInvestmentInfo extends IUserInvestmentInfo {
   poolName: string
   poolAddress: string
 
-  stakeTokenSymbol: string
+  stakeSymbol: string
   stakeAmount: number
   stakeValueUSD: number
 
   rewardTokenAddress: string
-  rewardTokenSymbol: string
+  rewardSymbol: string
   rewardAmount: number
   rewardValueUSD: number
 }
@@ -135,7 +135,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           poolName: `${pool.stakingToken}-${pool.unstakeToken}`,
           poolAddress: lendTx.poolAddress,
 
-          depositTokenSymbol: lendTx.depositTokenSymbol,
+          depositSymbol: lendTx.depositSymbol,
           depositAmount: _.sumBy(e.transferInfos, 'tokenAmount') ?? 0,
           depositValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
         } as ILendInvestmentInfo
@@ -151,11 +151,11 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           fairLaunchAddress: stakeTx.fairLaunchAddress,
 
-          stakeTokenSymbol: stakeTx.stakeTokenSymbol,
+          stakeSymbol: stakeTx.stakeSymbol,
           stakeAmount: _.sumBy(e.transferInfos, 'tokenAmount') ?? 0,
           stakeValueUSD: _.sumBy(e.transferInfos, 'tokenValueUSD') ?? 0,
 
-          unstakeTokenSymbol: stakeTx.stakeTokenSymbol,
+          unstakeSymbol: stakeTx.stakeSymbol,
         } as unknown as IStakeInvestmentInfo
       default:
         return null

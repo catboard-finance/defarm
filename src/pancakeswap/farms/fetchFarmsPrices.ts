@@ -3,9 +3,9 @@ import { BIG_ONE, BIG_ZERO } from '../utils/bigNumber'
 import { filterFarmsByQuoteToken } from '../utils/farmsPriceHelpers'
 import { Farm } from '../types'
 
-const getFarmFromTokenSymbol = (farms: Farm[], tokenSymbol: string, preferredQuoteTokens?: string[]): Farm => {
-  const farmsWithTokenSymbol = farms.filter((farm) => farm.token.symbol === tokenSymbol)
-  const filteredFarm = filterFarmsByQuoteToken(farmsWithTokenSymbol, preferredQuoteTokens)
+const getFarmFromSymbol = (farms: Farm[], tokenSymbol: string, preferredQuoteTokens?: string[]): Farm => {
+  const farmsWithSymbol = farms.filter((farm) => farm.token.symbol === tokenSymbol)
+  const filteredFarm = filterFarmsByQuoteToken(farmsWithSymbol, preferredQuoteTokens)
   return filteredFarm
 }
 
@@ -77,7 +77,7 @@ const fetchFarmsPrices = async (farms) => {
   const bnbPriceBusd = bnbBusdFarm.tokenPriceVsQuote ? BIG_ONE.div(bnbBusdFarm.tokenPriceVsQuote) : BIG_ZERO
 
   const farmsWithPrices = farms.map((farm) => {
-    const quoteTokenFarm = getFarmFromTokenSymbol(farms, farm.quoteToken.symbol)
+    const quoteTokenFarm = getFarmFromSymbol(farms, farm.quoteToken.symbol)
     const baseTokenPrice = getFarmBaseTokenPrice(farm, quoteTokenFarm, bnbPriceBusd)
     const quoteTokenPrice = getFarmQuoteTokenPrice(farm, quoteTokenFarm, bnbPriceBusd)
     const token = { ...farm.token, busdPrice: baseTokenPrice.toJSON() }
