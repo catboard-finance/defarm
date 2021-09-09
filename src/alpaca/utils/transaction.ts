@@ -286,7 +286,33 @@ export const withCurrentReward = async (account: string, transactionInfos: ITran
   return res
 }
 
-export const withRewardPriceUSD = (transactionInfos: ITransactionInfo[], symbolPriceUSDMap: { [symbol: string]: string }) => {
+export const withCurrentRewardPriceUSD = (transactionInfos: ITransactionInfo[], symbolPriceUSDMap: { [symbol: string]: string }) => {
+  const res = transactionInfos.map(e => {
+    switch (e.investmentType) {
+      case InvestmentTypeObject.farm:
+        const farmTx = e as unknown as IFarmTransaction
+        return {
+          ...e,
+          rewardValueUSD: farmTx.rewardAmount * parseFloat(symbolPriceUSDMap[farmTx.rewardSymbol]),
+        }
+      case InvestmentTypeObject.lend:
+        // TODO: reward from lend?
+        return e
+      case InvestmentTypeObject.stake:
+        const stakeTx = e as unknown as IStakeTransaction
+        return {
+          ...e,
+          rewardValueUSD: stakeTx.rewardAmount * parseFloat(symbolPriceUSDMap[stakeTx.rewardSymbol]),
+        }
+      default:
+        return e
+    }
+  })
+
+  return res
+}
+
+export const withTransactionPriceUSD = (transactionInfos: ITransactionInfo[], symbolPriceUSDMap: { [symbol: string]: string }) => {
   const res = transactionInfos.map(e => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
@@ -296,17 +322,6 @@ export const withRewardPriceUSD = (transactionInfos: ITransactionInfo[], symbolP
           // TOFIX: We can't get correct stratSymbol yet
           stratValueUSD: farmTx.stratAmount * parseFloat(symbolPriceUSDMap[farmTx.stratSymbol]),
           principalValueUSD: farmTx.principalAmount * parseFloat(symbolPriceUSDMap[farmTx.principalSymbol]),
-
-          rewardValueUSD: farmTx.rewardAmount * parseFloat(symbolPriceUSDMap[farmTx.rewardSymbol]),
-        }
-      case InvestmentTypeObject.lend:
-        // TODO
-        return e
-      case InvestmentTypeObject.stake:
-        const stakeTx = e as unknown as IStakeTransaction
-        return {
-          ...e,
-          rewardValueUSD: stakeTx.rewardAmount * parseFloat(symbolPriceUSDMap[stakeTx.rewardSymbol]),
         }
       default:
         return e
