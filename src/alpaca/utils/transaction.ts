@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import _ from "lodash";
 import { IToken, ITransaction, MethodType } from "../../type";
-import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol, getDebtPoolBySymbol } from "../core";
+import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingTokenSymbol, getDebtPoolBySymbol, VAULT_ADDRESS } from "../core";
 import { getUserEarnsByPoolIds } from "../users/earn";
 import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
@@ -144,6 +144,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
         const stratToken = tokenInfoFromTransferAddressMap[farmTx.stratAddress.toLowerCase()]
         return {
           ...e,
+
           stratSymbol: stratToken?.symbol,
           principalSymbol: pool.unstakingToken,
           vaultAddress: e.to_address,
@@ -155,7 +156,10 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
         var pool = getPoolByPoolAddress(e.to_address)
         return {
           ...e,
+
+          poolId: pool.id,
           poolAddress: e.to_address,
+
           depositTokenSymbol: pool.unstakingToken,
           withdrawTokenSymbol: pool.stakingToken,
         } as ILendTransaction
@@ -164,6 +168,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
         var pool = getIBPoolByStakingTokenSymbol(stakeToken.symbol)
         return {
           ...e,
+
           fairLaunchAddress: e.to_address,
           stakeTokenSymbol: stakeToken.symbol,
           unstakingTokenSymbol: pool.unstakingToken,
@@ -193,7 +198,7 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
     }
 
     if (ALPACA_BUSD_VAULT_ADDRESSES.includes(targetAddress.toLowerCase())) {
-      targetAddress = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f'.toLowerCase()
+      targetAddress = VAULT_ADDRESS.toLowerCase()
     }
 
     switch (farmTx.investmentType) {
