@@ -1,0 +1,11 @@
+{
+  "BNB": "wbnb",
+  "wBNB": "wbnb",
+  "CAKE": "pancakeswap-token",
+  "ALPACA": "alpaca-finance",
+  "BUSD": "binance-usd",
+  "USDT": "tether",
+  "TUSD": "true-usd",
+  "BTCB": "bitcoin-bep2",
+  "ETH": "ethereum"
+}
