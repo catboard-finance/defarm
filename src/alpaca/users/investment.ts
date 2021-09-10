@@ -106,7 +106,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         const farmTx = e as unknown as IFarmTransaction
 
         const farmNames = e.name.split(' ')
-        const farmName = farmNames[1] === 'CakeMaxiWorker' ? `CAKE+${farmNames[0]}` : farmNames[0]
+        const farmName = farmNames[1] === 'CakeMaxiWorker' ? `CAKE^${farmNames[0]}` : farmNames[0]
 
         return {
           ...baseInvestment,
