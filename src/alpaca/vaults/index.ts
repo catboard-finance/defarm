@@ -3,12 +3,11 @@ import alpacaInfo from '../info.mainnet.json'
 import { stringToFloat } from '../utils/converter';
 import { ITransfer } from '../../type';
 import _ from 'lodash'
-import { FAIR_LAUNCH_ADDRESS, VAULT_ADDRESS } from '../core';
+import { FAIR_LAUNCH_ADDRESS } from '../core';
 import { ALL_STRATEGY_LOWER_ADDRESSES } from './config';
 
 const ALPACA_VAULT_ADDRESSES = [
   FAIR_LAUNCH_ADDRESS,
-  VAULT_ADDRESS,
   ...ALL_STRATEGY_LOWER_ADDRESSES,
   ...alpacaInfo.Vaults.map(vault => vault.address.toLowerCase())
 ].map(vault => vault.toLowerCase())

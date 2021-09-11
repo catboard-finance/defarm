@@ -1,10 +1,10 @@
 import POOLS from './pools.json'
 import TOKENS from './tokens.json'
+import INFO from './info.mainnet.json'
 
 import { ITransfer } from '../type'
 
-export const VAULT_ADDRESS = '0x7C9e73d4C71dae564d41F78d56439bB4ba87592f';
-export const FAIR_LAUNCH_ADDRESS = '0xA625AB01B08ce023B2a342Dbb12a16f2C8489A8F';
+export const FAIR_LAUNCH_ADDRESS = INFO.FairLaunch.address;
 export const REWARD_TOKEN_SYMBOL = 'ALPACA';
 
 export type Token = {
