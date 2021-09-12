@@ -1,7 +1,6 @@
 import { fetchPriceUSD } from "../../coingecko"
 import { getPoolByPoolId, REWARD_TOKEN_SYMBOL } from "../core"
 import { IFarmTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo, withCurrentReward, withCurrentRewardPriceUSD } from "../utils/transaction"
-import { cachedPrice } from "./info"
 
 export interface ICurrentBalanceInfo {
   investmentType: InvestmentTypeObject,
@@ -25,7 +24,7 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
   let currentBalanceInfos = await withCurrentReward(account, transactionInfos)
 
   // Apply price in USD to rewards
-  const symbolPriceUSDMap = cachedPrice.symbolPriceUSDMap[REWARD_TOKEN_SYMBOL] ? cachedPrice.symbolPriceUSDMap : await fetchPriceUSD([REWARD_TOKEN_SYMBOL])
+  const symbolPriceUSDMap = await fetchPriceUSD([REWARD_TOKEN_SYMBOL])
   currentBalanceInfos = withCurrentRewardPriceUSD(currentBalanceInfos, symbolPriceUSDMap)
 
   // sum each transfers

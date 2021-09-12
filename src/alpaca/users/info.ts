@@ -7,11 +7,6 @@ import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbo
 import { getTokenInfoFromTransferAddressMap, withDirection, withPriceUSD, withRecordedPriceUSD } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
-export const cachedPrice = {
-  symbolPriceUSDMap: {},
-  symbolSlugYMDPriceUSDMap: {},
-}
-
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
   // Get transactions
   const transactions = await getTransactions(account)
@@ -74,31 +69,26 @@ export const getTransactionTransferInfos = async (transactionInfos: ITransaction
     const otherSymbols = symbols.filter(symbol => !symbol.startsWith('ib'))
     const mixedSymbols = [...Array.from(new Set([...otherSymbols, ...ibPairedSymbols]))]
 
-    cachedPrice.symbolPriceUSDMap = await fetchPriceUSD(mixedSymbols)
+    const symbolPriceUSDMap = await fetchPriceUSD(mixedSymbols)
 
-    transferInfos = withPriceUSD(transferInfos, cachedPrice.symbolPriceUSDMap)
+    transferInfos = withPriceUSD(transferInfos, symbolPriceUSDMap)
 
     // Hotfix ib price
     if (ibSymbols.length > 0) {
       // Just use base price for now, TODO : multiply with ib price
       ibSymbols.forEach((symbol, i) => {
-        cachedPrice.symbolPriceUSDMap[symbol] = cachedPrice.symbolPriceUSDMap[ibPairedSymbols[i]]
+        symbolPriceUSDMap[symbol] = symbolPriceUSDMap[ibPairedSymbols[i]]
       })
     }
 
     // Apply price in USD to transactions
-    transactionInfos = withTransactionPriceUSD(transactionInfos, cachedPrice.symbolPriceUSDMap)
+    transactionInfos = withTransactionPriceUSD(transactionInfos, symbolPriceUSDMap)
   } else {
-    cachedPrice.symbolSlugYMDPriceUSDMap = symbolSlugYMDPriceUSDMap
-
     // Apply historical price in USD to transfers
-    transferInfos = withRecordedPriceUSD(transferInfos, cachedPrice.symbolSlugYMDPriceUSDMap)
-
-    // TODO: Hotfix ib price
-
+    transferInfos = withRecordedPriceUSD(transferInfos, symbolSlugYMDPriceUSDMap)
 
     // Apply price in USD to transactions
-    transactionInfos = withRecordedTransactionPriceUSD(transactionInfos, cachedPrice.symbolSlugYMDPriceUSDMap)
+    transactionInfos = withRecordedTransactionPriceUSD(transactionInfos, symbolSlugYMDPriceUSDMap)
   }
 
   // Group transfers by block number
