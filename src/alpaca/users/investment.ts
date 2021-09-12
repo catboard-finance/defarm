@@ -112,7 +112,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
       case InvestmentTypeObject.farm:
         const farmTx = e as unknown as IFarmTransaction
 
-        const farmNames = e.name.split(' ')
+        const farmNames = e.name?.split(' ') || `${farmTx.stratSymbol}-${farmTx.principalSymbol}`
         const farmName = farmNames[1] === 'CakeMaxiWorker' ? `CAKE^${farmNames[0]}` : farmNames[0]
 
         return {

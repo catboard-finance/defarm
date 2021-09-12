@@ -11,12 +11,13 @@ import { MethodType } from '../../type';
 
 import alpacaInfo from '../info.mainnet.json'
 
-const WORKER_ADDRESS_MAP = {
-  "0xe8084D7Ded35E2840386f04d609cdb49C7E36d88": "USDT CakeMaxiWorker",
-  "0xECb008F4741465F9F169EC11A50Aa8871E423F33": "CAKE-USDT PancakeswapWorker",
-  "0x41c1D9544ED9fa6b604ecAf7430b4CfDf883c46F": "BUSD CakeMaxiWorker",
-  "0x4BfE9489937d6C0d7cD6911F1102c25c7CBc1B5A": "ALPACA-BUSD PancakeswapWorker",
-}
+const WORKER_ADDRESS_MAP = Object.assign({}, ...alpacaInfo.Vaults.map(
+  vault => vault.workers.map(
+    worker => ({
+      [worker.address]: worker.name
+    })
+  ).flat()
+).flat())
 
 const SharedStrategies_StrategyAddBaseTokenOnly = Object.values(alpacaInfo.SharedStrategies).map(e => Object.values(e)).flat()
 
