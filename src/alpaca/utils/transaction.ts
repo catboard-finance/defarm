@@ -86,7 +86,7 @@ export interface IFarmTransaction extends ITransactionInfo {
   principalAmount: number
   principalValueUSD: number
 
-  stratAddress: string // 
+  stratAddress: string
   stratSymbol: string
   stratAmount: number
   stratValueUSD: number
