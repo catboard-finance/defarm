@@ -10,3 +10,20 @@ export const fetchPriceUSD = async (ids?: string[]) => {
 
   return priceUSDMap
 }
+
+export const fetchRecordedPriceUSD = async (keys?: string[]): Promise<{ [slug: string]: number }[]> => {
+  const PRICE_URI = `https://api.undefi.org/v1/price`
+  const res = await fetch(PRICE_URI, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.UNDEFI_API_KEY,
+    },
+    body: JSON.stringify({ keys }),
+  })
+  const priceList = await res.json()
+  const { success, result } = priceList
+  if (!success) throw new Error(result)
+
+  return result
+}

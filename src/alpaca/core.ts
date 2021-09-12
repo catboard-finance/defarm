@@ -82,14 +82,24 @@ export const filterSupportedSymbols = (symbols: string[] = null) => {
 
 export const getUniqueAddressesFromTransfers = (transfers: ITransfer[]) => [...Array.from(new Set(transfers.map(e => e.address)))]
 
-export const getUniqueSymbolsFromTransfers = (transfers: ITransfer[]) => {
+export const getUniqueSymbolsFromTransfers = (transfers: ITransfer[], chain = 'bsc') => {
   const tokenAddresses = getUniqueAddressesFromTransfers(transfers)
-  const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)
-  return tokenSymbols
+  const ymds = transfers.map(e => new Date(e.block_timestamp).toISOString().slice(0, 10))
+  const symbols = getSymbolsFromAddresses(tokenAddresses)
+  const symbolSlugYMDs = transfers.map((tf, i) => `${chain.toUpperCase()}:${getSymbolFromAddress(tf.address)}:${ymds[i]}`)
+  return { symbols, symbolSlugYMDs }
 }
 
 export const getSymbolsFromTransfers = (transfers: ITransfer[]) => {
   const tokenAddresses = transfers.map(e => e.address)
   const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)
   return tokenSymbols
+}
+
+export const getSymbolSlugsFromTransfers = (transfers: ITransfer[], chain = 'bsc') => {
+  const tokenAddresses = transfers.map(e => e.address)
+  const ymds = transfers.map(e => new Date(e.block_timestamp).toISOString().slice(0, 10))
+  const symbols = getSymbolsFromAddresses(tokenAddresses)
+  const symbolSlugYMDs = symbols.map((symbol, i) => `${chain.toUpperCase()}:${symbol}:${ymds[i]}`)
+  return { symbols, symbolSlugYMDs }
 }

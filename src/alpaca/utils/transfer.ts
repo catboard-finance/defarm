@@ -1,4 +1,4 @@
-import { getSymbolFromAddress, getSymbolsFromTransfers } from ".."
+import { getSymbolFromAddress, getSymbolsFromTransfers, getSymbolSlugsFromTransfers } from ".."
 import { DirectionType, ITransfer, ITransferInfo } from "../../type"
 import { stringToFloat } from "./converter"
 
@@ -24,6 +24,30 @@ export const withPriceUSD = (transfers: ITransfer[], symbolPriceUSDMap: { [symbo
   return transfers.map((transfer, i) => {
     const tokenSymbol = symbols[i]
     const tokenPriceUSD = parseFloat(symbolPriceUSDMap[tokenSymbol])
+    const tokenAmount = stringToFloat(transfer.value)
+    const tokenValueUSD = tokenPriceUSD * tokenAmount
+    return ({
+      ...transfer,
+      tokenSymbol,
+      tokenPriceUSD,
+      tokenAmount,
+      tokenValueUSD,
+    }) as unknown as ITransferInfo
+  })
+}
+
+export const withRecordedPriceUSD = (transfers: ITransfer[], symbolSlugYMDPriceUSDMap: { [symbolSlugYMD: string]: number }): ITransferInfo[] => {
+  // Get symbols
+  const { symbols, symbolSlugYMDs } = getSymbolSlugsFromTransfers(transfers)
+
+  // Attach usd price and return
+  return transfers.map((transfer, i) => {
+    const tokenSymbol = symbols[i]
+    const tokenSymbolSlug = symbolSlugYMDs[i]
+    const tokenPriceUSD = (symbolSlugYMDPriceUSDMap[tokenSymbolSlug] && !tokenSymbol.startsWith('ib')) ?
+      symbolSlugYMDPriceUSDMap[tokenSymbolSlug] :
+      symbolSlugYMDPriceUSDMap[tokenSymbolSlug.replace('BSC:ib', 'BSC:')]
+
     const tokenAmount = stringToFloat(transfer.value)
     const tokenValueUSD = tokenPriceUSD * tokenAmount
     return ({
