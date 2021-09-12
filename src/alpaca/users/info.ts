@@ -1,9 +1,9 @@
 import _ from "lodash"
-import { filterInvestmentTransfers, getUniqueSymbolsFromTransfers } from ".."
+import { filterInvestmentTransfers, getUniqueSymbolsFromTransactions, getUniqueSymbolsFromTransfers } from ".."
 import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD, fetchRecordedPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
-import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withTransactionPriceUSD } from "../utils/transaction"
+import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withTransactionPriceUSD, withRecordedTransactionPriceUSD } from "../utils/transaction"
 import { getTokenInfoFromTransferAddressMap, withDirection, withPriceUSD, withRecordedPriceUSD } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
@@ -47,9 +47,15 @@ export const getTransactionTransferInfos = async (transactionInfos: ITransaction
   // Add token info by tokens address
   transactionInfos = withSymbol(transactionInfos, tokenInfoFromTransferAddressMap)
 
+  // TODO: use withSymbol with transferInfos
+
   ////////////////// PRICES //////////////////
 
-  const { symbols, symbolSlugYMDs } = getUniqueSymbolsFromTransfers(transferInfos)
+  const { symbols: tf_symbols, symbolSlugYMDs: tf_symbolSlugYMDs } = getUniqueSymbolsFromTransfers(transferInfos)
+  const { symbols: tx_symbols, symbolSlugYMDs: tx_symbolSlugYMDs } = getUniqueSymbolsFromTransactions(transactionInfos)
+
+  const symbols = _.uniq([...tf_symbols, ...tx_symbols])
+  const symbolSlugYMDs = _.uniq([...tf_symbolSlugYMDs, ...tx_symbolSlugYMDs])
 
   // ib?
   const noib_symbolSlugYMDs = symbolSlugYMDs.map(symbol => symbol.startsWith('BSC:ib') ? symbol.replace('BSC:ib', 'BSC:') : symbol)
@@ -91,7 +97,8 @@ export const getTransactionTransferInfos = async (transactionInfos: ITransaction
     // TODO: Hotfix ib price
 
 
-    // TODO: Apply price in USD to transactions
+    // Apply price in USD to transactions
+    transactionInfos = withRecordedTransactionPriceUSD(transactionInfos, cachedPrice.symbolSlugYMDPriceUSDMap)
   }
 
   // Group transfers by block number

@@ -15,10 +15,11 @@ export interface ITransactionInfo extends ITransaction {
   name: string
   positionId: number
   vaultAddress: string // "0x3fc149995021f1d7aec54d015dad3c7abc952bf0",
+
   principalSymbol: string // "ALPACA",
   principalAddress: string // "0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F",
   principalAmount: number //695.245603609934955053,
-  priceUSD: number // 1042.8684054149,
+
   block_timestamp: string // Date "2021-08-07T14:45:51.000Z",
   block_number: string // "10277278",
   block_hash: string // "0x9673166f4eb5e5f7a224d40ec2d3572777f51badf2e6ce7ed5bfb373b6325e06"
@@ -328,6 +329,29 @@ export const withTransactionPriceUSD = (transactionInfos: ITransactionInfo[], sy
           // TOFIX: We can't get correct stratSymbol yet
           stratValueUSD: farmTx.stratAmount * parseFloat(symbolPriceUSDMap[farmTx.stratSymbol]),
           principalValueUSD: farmTx.principalAmount * parseFloat(symbolPriceUSDMap[farmTx.principalSymbol]),
+        }
+      default:
+        return e
+    }
+  })
+
+  return res
+}
+
+export const withRecordedTransactionPriceUSD = (transactionInfos: ITransactionInfo[], symbolSlugYMDPriceUSDMap: { [symbolSlugYMD: string]: string }, chain = 'bsc') => {
+  const res = transactionInfos.map(e => {
+    switch (e.investmentType) {
+      case InvestmentTypeObject.farm:
+        const farmTx = e as unknown as IFarmTransaction
+        const ymds = new Date(e.block_timestamp).toISOString().slice(0, 10)
+        const stratPriceUSD = parseFloat(symbolSlugYMDPriceUSDMap[`${chain.toUpperCase()}:${farmTx.stratSymbol}:${ymds}`])
+        const principalPriceUSD = parseFloat(symbolSlugYMDPriceUSDMap[`${chain.toUpperCase()}:${farmTx.principalSymbol}:${ymds}`])
+
+        return {
+          ...e,
+          // TOFIX: We can't get correct stratSymbol yet
+          stratValueUSD: farmTx.stratAmount * stratPriceUSD,
+          principalValueUSD: farmTx.principalAmount * principalPriceUSD,
         }
       default:
         return e

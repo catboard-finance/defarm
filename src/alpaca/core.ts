@@ -3,6 +3,7 @@ import TOKENS from './tokens.json'
 import INFO from './info.mainnet.json'
 
 import { ITransfer } from '../type'
+import { ITransactionInfo } from './utils/transaction';
 
 export const FAIR_LAUNCH_ADDRESS = INFO.FairLaunch.address;
 export const REWARD_TOKEN_SYMBOL = 'ALPACA';
@@ -101,5 +102,23 @@ export const getSymbolSlugsFromTransfers = (transfers: ITransfer[], chain = 'bsc
   const ymds = transfers.map(e => new Date(e.block_timestamp).toISOString().slice(0, 10))
   const symbols = getSymbolsFromAddresses(tokenAddresses)
   const symbolSlugYMDs = symbols.map((symbol, i) => `${chain.toUpperCase()}:${symbol}:${ymds[i]}`)
+  return { symbols, symbolSlugYMDs }
+}
+
+export const getUniqueSymbolsFromTransactions = (transactions: ITransactionInfo[], chain = 'bsc') => {
+  const ymds = transactions.map(e => new Date(e.block_timestamp).toISOString().slice(0, 10))
+  const symbols = Array.from(new Set(
+    // TODO: move principalSymbol to IFarmTransactionInfo
+    ...transactions.map(e => e['principalSymbol']),
+    ...transactions.map(e => e['stratSymbol']),
+  ))
+
+  let symbolSlugYMDs = []
+  transactions.forEach((tf, i) => {
+    tf['principalSymbol'] && symbolSlugYMDs.push(`${chain.toUpperCase()}:${tf['principalSymbol']}:${ymds[i]}`)
+    tf['stratSymbol'] && symbolSlugYMDs.push(`${chain.toUpperCase()}:${tf['stratSymbol']}:${ymds[i]}`)
+  })
+  symbolSlugYMDs = Array.from(new Set(symbolSlugYMDs))
+
   return { symbols, symbolSlugYMDs }
 }
