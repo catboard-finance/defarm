@@ -78,7 +78,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
 export interface IFarmTransaction extends ITransactionInfo {
   farmName: string
   positionId: number
-  loanValueUSD: number
+  loanAmount: number
   workerAddress: string
 
   vaultAddress: string
@@ -207,11 +207,11 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const positionId = result ? result.id : null
-        const loanValueUSD = result ? stringToFloat(result.loan?.toString() ?? '0') : null
+        const loanAmount = result ? stringToFloat(result.loan?.toString() ?? '0') : null
         return {
           ...e,
           positionId,
-          loanValueUSD,
+          loanAmount,
         } as IFarmTransaction
       default:
         return e
