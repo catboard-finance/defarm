@@ -108,6 +108,7 @@ export interface ILendTransaction extends ITransactionInfo {
   poolAddress: string
 
   depositSymbol: string
+
   depositAmount?: number
   depositValueUSD?: number
 
@@ -122,8 +123,9 @@ export interface IStakeTransaction extends ITransactionInfo {
   poolAddress: string
 
   stakeSymbol: string
-  stakeAmount?: number
-  stakeValueUSD?: number
+
+  totalStakeAmount?: number
+  totalStakeValueUSD?: number
 
   unstakeSymbol: string
 
@@ -196,7 +198,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
 export const withRecordedPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
   const promises = transactionInfos.map(e => {
     if (e.investmentType !== InvestmentTypeObject.farm) return null
-    return getPositionIdFromGetBlock(e.to_address, e.block_number)
+    return getPositionIdFromGetBlock(e.to_address, e.block_number, e.hash)
   })
 
   const results = await Promise.all(promises)

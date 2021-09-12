@@ -16,10 +16,10 @@ export const getPositionRecordFromWorkEvent = async (address: string, blockNumbe
   }
 }
 
-export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, chain: Chain = 'bsc'): Promise<{ id: number, loan: BigNumber }> => {
+export const getPositionIdFromGetBlock = async (address: string, blockNumber: string, transactionHash: string, chain: Chain = 'bsc'): Promise<{ id: number, loan: BigNumber }> => {
   const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
   const topic = 'Work(uint256,uint256)'
-  const result = await provider.getLogs({
+  const events = await provider.getLogs({
     address,
     fromBlock: parseInt(blockNumber),
     toBlock: parseInt(blockNumber),
@@ -48,7 +48,9 @@ export const getPositionIdFromGetBlock = async (address: string, blockNumber: st
     "type": "event"
   }]);
 
-  const decodedEventLog = iface.decodeEventLog("Work", result[0].data, result[0].topics);
+  const matchedEvent = events.find(e => e.transactionHash === transactionHash)
+  const decodedEventLog = iface.decodeEventLog("Work", matchedEvent.data, matchedEvent.topics);
+
   return {
     id: parseInt(decodedEventLog.id),
     loan: BigNumber.from(decodedEventLog.loan),
