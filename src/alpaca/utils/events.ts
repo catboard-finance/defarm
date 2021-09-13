@@ -4,6 +4,7 @@ import { Chain } from "@defillama/sdk/build/general";
 import { BigNumber, ethers, utils } from "ethers";
 import { Interface } from "ethers/lib/utils";
 import { getWorkEvent } from "../vaults/vaultEvent";
+import abi from '../../alpaca/users/userWork.abi.json'
 
 const GETBLOCK_API_KEY = process.env.GETBLOCK_API_KEY
 const RPC_URL = `https://bsc.getblock.io/mainnet/?api_key=${GETBLOCK_API_KEY}`
@@ -28,25 +29,7 @@ export const getPositionIdFromGetBlock = async (address: string, blockNumber: st
     ]
   });
 
-  const iface = new Interface([{
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "loan",
-        "type": "uint256"
-      }
-    ],
-    "name": "Work",
-    "type": "event"
-  }]);
+  const iface = new Interface([abi.Work]);
 
   const matchedEvent = events.find(e => e.transactionHash === transactionHash)
   const decodedEventLog = iface.decodeEventLog("Work", matchedEvent.data, matchedEvent.topics);

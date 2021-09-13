@@ -151,3 +151,8 @@ import { alpaca } from '@undefiorg/defarm'
 const lends = await alpaca.fetchUserLends('0x8155430e4860e791aeddb43e4764d15de7e0def1')
 const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de7e0def1')
 ```
+
+### TODO
+- [ ] Fix `debtValue` is amount (currently assume as `USD`).
+- [ ] Add `kill` support.
+- [ ] Use `0x0002e89a801bf95a131fbbbdfd3097fa84809d7c` for stress kill test.

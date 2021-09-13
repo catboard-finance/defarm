@@ -1,11 +1,18 @@
+import { filterVaults } from ".";
 import { _fetchUserPositionWithAPIs } from "../api";
 import { parseVaultInput } from "./worker";
 import mockedTransactions from './__snapshots__/transactions.json'
+import mocked_transfers from '../../account/__snapshots__/transfers.json'
 
 describe('🦙 Vault', () => {
   beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
     jest.spyOn(console, 'log').mockImplementation(() => { });
+  });
+
+  it('can get all alpaca vault related transfers.', async () => {
+    const res = filterVaults(mocked_transfers['result'])
+    expect(res).toBeDefined()
   });
 
   it('can get positions', async () => {

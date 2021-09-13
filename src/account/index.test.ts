@@ -1,6 +1,4 @@
 import { getEventsByBlockNumber, getTransactions, getTransfers } from ".";
-import { filterVaults } from "../alpaca";
-import mocked_transfers from './__snapshots__/transfers.json'
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 
@@ -20,35 +18,21 @@ describe('🐈 User', () => {
     expect(res).not.toBeNull()
   });
 
-  it.skip('can get events by topic.', async () => {
-    const abi = `{
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "loan",
-          "type": "uint256"
-        }
-      ],
-      "name": "Work",
-      "type": "event"
-    }`
+  it('can get work events by topic.', async () => {
+    const abi = require('../alpaca/users/userWork.abi.json')
 
     const topic = 'Work(uint256,uint256)'
-    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', abi, topic, '9967403')
+    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', JSON.stringify(abi.Work), topic, 9967403)
 
     expect(events).not.toBeNull()
   });
 
-  it('can get all alpaca vault related transfers.', async () => {
-    const res = filterVaults(mocked_transfers['result'])
-    expect(res).toBeDefined()
+  it('can get kill events by topic.', async () => {
+    const abi = require('../alpaca/users/userKill.abi.json')
+
+    const topic = 'Kill(uint256,address,address,uint256,uint256,uint256,uint256)'
+    const events = await getEventsByBlockNumber('0x158da805682bdc8ee32d52833ad41e74bb951e59', JSON.stringify(abi.Kill), topic, 9967403)
+
+    expect(events).not.toBeNull()
   });
 })
