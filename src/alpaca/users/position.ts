@@ -2,6 +2,8 @@ import { api } from "@defillama/sdk"
 import { Chain } from "@defillama/sdk/build/general"
 import { BigNumber } from "ethers"
 import _ from "lodash"
+import { getPoolByPoolAddress } from ".."
+import { fetchRecordedPriceUSD } from "../../coingecko"
 import { stringToFloat } from "../utils/converter"
 import abi from './userPosition.abi.json'
 
@@ -12,8 +14,8 @@ export interface IGetPositionParams {
 }
 
 interface IEncodedUserPosition extends IGetPositionParams {
-  positionValueUSDbn: BigNumber // BigNumber
-  debtValueUSDbn: BigNumber // BigNumber
+  positionValueBN: BigNumber // BigNumber
+  debtValueBN: BigNumber // BigNumber
 }
 
 export const getCurrentPositions = async (positions: IGetPositionParams[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedUserPosition[]> => {
@@ -35,8 +37,8 @@ export const getCurrentPositions = async (positions: IGetPositionParams[], block
 
   const encodedPositions: IEncodedUserPosition[] = positions.map((position, i) => ({
     ...position,
-    positionValueUSDbn: BigNumber.from(positionInfos[i].output[0]),
-    debtValueUSDbn: BigNumber.from(positionInfos[i].output[1])
+    positionValueBN: BigNumber.from(positionInfos[i].output[0]),
+    debtValueBN: BigNumber.from(positionInfos[i].output[1])
   }))
 
   return encodedPositions
@@ -44,14 +46,32 @@ export const getCurrentPositions = async (positions: IGetPositionParams[], block
 
 export const withCurrentPosition = async (positionParams: IGetPositionParams[]) => {
   const positions = await getCurrentPositions(positionParams)
+  const today = new Date().toISOString().slice(0, 10)
+
+  // Prepare symbol
+  const symbolKeys = positions.map(position => {
+    const pool = getPoolByPoolAddress(position.vaultAddress)
+    return `BSC:${pool.unstakeToken}:${today}`
+  })
+
+  // Prepare price
+  const symbolPriceUSDMap = await fetchRecordedPriceUSD(symbolKeys)
 
   const res = positions.map(position => {
+    const pool = getPoolByPoolAddress(position.vaultAddress)
+    const positionValue = stringToFloat(position.positionValueBN.toString())
+    const debtValue = stringToFloat(position.debtValueBN.toString())
+    const symbolKey = `BSC:${pool.unstakeToken}:${today}`
+    const priceUSD = symbolPriceUSDMap[symbolKey]
+
     return {
       positionId: position.positionId,
       farmName: position.farmName,
       vaultAddress: position.vaultAddress,
-      positionValueUSD: stringToFloat(position.positionValueUSDbn.toString()),
-      debtValueUSD: stringToFloat(position.debtValueUSDbn.toString()),
+      positionValue,
+      debtValue,
+      positionValueUSD: positionValue * priceUSD,
+      debtValueUSD: debtValue * priceUSD,
     }
   })
 

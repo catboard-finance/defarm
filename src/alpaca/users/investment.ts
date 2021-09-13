@@ -134,7 +134,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           borrowValueUSD: farmTx.borrowAmount,
 
           totalInvestValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') ?? 0,
-          totalDebtValueUSD: farmTx.borrowValueUSD,
+          totaldebtValue: farmTx.borrowValueUSD,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction

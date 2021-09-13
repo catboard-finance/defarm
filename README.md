@@ -153,6 +153,10 @@ const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de
 ```
 
 ### TODO
-- [ ] Fix `debtValue` is amount (currently assume as `USD`).
+- [x] Record today price every 5 minutes.
+- [x] Fix `debtValue` is amount (currently assume as `USD`).
+- [ ] Add equity to current.farms.
+- [ ] Add total position,debt,equity to summary.farms.
 - [ ] Add `kill` support.
+- [ ] Find close position state.
 - [ ] Use `0x0002e89a801bf95a131fbbbdfd3097fa84809d7c` for stress kill test.

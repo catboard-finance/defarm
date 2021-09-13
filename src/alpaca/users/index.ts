@@ -44,22 +44,22 @@ export const fetchUserPositionWithAPIs = async (account: string): Promise<IUserP
 
   // Parsed
   const parsedUserPositions = userPositions.map(userPosition => {
-    const positionValueUSD = parseFloat(formatBigNumberToFixed(userPosition.positionValueUSDbn))
-    const debtValueUSD = parseFloat(formatBigNumberToFixed(userPosition.debtValueUSDbn))
-    const equityValueUSD = positionValueUSD - debtValueUSD
-    const debtRatio = debtValueUSD <= 0 ? 0 : 100 * debtValueUSD / positionValueUSD
+    const positionValue = parseFloat(formatBigNumberToFixed(userPosition.positionValueBN))
+    const debtValue = parseFloat(formatBigNumberToFixed(userPosition.debtValueBN))
+    const equityValue = positionValue - debtValue
+    const debtRatio = debtValue <= 0 ? 0 : 100 * debtValue / positionValue
     const safetyBuffer = 80 - debtRatio
 
     // const farmTokenPriceUSD = parseFloat(symbolPriceUSDMap[userPosition.farmSymbol.toUpperCase()])
-    // const quoteTokenAmount = positionValueUSD * 0.5
+    // const quoteTokenAmount = positionValue * 0.5
     // const farmTokenAmount = quoteTokenAmount / farmTokenPriceUSD
 
     return ({
       ...userPosition,
-      positionValueUSD,
-      debtValueUSD,
+      positionValue,
+      debtValue,
       vaultSymbol: userPosition.vaultSymbol,
-      equityValueUSD,
+      equityValue,
       debtRatio,
       safetyBuffer,
       // farmTokenAmount,

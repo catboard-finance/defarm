@@ -41,10 +41,11 @@ export interface IUserBalance {
 }
 
 export interface IUserPositionUSD {
-  positionValueUSD: number;
-  debtValueUSD: number;
+  positionValue: number;
+  debtValue: number;
+  equityValue: number;
+
   vaultSymbol: string;
-  equityValueUSD: number;
   debtRatio: number;
   safetyBuffer: number;
 

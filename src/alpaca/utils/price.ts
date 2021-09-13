@@ -2,6 +2,10 @@ import { fetchTokenUSDPricesBySymbols } from "../../pancakeswap"
 import { ITransfer } from "../../type"
 import { getUniqueAddressesFromTransfers, getSymbolsFromAddresses } from "../core"
 
+export interface IPriceUSDMap {
+  [slug: string]: number
+}
+
 export const getSymbolPriceUSDMapByAddresses = async (transfers: ITransfer[]) => {
   const tokenAddresses = getUniqueAddressesFromTransfers(transfers)
   const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)

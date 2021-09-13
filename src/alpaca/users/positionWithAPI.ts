@@ -17,8 +17,8 @@ interface IPositionWithAPI {
 }
 
 export interface IEncodedUserPositionWithAPI extends IPositionWithAPI {
-  positionValueUSDbn: BigNumber // BigNumber
-  debtValueUSDbn: BigNumber // BigNumber
+  positionValueBN: BigNumber // BigNumber
+  debtValueBN: BigNumber // BigNumber
 }
 
 export interface IUserPositionWithAPI extends IEncodedUserPositionWithAPI {
@@ -45,8 +45,8 @@ export const getUserPositionWithAPIs = async (positions: IPositionWithAPI[], blo
 
   let encodedPositions: IEncodedUserPositionWithAPI[] = positions.map((position, i) => ({
     ...position,
-    positionValueUSDbn: BigNumber.from(positionInfos[i].output[0]),
-    debtValueUSDbn: BigNumber.from(positionInfos[i].output[1])
+    positionValueBN: BigNumber.from(positionInfos[i].output[0]),
+    debtValueBN: BigNumber.from(positionInfos[i].output[1])
   }))
 
   // Get quote symbol
