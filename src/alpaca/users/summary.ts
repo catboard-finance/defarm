@@ -39,13 +39,17 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]) => {
       const outTransfers = farmInfo.transfers.filter(transfer => transfer.direction === 'out')
       const symbols = getUniqueSymbolsFromUserInvestmentTransfer(outTransfers)
       const symbolInfos = symbols.map(tokenSymbol => {
+        // This is no use but just in case we have more than 2 symbols and 2 transfers in sane transaction.
         const targets = outTransfers.filter(transfer => transfer.tokenSymbol === tokenSymbol)
+        const tokenAmount = _.sumBy(targets, 'tokenAmount')
+        const tokenValueUSD = _.sumBy(targets, 'tokenValueUSD')
+        const tokenPriceUSD = tokenValueUSD / tokenAmount
 
         return {
           tokenSymbol,
-          tokenAmount: _.sumBy(targets, 'tokenAmount'),
-          tokenPriceUSD: _.meanBy(targets, 'tokenPriceUSD'),
-          tokenValueUSD: _.sumBy(targets, 'tokenValueUSD'),
+          tokenAmount,
+          tokenPriceUSD,
+          tokenValueUSD,
         }
       })
 
@@ -54,12 +58,18 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]) => {
 
     // Sum by token symbol
     const spendGroup = _.groupBy(spendAlls, 'tokenSymbol')
-    const spends = Object.values(spendGroup).map(spend => {
+    const spendGroups = Object.values(spendGroup)
+    const spends = spendGroups.map(spend => {
+      const tokenSymbol = spend[0].tokenSymbol
+      const tokenAmount = _.sumBy(spend, 'tokenAmount')
+      const tokenValueUSD = _.sumBy(spend, 'tokenValueUSD')
+      const tokenPriceUSD = tokenValueUSD / tokenAmount
+
       return {
-        tokenSymbol: spend[0].tokenSymbol,
-        tokenAmount: _.sumBy(spend, 'tokenAmount'),
-        tokenPriceUSD: _.meanBy(spend, 'tokenPriceUSD'),
-        tokenValueUSD: _.sumBy(spend, 'tokenValueUSD'),
+        tokenSymbol,
+        tokenAmount,
+        tokenPriceUSD,
+        tokenValueUSD,
       }
     })
 
