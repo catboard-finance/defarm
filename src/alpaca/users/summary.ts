@@ -1,5 +1,5 @@
 import _ from "lodash"
-import { IGetPositionParams, withCurrentPosition } from "./position";
+import { ICurrentPosition, IGetPositionParams, withCurrentPosition } from "./position";
 import { IFarmInvestmentInfo, ILendInvestmentInfo, IStakeInvestmentInfo, IUserInvestmentInfo, IUserInvestmentTransfer } from "./investment";
 import { InvestmentTypeObject } from "../utils/transaction";
 import { ICurrentBalanceInfo } from "./current";
@@ -29,7 +29,24 @@ const getUniqueSymbolsFromUserInvestmentTransfer = (transfers: IUserInvestmentTr
   return [...new Set(transfers.map(transfer => transfer.tokenSymbol))]
 }
 
-const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]) => {
+export interface ISpend {
+  tokenSymbol: string,
+  tokenAmount: number,
+  tokenPriceUSD: number,
+  tokenValueUSD: number,
+}
+
+export interface IPositionSummary {
+  positionId: number,
+  farmName: string,
+  vaultAddress: string,
+  spends: ISpend[],
+  positionValueUSD: number,
+  debtValueUSD: number,
+  equityValueUSD: number,
+}
+
+const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionSummary[] => {
   const recordedFarmGroup = _.groupBy(farmHistories, 'positionId')
   const farms = Object.values(recordedFarmGroup)
   const farmPositions = farms.map((farmInfos: IFarmInvestmentInfo[]) => {
@@ -73,11 +90,20 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]) => {
       }
     })
 
+    const stratValueUSD = _.sumBy(farmInfos, 'stratValueUSD') || 0
+    const principalValueUSD = _.sumBy(farmInfos, 'principalValueUSD') || 0
+    const debtValueUSD = _.sumBy(farmInfos, 'borrowValueUSD') || 0
+    const positionValueUSD = stratValueUSD + principalValueUSD + debtValueUSD
+    const equityValueUSD = positionValueUSD - debtValueUSD
+
     return {
       positionId: farmInfos[0].positionId,
       farmName: farmInfos[0].farmName,
       vaultAddress: farmInfos[0].vaultAddress,
       spends,
+      positionValueUSD,
+      debtValueUSD,
+      equityValueUSD,
     }
   })
 
@@ -99,9 +125,18 @@ const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
   return earnCurrents
 }
 
-// const withPositionSummary = (farmHistories: IFarmInvestmentInfo[]) => {
-//   return farmHistories.map
-// }
+const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => {
+  const farmPNLs = farmCurrents.map((farmCurrent, i) => {
+    const farmSummary = farmSummaries[i]
+    return {
+      farmName: farmCurrent.farmName,
+      positionId: farmCurrent.positionId,
+      profit: farmCurrent.equityValueUSD - farmSummary.equityValueUSD,
+    }
+  })
+
+  return farmPNLs
+}
 
 export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentInfo[], userCurrentBalances: ICurrentBalanceInfo[]) => {
 
@@ -120,6 +155,10 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
   const farmCurrents = await withCurrentPosition(farmSummaries as IGetPositionParams[])
   const lendCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.lend)
   const stakeCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.stake)
+
+  ///////// PNL /////////
+
+  const farmPNLs = getFarmPNLs(farmCurrents, farmSummaries)
 
   ///////// EARN /////////
 
@@ -143,8 +182,9 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
       lends: lendCurrents,
       stakes: stakeCurrents,
     },
-    earn: {
-      farm: earnCurrents,
+    pnl: {
+      rewards: earnCurrents,
+      farms: farmPNLs,
     }
   }
 

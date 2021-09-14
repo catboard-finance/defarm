@@ -44,7 +44,18 @@ export const getCurrentPositions = async (positions: IGetPositionParams[], block
   return encodedPositions
 }
 
-export const withCurrentPosition = async (positionParams: IGetPositionParams[]) => {
+export interface ICurrentPosition {
+  positionId: number
+  farmName: string
+  vaultAddress: string
+  positionValue: number
+  debtValue: number
+  positionValueUSD: number
+  debtValueUSD: number
+  equityValueUSD: number
+}
+
+export const withCurrentPosition = async (positionParams: IGetPositionParams[]): Promise<ICurrentPosition[]> => {
   const positions = await getCurrentPositions(positionParams)
   const today = new Date().toISOString().slice(0, 10)
 
@@ -63,6 +74,9 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]) 
     const debtValue = stringToFloat(position.debtValueBN.toString())
     const symbolKey = `BSC:${pool.unstakeToken}:${today}`
     const priceUSD = symbolPriceUSDMap[symbolKey]
+    const positionValueUSD = positionValue * priceUSD
+    const debtValueUSD = debtValue * priceUSD
+    const equityValueUSD = positionValueUSD - debtValueUSD
 
     return {
       positionId: position.positionId,
@@ -70,9 +84,10 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]) 
       vaultAddress: position.vaultAddress,
       positionValue,
       debtValue,
-      positionValueUSD: positionValue * priceUSD,
-      debtValueUSD: debtValue * priceUSD,
-    }
+      positionValueUSD,
+      debtValueUSD,
+      equityValueUSD,
+    } as ICurrentPosition
   })
 
   return res

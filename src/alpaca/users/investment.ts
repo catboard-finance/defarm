@@ -20,7 +20,7 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
   positionId: number // 9967403,
 
   // depositValueUSD: number // 1000,
-  totalInvestValueUSD: number // 1000,
+  totalSpendValueUSD: number // 1000,
 
   stratAddress: string // "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90",
   stratSymbol: string // "CAKE",
@@ -128,13 +128,12 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           stratAddress: farmTx.stratAddress,
           stratSymbol: farmTx.stratSymbol,
-          stratAmount: farmTx.stratAmount,
+          stratAmount: farmTx.stratAmount || 0,
           stratValueUSD: farmTx.stratValueUSD,
 
-          borrowValueUSD: farmTx.borrowAmount,
+          borrowValueUSD: farmTx.borrowValueUSD,
 
-          totalInvestValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') ?? 0,
-          totaldebtValue: farmTx.borrowValueUSD,
+          totalSpendValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') || 0,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
@@ -149,8 +148,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           depositSymbol: lendTx.depositSymbol,
 
-          totalDepositAmount: _.sumBy(spendingTransfers, 'tokenAmount') ?? 0,
-          totalDepositValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') ?? 0,
+          totalDepositAmount: _.sumBy(spendingTransfers, 'tokenAmount') || 0,
+          totalDepositValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') || 0,
         } as ILendInvestmentInfo
       case InvestmentTypeObject.stake:
         const stakeTx = e as unknown as IStakeTransaction
@@ -167,8 +166,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           stakeSymbol: stakeTx.stakeSymbol,
 
-          totalStakeAmount: _.sumBy(spendingTransfers, 'tokenAmount') ?? 0,
-          totalStakeValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') ?? 0,
+          totalStakeAmount: _.sumBy(spendingTransfers, 'tokenAmount') || 0,
+          totalStakeValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') || 0,
 
           unstakeSymbol: stakeTx.stakeSymbol,
         } as IStakeInvestmentInfo

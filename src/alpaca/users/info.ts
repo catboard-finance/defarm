@@ -3,7 +3,7 @@ import { filterInvestmentTransfers, getUniqueSymbolsFromTransactions, getUniqueS
 import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD, fetchRecordedPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
-import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withTransactionPriceUSD, withRecordedTransactionPriceUSD } from "../utils/transaction"
+import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withTransactionFlatPriceUSD, withRecordedTransactionPriceUSD } from "../utils/transaction"
 import { getTokenInfoFromTransferAddressMap, withDirection, withPriceUSD, withRecordedPriceUSD } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
@@ -82,7 +82,7 @@ export const getTransactionTransferInfos = async (transactionInfos: ITransaction
     }
 
     // Apply price in USD to transactions
-    transactionInfos = withTransactionPriceUSD(transactionInfos, symbolPriceUSDMap)
+    transactionInfos = withTransactionFlatPriceUSD(transactionInfos, symbolPriceUSDMap)
   } else {
     // Apply historical price in USD to transfers
     transferInfos = withRecordedPriceUSD(transferInfos, symbolSlugYMDPriceUSDMap)

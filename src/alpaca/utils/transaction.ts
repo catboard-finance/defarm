@@ -271,7 +271,7 @@ export const withCurrentReward = async (account: string, transactionInfos: ITran
           ...e,
           // rewardSymbol: REWARD_TOKEN_SYMBOL,
           rewardPoolAddress: farmEarning.address,
-          rewardAmount: stringToFloat(BigNumber.from(farmEarning?.pendingAlpaca ?? 0).toString()),
+          rewardAmount: stringToFloat(BigNumber.from(farmEarning?.pendingAlpaca || 0).toString()),
         }
       case InvestmentTypeObject.lend:
         // TODO: rewards from lend?
@@ -285,7 +285,7 @@ export const withCurrentReward = async (account: string, transactionInfos: ITran
           // rewardTokenAddress: getAddressFromSymbol(stakeInfo.rewardToken), // TODO: reward as ib?
           rewardSymbol: stakeInfo?.rewardToken,
           rewardPoolAddress: stakeInfo?.poolAddress,
-          rewardAmount: stringToFloat(BigNumber.from(stakeInfo?.pendingAlpaca ?? 0).toString()),
+          rewardAmount: stringToFloat(BigNumber.from(stakeInfo?.pendingAlpaca || 0).toString()),
         }
       default:
         return e
@@ -321,7 +321,7 @@ export const withCurrentRewardPriceUSD = (transactionInfos: ITransactionInfo[], 
   return res
 }
 
-export const withTransactionPriceUSD = (transactionInfos: ITransactionInfo[], symbolPriceUSDMap: { [symbol: string]: string }) => {
+export const withTransactionFlatPriceUSD = (transactionInfos: ITransactionInfo[], symbolPriceUSDMap: { [symbol: string]: string }) => {
   const res = transactionInfos.map(e => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
@@ -346,14 +346,15 @@ export const withRecordedTransactionPriceUSD = (transactionInfos: ITransactionIn
       case InvestmentTypeObject.farm:
         const farmTx = e as unknown as IFarmTransaction
         const ymds = new Date(e.block_timestamp).toISOString().slice(0, 10)
-        const stratPriceUSD = parseFloat(symbolSlugYMDPriceUSDMap[`${chain.toUpperCase()}:${farmTx.stratSymbol}:${ymds}`])
-        const principalPriceUSD = parseFloat(symbolSlugYMDPriceUSDMap[`${chain.toUpperCase()}:${farmTx.principalSymbol}:${ymds}`])
+        const stratPriceUSD = parseFloat(symbolSlugYMDPriceUSDMap[`${chain.toUpperCase()}:${farmTx.stratSymbol}:${ymds}`]) || 0
+        const principalPriceUSD = parseFloat(symbolSlugYMDPriceUSDMap[`${chain.toUpperCase()}:${farmTx.principalSymbol}:${ymds}`]) || 0
 
         return {
           ...e,
           // TOFIX: We can't get correct stratSymbol yet
           stratValueUSD: farmTx.stratAmount * stratPriceUSD,
           principalValueUSD: farmTx.principalAmount * principalPriceUSD,
+          borrowValueUSD: farmTx.borrowAmount * principalPriceUSD,
         }
       default:
         return e
