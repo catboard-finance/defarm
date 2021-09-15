@@ -11,6 +11,11 @@ import { MethodType } from '../../type';
 
 import alpacaInfo from '../info.mainnet.json'
 
+export enum STRAT_TYPE {
+  withdraw = 'withdraw',
+  deposit = 'deposit',
+}
+
 const WORKER_ADDRESS_MAP = Object.assign({}, ...alpacaInfo.Vaults.map(
   vault => vault.workers.map(
     worker => ({
@@ -19,7 +24,18 @@ const WORKER_ADDRESS_MAP = Object.assign({}, ...alpacaInfo.Vaults.map(
   ).flat()
 ).flat())
 
-const SharedStrategies_StrategyAddBaseTokenOnly = Object.values(alpacaInfo.SharedStrategies).map(e => Object.values(e)).flat()
+const SHARED_STRATEGIES_ADDRESSES = Object.values(alpacaInfo.SharedStrategies).map(e => Object.values(e)).flat()
+const SHARED_STRATEGIES_KEYS = Object.keys(alpacaInfo.SharedStrategies)
+const SHARED_STRATEGIES_VALUES = Object.values(alpacaInfo.SharedStrategies)
+const SHARED_STRATEGIES_MAP = SHARED_STRATEGIES_KEYS.map((e, i) => {
+  const stratType = e
+  const value = SHARED_STRATEGIES_VALUES[i]
+  const kv = []
+  for (let [stratName, stratAddress] of Object.entries(value)) {
+    kv.push({ stratType, stratName, stratAddress })
+  }
+  return kv
+}).flat()
 
 export const parseVaultInput = (data: string) => {
   const iface = new ethers.utils.Interface(Array.from(new Set([
@@ -81,6 +97,7 @@ export const parseVaultInput = (data: string) => {
           maxReturn: stringToFloat(maxReturn),
         }
 
+        // TODO: move to withWorkContext
         // Vault.sol: data = The calldata to pass along to the worker for more working context.
         if (args[5]) {
           const [stratAddress, amountByte] = ethers.utils.defaultAbiCoder.decode(["address", "bytes"], args[5])
@@ -91,10 +108,18 @@ export const parseVaultInput = (data: string) => {
             stratAddress,
           }
 
-          if (SharedStrategies_StrategyAddBaseTokenOnly.includes(stratAddress)) {
+          if (SHARED_STRATEGIES_ADDRESSES.includes(stratAddress)) {
+            // Which strategy is this?
+            const strat = SHARED_STRATEGIES_MAP.find(e => e.stratAddress === stratAddress)
+            parsed = {
+              ...parsed,
+              ...strat,
+            }
+            parsed.stratType = STRAT_TYPE.withdraw
             parsed.minLPAmount = stringToFloat(stratAmount)
             parsed.stratAmount = 0
           } else {
+            parsed.stratType = STRAT_TYPE.deposit
             parsed.minLPAmount = 0
             parsed.stratAmount = stringToFloat(stratAmount)
           }

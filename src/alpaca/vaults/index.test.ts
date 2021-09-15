@@ -4,6 +4,8 @@ import { parseVaultInput } from "./worker";
 import mockedTransactions from './__snapshots__/transactions.json'
 import mocked_transfers from '../../account/__snapshots__/transfers.json'
 
+const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
+
 describe('🦙 Vault', () => {
   beforeAll(() => {
     jest.spyOn(console, 'warn').mockImplementation(() => { });
@@ -16,15 +18,14 @@ describe('🦙 Vault', () => {
   });
 
   it('can get positions', async () => {
-    const positions = await _fetchUserPositionWithAPIs('0x8155430e4860e791aeddb43e4764d15de7e0def1')
+    const positions = await _fetchUserPositionWithAPIs(TEST_ACCOUNT_ADDRESS)
 
     expect(positions).toBeDefined()
   }, 100000);
 
   it('can get parseVaultInput', async () => {
-
     let res = mockedTransactions.result.map(e => {
-      if (e.from_address !== '0x8155430e4860e791aeddb43e4764d15de7e0def1') return null
+      if (e.from_address !== TEST_ACCOUNT_ADDRESS && e.to_address !== TEST_ACCOUNT_ADDRESS) return null
 
       return {
         ...parseVaultInput(e.input),
