@@ -153,12 +153,10 @@ const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de
 ```
 
 ### TODO
-- [ ] Define `close` position state.
-- [ ] Find `closeValueUSD`.
-- [ ] Find `PNL` at closed position time.
 - [ ] Add `priceUSD` to farm.history.
 - [ ] Define `open` position state.
 - [ ] Define `liquidate` position state.
 - [ ] Add all `kill` related support.
 - [ ] Use `0x0002e89a801bf95a131fbbbdfd3097fa84809d7c` for stress kill test.
 - [ ] `kill` in action https://bscscan.com/tx/0xc14748b07056596783c7054dc1b345283aa4e39846ba13fb7084621b7f37f1f8
+- [ ] `kill` list https://explorer.bitquery.io/bsc/txs/calls?contract=0xd7d069493685a581d27824fc46eda46b7efc0063&method=d29a0025
