@@ -21,12 +21,19 @@ export const fetchUserBalance = async (account: string): Promise<IUserBalance[]>
     getERC20Balance(account),
   ])
 
-  const parsedERC20s = erc20.map(e => ({
-    symbol: e.symbol,
-    name: e.name,
-    address: e.token_address,
-    amount: stringToFloat(e.balance, parseInt(e.decimals), parseInt(e.decimals)),
-  }))
+  const parsedERC20s = erc20.map(e => {
+    // Ignore null from API
+    if (e.decimals === null || e.balance === null) {
+      return null
+    }
+
+    return {
+      symbol: e.symbol,
+      name: e.name,
+      address: e.token_address,
+      amount: stringToFloat(e.balance, parseInt(e.decimals), parseInt(e.decimals)),
+    }
+  }).filter(e => e)
 
   return [
     {
