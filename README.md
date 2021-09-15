@@ -161,3 +161,4 @@ const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de
 - [ ] Define `liquidate` position state.
 - [ ] Add all `kill` related support.
 - [ ] Use `0x0002e89a801bf95a131fbbbdfd3097fa84809d7c` for stress kill test.
+- [ ] `kill` in action https://bscscan.com/tx/0xc14748b07056596783c7054dc1b345283aa4e39846ba13fb7084621b7f37f1f8
