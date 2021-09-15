@@ -44,6 +44,11 @@ export const getCurrentPositions = async (positions: IGetPositionParams[], block
   return encodedPositions
 }
 
+export enum PositionStatusType {
+  open = 'open',
+  close = 'close',
+}
+
 export interface ICurrentPosition {
   positionId: number
   farmName: string
@@ -53,6 +58,7 @@ export interface ICurrentPosition {
   positionValueUSD: number
   debtValueUSD: number
   equityValueUSD: number
+  status: PositionStatusType
 }
 
 export const withCurrentPosition = async (positionParams: IGetPositionParams[]): Promise<ICurrentPosition[]> => {
@@ -77,6 +83,7 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]):
     const positionValueUSD = positionValue * priceUSD
     const debtValueUSD = debtValue * priceUSD
     const equityValueUSD = positionValueUSD - debtValueUSD
+    const status = equityValueUSD === 0 ? PositionStatusType.close : PositionStatusType.open
 
     return {
       positionId: position.positionId,
@@ -87,6 +94,7 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]):
       positionValueUSD,
       debtValueUSD,
       equityValueUSD,
+      status,
     } as ICurrentPosition
   })
 
