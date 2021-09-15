@@ -129,7 +129,7 @@ export const fetchUserInvestments = async (account: string) => {
   const transactionsInfos = await getTransactionInfos(account)
   const transferInfos = await getTransferInfos(account)
 
-  // Aggregated transactions and tra
+  // Aggregated transactions and transfers
   const transactionTransferInfos = await getTransactionTransferInfos(transactionsInfos, transferInfos)
 
   // Sum recorded value
