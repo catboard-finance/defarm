@@ -23,6 +23,8 @@ export interface ITransactionInfo extends ITransaction {
   block_timestamp: string // Date "2021-08-07T14:45:51.000Z",
   block_number: string // "10277278",
   block_hash: string // "0x9673166f4eb5e5f7a224d40ec2d3572777f51badf2e6ce7ed5bfb373b6325e06"
+
+  stratType: string // deposit, withdraw
 }
 
 export enum InvestmentTypeObject {
@@ -220,6 +222,30 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
 
   return res
 }
+
+// export const withRecordedClosePosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
+//   const promises = transactionInfos.map(e => {
+//     if (e.investmentType !== InvestmentTypeObject.farm || e.stratType !== STRAT_TYPE.withdraw) return null
+//     return getPositionInfoFromGetBlock(e.to_address, e.block_number, e.hash)
+//   })
+
+//   const results = await Promise.all(promises)
+//   const res = transactionInfos.map((e, i) => {
+//     const result = results[i]
+//     switch (e.investmentType) {
+//       case InvestmentTypeObject.farm:
+//         result
+
+//         return {
+//           ...e
+//         } as IFarmTransaction
+//       default:
+//         return e
+//     }
+//   })
+
+//   return res
+// }
 
 const getFarmDebtPools = (transactionInfos: ITransactionInfo[]) => {
   const poolIds = transactionInfos
