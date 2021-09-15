@@ -153,11 +153,6 @@ const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de
 ```
 
 ### TODO
-- [x] Record today price every 5 minutes.
-- [x] Fix `debtValue` is amount (currently assume as `USD`).
-- [x] mean with weight.
-- [x] Add equity to current.farms.
-- [x] Add total position,debt,equity to summary.farms.
 - [ ] Define `close` position state.
 - [ ] Find `closeValueUSD`.
 - [ ] Find `PNL` at closed position time.
