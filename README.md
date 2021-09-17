@@ -153,8 +153,6 @@ const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de
 ```
 
 ### TODO
-- [ ] Add `priceUSD` to farm.history.
-- [ ] Define `open` position state.
 - [ ] Define `liquidate` position state.
 - [ ] Add all `kill` related support.
 - [ ] Use `0x0002e89a801bf95a131fbbbdfd3097fa84809d7c` for stress kill test.
