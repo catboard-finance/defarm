@@ -13,6 +13,7 @@ export interface IUserInvestmentTransfer {
   tokenAmount: number // 1272.6522003096,
   tokenPriceUSD: number // 22.1,
   tokenValueUSD: number // 1527.12000,
+  transferredAt: string // "2021-08-07T14:45:51.000Z",
 }
 
 export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
@@ -98,6 +99,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         tokenAmount: transfer.tokenAmount,
         tokenPriceUSD: transfer.tokenPriceUSD,
         tokenValueUSD: transfer.tokenValueUSD,
+        transferredAt: transfer.block_timestamp,
       }) as IUserInvestmentTransfer)
 
     const baseInvestment: IUserInvestmentInfo = {

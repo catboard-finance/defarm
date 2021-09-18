@@ -84,6 +84,7 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]):
     const debtValueUSD = debtValue * priceUSD
     const equityValueUSD = positionValueUSD - debtValueUSD
     const status = equityValueUSD === 0 ? PositionStatusType.close : PositionStatusType.open
+    const positionAt = new Date().toISOString()
 
     return {
       positionId: position.positionId,
@@ -95,6 +96,7 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]):
       debtValueUSD,
       equityValueUSD,
       status,
+      positionAt,
     } as ICurrentPosition
   })
 

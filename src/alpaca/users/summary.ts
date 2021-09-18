@@ -61,12 +61,14 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
         const tokenAmount = _.sumBy(targets, 'tokenAmount')
         const tokenValueUSD = _.sumBy(targets, 'tokenValueUSD')
         const tokenPriceUSD = tokenValueUSD / tokenAmount
+        const transferredAt = targets[0].transferredAt
 
         return {
           tokenSymbol,
           tokenAmount,
           tokenPriceUSD,
           tokenValueUSD,
+          transferredAt,
         }
       })
 
@@ -95,6 +97,8 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
     const debtValueUSD = _.sumBy(farmInfos, 'borrowValueUSD') || 0
     const positionValueUSD = stratValueUSD + principalValueUSD + debtValueUSD
     const equityValueUSD = positionValueUSD - debtValueUSD
+    const beginInvestedAt = farmInfos[farmInfos.length - 1].investedAt
+    const endInvestedAt = farmInfos[0].investedAt
 
     return {
       positionId: farmInfos[0].positionId,
@@ -104,6 +108,8 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
       positionValueUSD,
       debtValueUSD,
       equityValueUSD,
+      beginInvestedAt,
+      endInvestedAt,
     }
   })
 
@@ -129,11 +135,11 @@ const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => 
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
     // farmCurrent.equityValueUSD === 0 mean close position
-    const profit = farmCurrent.equityValueUSD > 0 ? farmCurrent.equityValueUSD - farmSummary.equityValueUSD : farmSummary.equityValueUSD
+    const profitUSD = farmCurrent.equityValueUSD > 0 ? farmCurrent.equityValueUSD - farmSummary.equityValueUSD : farmSummary.equityValueUSD
     return {
       farmName: farmCurrent.farmName,
       positionId: farmCurrent.positionId,
-      profit,
+      profitUSD,
     }
   })
 
@@ -187,6 +193,9 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
     pnl: {
       rewards: earnCurrents,
       farms: farmPNLs,
+      totalReward: _.sumBy(earnCurrents, 'rewardAmount'),
+      totalRewardUSD: _.sumBy(earnCurrents, 'rewardValueUSD'),
+      totalFarmsPNL: _.sumBy(farmPNLs, 'profitUSD'),
     }
   }
 
