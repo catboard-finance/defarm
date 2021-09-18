@@ -146,12 +146,15 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
       case InvestmentTypeObject.farm:
         const farmTx = e as IFarmTransaction
         var pool = getPoolByPoolAddress(e.to_address)
-        // Can't get token from stratAddress  e.g. SharedStrategies
         const stratToken = tokenInfoFromTransferAddressMap[farmTx.stratAddress.toLowerCase()]
+
+        // Try again with worker address
+        const stratSymbol = stratToken ? stratToken.symbol : farmTx.name.split(' ')[0].split('-')[0]
+
         return {
           ...e,
 
-          stratSymbol: stratToken?.symbol,
+          stratSymbol,
           principalSymbol: pool.unstakeToken,
           vaultAddress: e.to_address,
 

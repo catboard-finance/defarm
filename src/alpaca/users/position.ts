@@ -5,12 +5,13 @@ import _ from "lodash"
 import { getPoolByPoolAddress } from ".."
 import { fetchRecordedPriceUSD } from "../../coingecko"
 import { stringToFloat } from "../utils/converter"
+import { IPositionSummary } from "./summary"
 import abi from './userPosition.abi.json'
 
 export interface IGetPositionParams {
   vaultAddress: string,
   farmName: string,
-  positionId: number
+  positionId: number,
 }
 
 interface IEncodedUserPosition extends IGetPositionParams {
@@ -59,22 +60,34 @@ export interface ICurrentPosition {
   debtValueUSD: number
   equityValueUSD: number
   status: PositionStatusType
+
+  stratSymbol: string
+  stratValue: number
+  stratValueUSD: number
+
+  principalSymbol: string
+  principalValue: number
+  principalValueUSD: number
+
+  tradeValue: number
+  tradeValueUSD: number
 }
 
-export const withCurrentPosition = async (positionParams: IGetPositionParams[]): Promise<ICurrentPosition[]> => {
+export const withCurrentPosition = async (positionParams: IPositionSummary[]): Promise<ICurrentPosition[]> => {
   const positions = await getCurrentPositions(positionParams)
   const today = new Date().toISOString().slice(0, 10)
 
   // Prepare symbol
-  const symbolKeys = positions.map(position => {
+  const symbolKeys = [...new Set(positions.map((position, i) => {
     const pool = getPoolByPoolAddress(position.vaultAddress)
-    return `BSC:${pool.unstakeToken}:${today}`
-  })
+    const stratSymbol = positionParams[i].stratSymbol
+    return [`BSC:${pool.unstakeToken}:${today}`, `BSC:${stratSymbol}:${today}`]
+  }).flat())]
 
   // Prepare price
   const symbolPriceUSDMap = await fetchRecordedPriceUSD(symbolKeys)
 
-  const res = positions.map(position => {
+  const res = positions.map((position, i) => {
     const pool = getPoolByPoolAddress(position.vaultAddress)
     const positionValue = stringToFloat(position.positionValueBN.toString())
     const debtValue = stringToFloat(position.debtValueBN.toString())
@@ -86,6 +99,25 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]):
     const status = equityValueUSD === 0 ? PositionStatusType.close : PositionStatusType.open
     const positionAt = new Date().toISOString()
 
+    const stratSymbol = positionParams[i].stratSymbol
+    const stratSymbolKey = `BSC:${stratSymbol}:${today}`
+    const stratPriceUSD = symbolPriceUSDMap[stratSymbolKey]
+    const stratValue = equityValueUSD / stratPriceUSD
+    const stratValueUSD = stratValue * stratPriceUSD
+
+    const principalSymbol = positionParams[i].principalSymbol
+    const principalSymbolKey = `BSC:${principalSymbol}:${today}`
+    const principalPriceUSD = symbolPriceUSDMap[principalSymbolKey]
+    const principalValue = equityValueUSD / principalPriceUSD
+    const principalValueUSD = principalValue * principalPriceUSD
+
+    // debt
+    const tradeValueUSD = (positionValueUSD / 2) - debtValueUSD
+    const tradeValue = tradeValueUSD / stratPriceUSD
+
+    // receive
+    const receiveValueUSD = principalValueUSD - tradeValueUSD
+
     return {
       positionId: position.positionId,
       farmName: position.farmName,
@@ -95,6 +127,20 @@ export const withCurrentPosition = async (positionParams: IGetPositionParams[]):
       positionValueUSD,
       debtValueUSD,
       equityValueUSD,
+
+      stratSymbol,
+      stratValue,
+      stratValueUSD,
+
+      principalSymbol,
+      principalValue,
+      principalValueUSD,
+
+      tradeValue,
+      tradeValueUSD,
+
+      receiveValueUSD,
+
       status,
       positionAt,
     } as ICurrentPosition

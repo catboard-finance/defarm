@@ -19,7 +19,7 @@ export enum STRAT_TYPE {
 const WORKER_ADDRESS_MAP = Object.assign({}, ...alpacaInfo.Vaults.map(
   vault => vault.workers.map(
     worker => ({
-      [worker.address]: worker.name
+      [worker.address]: worker,
     })
   ).flat()
 ).flat())
@@ -89,7 +89,7 @@ export const parseVaultInput = (data: string) => {
         const { id, worker, principalAmount, borrowAmount, maxReturn } = args
         parsed = {
           ...parsed,
-          name: WORKER_ADDRESS_MAP[worker],
+          name: WORKER_ADDRESS_MAP[worker].name,
           positionId: ethers.BigNumber.from(id).toString(),
           workerAddress: worker,
           principalAmount: stringToFloat(principalAmount),
@@ -106,8 +106,12 @@ export const parseVaultInput = (data: string) => {
           parsed = {
             ...parsed,
             stratAddress,
+            stratType: STRAT_TYPE.deposit,
+            minLPAmount: 0,
+            stratAmount: stringToFloat(stratAmount)
           }
 
+          // TODO: more clarify/test on this
           if (SHARED_STRATEGIES_ADDRESSES.includes(stratAddress)) {
             // Which strategy is this?
             const strat = SHARED_STRATEGIES_MAP.find(e => e.stratAddress === stratAddress)
@@ -115,16 +119,17 @@ export const parseVaultInput = (data: string) => {
               ...parsed,
               ...strat,
             }
-            parsed.stratType = STRAT_TYPE.withdraw
+
+            // withdraw?
+            if (strat.stratName.toLowerCase().includes('withdraw')) {
+              parsed.stratType = STRAT_TYPE.withdraw
+            }
+
+            // StrategyAddBaseTokenOnly = adjust position
             parsed.minLPAmount = stringToFloat(stratAmount)
             parsed.stratAmount = 0
-          } else {
-            parsed.stratType = STRAT_TYPE.deposit
-            parsed.minLPAmount = 0
-            parsed.stratAmount = stringToFloat(stratAmount)
           }
         }
-
         break;
       // Special case for pancake
       case MethodType.swapETHForExactTokens:

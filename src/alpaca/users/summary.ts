@@ -1,29 +1,8 @@
 import _ from "lodash"
-import { ICurrentPosition, IGetPositionParams, withCurrentPosition } from "./position";
+import { ICurrentPosition, withCurrentPosition } from "./position";
 import { IFarmInvestmentInfo, ILendInvestmentInfo, IStakeInvestmentInfo, IUserInvestmentInfo, IUserInvestmentTransfer } from "./investment";
 import { InvestmentTypeObject } from "../utils/transaction";
 import { ICurrentBalanceInfo } from "./current";
-
-// const sumFarmEarning = (farms: IFarmInvestmentInfo[]) => {
-//   return {
-//     spendValueUSD: _.sumBy(farms, "principalValueUSD"),
-//     returnValueUSD: _.sumBy(farms, "rewardValueUSD"),
-//   }
-// }
-
-// const sumLendEarning = (lends: ILendInvestmentInfo[]) => {
-//   return {
-//     depositValueUSD: _.sumBy(lends, "depositValueUSD"),
-//     rewardValueUSD: _.sumBy(lends, "rewardValueUSD"),
-//   }
-// }
-
-// const sumStakeEarning = (stakes: IStakeInvestmentInfo[]) => {
-//   return {
-//     stakeValueUSD: _.sumBy(stakes, "stakeValueUSD"),
-//     rewardValueUSD: _.sumBy(stakes, "rewardValueUSD"),
-//   }
-// }
 
 const getUniqueSymbolsFromUserInvestmentTransfer = (transfers: IUserInvestmentTransfer[]) => {
   return [...new Set(transfers.map(transfer => transfer.tokenSymbol))]
@@ -44,6 +23,8 @@ export interface IPositionSummary {
   positionValueUSD: number,
   debtValueUSD: number,
   equityValueUSD: number,
+  stratSymbol: string,
+  principalSymbol: string,
 }
 
 const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionSummary[] => {
@@ -95,8 +76,8 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
     const stratValueUSD = _.sumBy(farmInfos, 'stratValueUSD') || 0
     const principalValueUSD = _.sumBy(farmInfos, 'principalValueUSD') || 0
     const debtValueUSD = _.sumBy(farmInfos, 'borrowValueUSD') || 0
-    const positionValueUSD = stratValueUSD + principalValueUSD + debtValueUSD
-    const equityValueUSD = positionValueUSD - debtValueUSD
+    const equityValueUSD = stratValueUSD + principalValueUSD
+    const positionValueUSD = equityValueUSD + debtValueUSD
     const beginInvestedAt = farmInfos[farmInfos.length - 1].investedAt
     const endInvestedAt = farmInfos[0].investedAt
 
@@ -104,6 +85,8 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
       positionId: farmInfos[0].positionId,
       farmName: farmInfos[0].farmName,
       vaultAddress: farmInfos[0].vaultAddress,
+      stratSymbol: farmInfos[0].stratSymbol,
+      principalSymbol: farmInfos[0].principalSymbol,
       spends,
       positionValueUSD,
       debtValueUSD,
@@ -134,12 +117,15 @@ const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
 const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => {
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
-    // farmCurrent.equityValueUSD === 0 mean close position
-    const profitUSD = farmCurrent.equityValueUSD > 0 ? farmCurrent.equityValueUSD - farmSummary.equityValueUSD : farmSummary.equityValueUSD
+    // farmCurrent.equityValueUSD === 0 mean closed position
+    const profitValueUSD = farmCurrent.equityValueUSD > 0 ?
+      farmCurrent.equityValueUSD - farmSummary.equityValueUSD :
+      farmSummary.equityValueUSD
+
     return {
       farmName: farmCurrent.farmName,
       positionId: farmCurrent.positionId,
-      profitUSD,
+      profitValueUSD,
     }
   })
 
@@ -160,7 +146,7 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
 
   ///////// CURRENT /////////
 
-  const farmCurrents = await withCurrentPosition(farmSummaries as IGetPositionParams[])
+  const farmCurrents = await withCurrentPosition(farmSummaries)
   const lendCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.lend)
   const stakeCurrents = userCurrentBalances.filter(e => e.investmentType === InvestmentTypeObject.stake)
 
@@ -195,7 +181,8 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
       farms: farmPNLs,
       totalReward: _.sumBy(earnCurrents, 'rewardAmount'),
       totalRewardUSD: _.sumBy(earnCurrents, 'rewardValueUSD'),
-      totalFarmsPNL: _.sumBy(farmPNLs, 'profitUSD'),
+      totalFarmsPNL: _.sumBy(farmPNLs, 'profitValueUSD'),
+      totalFarmsEquity: _.sumBy(farmPNLs, 'equityValueUSD'),
     }
   }
 
