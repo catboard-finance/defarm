@@ -50,27 +50,42 @@ export enum PositionStatusType {
   close = 'close',
 }
 
+interface IFarmPair {
+  stratAmount: number
+  principalAmount: number
+}
+
 export interface ICurrentPosition {
   positionId: number
   farmName: string
   vaultAddress: string
   positionValue: number
   debtValue: number
+
   positionValueUSD: number
   debtValueUSD: number
   equityValueUSD: number
-  status: PositionStatusType
 
   stratSymbol: string
   stratValue: number
   stratValueUSD: number
+  stratAmount: number
 
   principalSymbol: string
   principalValue: number
   principalValueUSD: number
+  principalAmount: number
 
   tradeValue: number
   tradeValueUSD: number
+  tradeAmount: number
+
+  positionValueAsset: IFarmPair
+  convertedPositionValueAsset: IFarmPair
+  receiveValueAsset: IFarmPair
+
+  status: PositionStatusType
+  positionAt: string // Date,
 }
 
 export const withCurrentPosition = async (positionParams: IPositionSummary[]): Promise<ICurrentPosition[]> => {
@@ -89,34 +104,67 @@ export const withCurrentPosition = async (positionParams: IPositionSummary[]): P
 
   const res = positions.map((position, i) => {
     const pool = getPoolByPoolAddress(position.vaultAddress)
+
+    // Raw value
     const positionValue = stringToFloat(position.positionValueBN.toString())
     const debtValue = stringToFloat(position.debtValueBN.toString())
-    const symbolKey = `BSC:${pool.unstakeToken}:${today}`
-    const priceUSD = symbolPriceUSDMap[symbolKey]
-    const positionValueUSD = positionValue * priceUSD
-    const debtValueUSD = debtValue * priceUSD
-    const equityValueUSD = positionValueUSD - debtValueUSD
-    const status = equityValueUSD === 0 ? PositionStatusType.close : PositionStatusType.open
-    const positionAt = new Date().toISOString()
+    const halfPosition = positionValue / 2
+    const principalValue = halfPosition
+    const stratValue = halfPosition
+    const equityValue = positionValue - debtValue
 
-    const stratSymbol = positionParams[i].stratSymbol
-    const stratSymbolKey = `BSC:${stratSymbol}:${today}`
-    const stratPriceUSD = symbolPriceUSDMap[stratSymbolKey]
-    const stratValue = equityValueUSD / stratPriceUSD
-    const stratValueUSD = stratValue * stratPriceUSD
+    // Debt (principal) USD value
+    const debtSymbolKey = `BSC:${pool.unstakeToken}:${today}`
+    const debtPriceUSD = symbolPriceUSDMap[debtSymbolKey]
 
+    // Principal
     const principalSymbol = positionParams[i].principalSymbol
     const principalSymbolKey = `BSC:${principalSymbol}:${today}`
     const principalPriceUSD = symbolPriceUSDMap[principalSymbolKey]
-    const principalValue = equityValueUSD / principalPriceUSD
-    const principalValueUSD = principalValue * principalPriceUSD
+    const principalValueUSD = principalValue * debtPriceUSD
+    const principalAmount = principalValueUSD / principalPriceUSD
 
-    // debt
-    const tradeValueUSD = (positionValueUSD / 2) - debtValueUSD
-    const tradeValue = tradeValueUSD / stratPriceUSD
+    // Strategy
+    const stratSymbol = positionParams[i].stratSymbol
+    const stratSymbolKey = `BSC:${stratSymbol}:${today}`
+    const stratPriceUSD = symbolPriceUSDMap[stratSymbolKey]
+    const stratValueUSD = stratValue * debtPriceUSD
+    const stratAmount = stratValueUSD / stratPriceUSD
 
-    // receive
-    const receiveValueUSD = principalValueUSD - tradeValueUSD
+    // Position
+    const positionValueUSD = positionValue * debtPriceUSD
+    const debtValueUSD = debtValue * debtPriceUSD
+    const equityValueUSD = equityValue * debtPriceUSD
+
+    // Trade
+    const tradeValue = debtValue > 0 ? halfPosition - debtValue : 0
+    const tradeValueUSD = tradeValue * debtPriceUSD
+    const tradeStratAmount = tradeValueUSD / stratPriceUSD
+
+    const tradeAmount = tradeStratAmount
+    const debtPrincipalAmount = debtValueUSD / principalPriceUSD
+
+    // Position value
+    const positionValueAsset = {
+      stratAmount,
+      principalAmount,
+    }
+
+    // Converted position value
+    const convertedPositionValueAsset = {
+      stratAmount: stratAmount + tradeStratAmount,
+      principalAmount: principalAmount - tradeValue,
+    }
+
+    // Receive
+    const receiveValueAsset = {
+      stratAmount: convertedPositionValueAsset.stratAmount,
+      principalAmount: convertedPositionValueAsset.principalAmount - debtPrincipalAmount,
+    }
+
+    // Status
+    const status = equityValueUSD === 0 ? PositionStatusType.close : PositionStatusType.open
+    const positionAt = new Date().toISOString()
 
     return {
       positionId: position.positionId,
@@ -124,22 +172,28 @@ export const withCurrentPosition = async (positionParams: IPositionSummary[]): P
       vaultAddress: position.vaultAddress,
       positionValue,
       debtValue,
+
       positionValueUSD,
       debtValueUSD,
       equityValueUSD,
 
       stratSymbol,
       stratValue,
+      stratAmount,
       stratValueUSD,
 
       principalSymbol,
+      principalAmount,
       principalValue,
       principalValueUSD,
 
       tradeValue,
       tradeValueUSD,
+      tradeAmount,
 
-      receiveValueUSD,
+      positionValueAsset,
+      convertedPositionValueAsset,
+      receiveValueAsset,
 
       status,
       positionAt,
