@@ -125,6 +125,7 @@ const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => 
     return {
       farmName: farmCurrent.farmName,
       positionId: farmCurrent.positionId,
+      equityValueUSD: farmCurrent.equityValueUSD,
       profitValueUSD,
     }
   })
