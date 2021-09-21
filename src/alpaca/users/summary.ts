@@ -113,7 +113,7 @@ const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
 
   return earnCurrents
 }
-
+// $2471.62  $2064.94(-16.45%)
 const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => {
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
@@ -122,11 +122,14 @@ const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => 
       farmCurrent.equityValueUSD - farmSummary.equityValueUSD :
       farmSummary.equityValueUSD
 
+    const profitPercent = farmCurrent.equityValueUSD > 0 ? 100 * (profitValueUSD / farmSummary.equityValueUSD) : 0
+
     return {
       farmName: farmCurrent.farmName,
       positionId: farmCurrent.positionId,
       equityValueUSD: farmCurrent.equityValueUSD,
       profitValueUSD,
+      profitPercent,
     }
   })
 
@@ -184,6 +187,7 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
       totalRewardUSD: _.sumBy(earnCurrents, 'rewardValueUSD'),
       totalFarmsPNL: _.sumBy(farmPNLs, 'profitValueUSD'),
       totalFarmsEquity: _.sumBy(farmPNLs, 'equityValueUSD'),
+      totalFarmsProfitPercent: _.sumBy(farmPNLs, 'profitPercent'),
     }
   }
 
