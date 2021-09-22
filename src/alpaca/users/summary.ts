@@ -122,7 +122,8 @@ const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => 
       farmCurrent.equityValueUSD - farmSummary.equityValueUSD :
       farmSummary.equityValueUSD
 
-    const profitPercent = farmCurrent.equityValueUSD > 0 ? 100 * (profitValueUSD / farmSummary.equityValueUSD) : 0
+    const profitPercent = farmCurrent.equityValueUSD > 0 && farmSummary.equityValueUSD > 0 ?
+      100 * ((farmCurrent.equityValueUSD / farmSummary.equityValueUSD) - 1) : 0
 
     return {
       farmName: farmCurrent.farmName,
