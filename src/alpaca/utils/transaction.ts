@@ -24,7 +24,8 @@ export interface ITransactionInfo extends ITransaction {
   block_number: string // "10277278",
   block_hash: string // "0x9673166f4eb5e5f7a224d40ec2d3572777f51badf2e6ce7ed5bfb373b6325e06"
 
-  stratType: string // deposit, withdraw
+  stratType: string // "deposit" | "withdraw"
+  stratName: string // "StrategyPartialCloseMinimizeTrading"
 }
 
 export enum InvestmentTypeObject {

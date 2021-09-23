@@ -1,5 +1,6 @@
 import _ from "lodash"
-import { ITransferInfo } from "../../type"
+import { REWARD_TOKEN_SYMBOL } from ".."
+import { DirectionType, ITransferInfo } from "../../type"
 import { getPoolByPoolAddress, getPoolByPoolId } from "../core"
 import { IFarmTransaction, ILendTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo } from "../utils/transaction"
 
@@ -108,8 +109,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
       transfers,
     }
 
-    const spendingTransfers = e.transferInfos.filter(e => e.direction === 'out')
-    const takingTransfers = e.transferInfos.filter(e => e.direction === 'in')
+    const spendingTransfers = e.transferInfos.filter(e => e.direction === DirectionType.OUT)
+    const takingTransfers = e.transferInfos.filter(e => e.direction === DirectionType.IN)
 
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
@@ -120,8 +121,13 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         const farmName = isSingleAsset ? `CAKE^${farmNames[0]}` : farmNames[0]
 
         const totalSpendValueUSD = _.sumBy(spendingTransfers, 'tokenValueUSD') || 0
-        const takenSymbol = isSingleAsset ? 'CAKE' : farmTx.stratSymbol
-        const totalCloseValueUSD = _.sumBy(takingTransfers.filter(e => e.tokenSymbol === takenSymbol), 'tokenValueUSD')
+        const takenSymbol = isSingleAsset ? 'CAKE' : farmTx.stratSymbol // TOFIX: other single asset? not CAKE?
+
+        const totalPartialCloseValueUSD = (e.stratName === 'StrategyPartialCloseMinimizeTrading') ? _.sumBy(takingTransfers.filter(e => e.tokenSymbol === takenSymbol), 'tokenValueUSD') : 0
+        const totalRewardValueUSD = _.sumBy(takingTransfers.filter(e => e.tokenSymbol === REWARD_TOKEN_SYMBOL), 'tokenValueUSD')
+
+        const withdrawTransfers = (e.stratType === 'withdraw') ? takingTransfers : []
+        const totalCloseValueUSD = _.sumBy(withdrawTransfers.filter(e => e.tokenSymbol === takenSymbol), 'tokenValueUSD')
 
         return {
           ...baseInvestment,
@@ -141,8 +147,12 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           borrowValueUSD: farmTx.borrowValueUSD,
 
-          totalSpendValueUSD,
-          totalCloseValueUSD,
+          totalSpendValueUSD, // deposit
+          totalPartialCloseValueUSD, // partial withdraw
+
+          totalCloseValueUSD, // last withdraw (close)
+
+          totalRewardValueUSD, // rewards
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction

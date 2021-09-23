@@ -58,6 +58,8 @@ interface IFarmPair {
 export interface ICurrentPosition {
   positionId: number
   farmName: string
+  farmStatus: PositionStatusType
+
   vaultAddress: string
   positionValue: number
   debtValue: number
@@ -84,7 +86,6 @@ export interface ICurrentPosition {
   convertedPositionValueAsset: IFarmPair
   receiveValueAsset: IFarmPair
 
-  status: PositionStatusType
   positionAt: string // Date,
 }
 
@@ -163,12 +164,14 @@ export const withCurrentPosition = async (positionParams: IPositionSummary[]): P
     }
 
     // Status
-    const status = equityValueUSD === 0 ? PositionStatusType.close : PositionStatusType.open
+    const farmStatus = equityValueUSD === 0 ? PositionStatusType.close : PositionStatusType.open
     const positionAt = new Date().toISOString()
 
     return {
       positionId: position.positionId,
       farmName: position.farmName,
+      farmStatus,
+
       vaultAddress: position.vaultAddress,
       positionValue,
       debtValue,
@@ -195,7 +198,6 @@ export const withCurrentPosition = async (positionParams: IPositionSummary[]): P
       convertedPositionValueAsset,
       receiveValueAsset,
 
-      status,
       positionAt,
     } as ICurrentPosition
   })

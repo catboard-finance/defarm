@@ -23,7 +23,8 @@ export interface IPositionSummary {
   positionValueUSD: number,
   debtValueUSD: number,
   equityValueUSD: number,
-  closedValueUSD: number,
+  totalPartialCloseValueUSD: number,
+  totalCloseValueUSD: number,
 
   stratSymbol: string,
   principalSymbol: string,
@@ -89,7 +90,9 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
     const positionValueUSD = equityValueUSD + debtValueUSD
 
     // For profit calculation
-    const closedValueUSD = _.sumBy(farmInfos, 'totalCloseValueUSD') || 0
+    const totalPartialCloseValueUSD = _.sumBy(farmInfos, 'totalPartialCloseValueUSD') || 0
+    const totalCloseValueUSD = _.sumBy(farmInfos, 'totalCloseValueUSD') || 0
+    const totalRewardValueUSD = _.sumBy(farmInfos, 'totalRewardValueUSD') || 0
 
     // At
     const beginInvestedAt = farmInfos[farmInfos.length - 1].investedAt
@@ -108,7 +111,9 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
       positionValueUSD,
       debtValueUSD,
       equityValueUSD,
-      closedValueUSD,
+      totalPartialCloseValueUSD,
+      totalCloseValueUSD,
+      totalRewardValueUSD,
 
       beginInvestedAt,
       endInvestedAt,
@@ -137,18 +142,22 @@ const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionS
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
     // farmCurrent.equityValueUSD === 0 mean closed position
-    const profitValueUSD = farmSummary.closedValueUSD + farmCurrent.equityValueUSD > 0 ?
+    const allEquity = farmSummary.totalCloseValueUSD + farmSummary.totalPartialCloseValueUSD + farmCurrent.equityValueUSD
+    const profitValueUSD = allEquity > 0 ?
       farmCurrent.equityValueUSD - farmSummary.equityValueUSD :
       farmSummary.equityValueUSD
 
-    const profitPercent = farmCurrent.equityValueUSD > 0 && farmSummary.equityValueUSD > 0 ?
-      100 * (((farmCurrent.equityValueUSD + farmSummary.closedValueUSD) / farmSummary.equityValueUSD) - 1) : 0
+    const profitPercent = farmSummary.equityValueUSD > 0 ?
+      100 * ((allEquity / farmSummary.equityValueUSD) - 1) : 0
 
     return {
-      farmName: farmCurrent.farmName,
       positionId: farmCurrent.positionId,
+      farmName: farmCurrent.farmName,
+      farmStatus: farmCurrent.farmStatus,
+
       investedValueUSD: farmSummary.equityValueUSD,
-      closedValueUSD: farmSummary.closedValueUSD,
+      totalPartialCloseValueUSD: farmSummary.totalPartialCloseValueUSD,
+      totalCloseValueUSD: farmSummary.totalCloseValueUSD,
       equityValueUSD: farmCurrent.equityValueUSD,
       profitValueUSD,
       profitPercent,
