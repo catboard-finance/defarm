@@ -109,13 +109,19 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
     }
 
     const spendingTransfers = e.transferInfos.filter(e => e.direction === 'out')
+    const takingTransfers = e.transferInfos.filter(e => e.direction === 'in')
 
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as unknown as IFarmTransaction
 
-        const farmNames = e.name?.split(' ') || `${farmTx.stratSymbol}-${farmTx.principalSymbol}`
-        const farmName = farmNames[1] === 'CakeMaxiWorker' ? `CAKE^${farmNames[0]}` : farmNames[0]
+        const farmNames = farmTx.name?.split(' ') || `${farmTx.stratSymbol}-${farmTx.principalSymbol}`
+        const isSingleAsset = farmNames[1] === 'CakeMaxiWorker'
+        const farmName = isSingleAsset ? `CAKE^${farmNames[0]}` : farmNames[0]
+
+        const totalSpendValueUSD = _.sumBy(spendingTransfers, 'tokenValueUSD') || 0
+        const takenSymbol = isSingleAsset ? 'CAKE' : farmTx.stratSymbol
+        const totalCloseValueUSD = _.sumBy(takingTransfers.filter(e => e.tokenSymbol === takenSymbol), 'tokenValueUSD')
 
         return {
           ...baseInvestment,
@@ -135,7 +141,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           borrowValueUSD: farmTx.borrowValueUSD,
 
-          totalSpendValueUSD: _.sumBy(spendingTransfers, 'tokenValueUSD') || 0,
+          totalSpendValueUSD,
+          totalCloseValueUSD,
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction

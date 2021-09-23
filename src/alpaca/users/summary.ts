@@ -23,8 +23,55 @@ export interface IPositionSummary {
   positionValueUSD: number,
   debtValueUSD: number,
   equityValueUSD: number,
+  closedValueUSD: number,
+
   stratSymbol: string,
   principalSymbol: string,
+}
+
+const getSummaryPerTokenByDirection = (farmInfos: IFarmInvestmentInfo[], direction: 'in' | 'out') => {
+  // Sum sent from transfers
+  const spendAlls = farmInfos.map(farmInfo => {
+    const outTransfers = farmInfo.transfers.filter(transfer => transfer.direction === direction)
+    const symbols = getUniqueSymbolsFromUserInvestmentTransfer(outTransfers)
+    const symbolInfos = symbols.map(tokenSymbol => {
+      // This is no use but just in case we have more than 2 symbols and 2 transfers in same transaction.
+      const targets = outTransfers.filter(transfer => transfer.tokenSymbol === tokenSymbol)
+      const tokenAmount = _.sumBy(targets, 'tokenAmount')
+      const tokenValueUSD = _.sumBy(targets, 'tokenValueUSD')
+      const tokenPriceUSD = tokenAmount > 0 ? tokenValueUSD / tokenAmount : tokenValueUSD
+      const transferredAt = targets[0].transferredAt
+
+      return {
+        tokenSymbol,
+        tokenAmount,
+        tokenPriceUSD,
+        tokenValueUSD,
+        transferredAt,
+      }
+    })
+
+    return symbolInfos
+  }).flat()
+
+  // Sum by token symbol
+  const movingGroup = _.groupBy(spendAlls, 'tokenSymbol')
+  const movingGroups = Object.values(movingGroup)
+  const moves = movingGroups.map(e => {
+    const tokenSymbol = e[0].tokenSymbol
+    const tokenAmount = _.sumBy(e, 'tokenAmount')
+    const tokenValueUSD = _.sumBy(e, 'tokenValueUSD')
+    const tokenPriceUSD = tokenAmount > 0 ? tokenValueUSD / tokenAmount : tokenValueUSD
+
+    return {
+      tokenSymbol,
+      tokenAmount,
+      tokenPriceUSD,
+      tokenValueUSD,
+    }
+  })
+
+  return moves
 }
 
 const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionSummary[] => {
@@ -32,52 +79,19 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
   const farms = Object.values(recordedFarmGroup)
   const farmPositions = farms.map((farmInfos: IFarmInvestmentInfo[]) => {
 
-    // Sum sent from transfers
-    const spendAlls = farmInfos.map(farmInfo => {
-      const outTransfers = farmInfo.transfers.filter(transfer => transfer.direction === 'out')
-      const symbols = getUniqueSymbolsFromUserInvestmentTransfer(outTransfers)
-      const symbolInfos = symbols.map(tokenSymbol => {
-        // This is no use but just in case we have more than 2 symbols and 2 transfers in sane transaction.
-        const targets = outTransfers.filter(transfer => transfer.tokenSymbol === tokenSymbol)
-        const tokenAmount = _.sumBy(targets, 'tokenAmount')
-        const tokenValueUSD = _.sumBy(targets, 'tokenValueUSD')
-        const tokenPriceUSD = tokenValueUSD / tokenAmount
-        const transferredAt = targets[0].transferredAt
-
-        return {
-          tokenSymbol,
-          tokenAmount,
-          tokenPriceUSD,
-          tokenValueUSD,
-          transferredAt,
-        }
-      })
-
-      return symbolInfos
-    }).flat()
-
-    // Sum by token symbol
-    const spendGroup = _.groupBy(spendAlls, 'tokenSymbol')
-    const spendGroups = Object.values(spendGroup)
-    const spends = spendGroups.map(spend => {
-      const tokenSymbol = spend[0].tokenSymbol
-      const tokenAmount = _.sumBy(spend, 'tokenAmount')
-      const tokenValueUSD = _.sumBy(spend, 'tokenValueUSD')
-      const tokenPriceUSD = tokenValueUSD / tokenAmount
-
-      return {
-        tokenSymbol,
-        tokenAmount,
-        tokenPriceUSD,
-        tokenValueUSD,
-      }
-    })
+    const spends = getSummaryPerTokenByDirection(farmInfos, 'out')
+    const takes = getSummaryPerTokenByDirection(farmInfos, 'in')
 
     const stratValueUSD = _.sumBy(farmInfos, 'stratValueUSD') || 0
     const principalValueUSD = _.sumBy(farmInfos, 'principalValueUSD') || 0
     const debtValueUSD = _.sumBy(farmInfos, 'borrowValueUSD') || 0
     const equityValueUSD = stratValueUSD + principalValueUSD
     const positionValueUSD = equityValueUSD + debtValueUSD
+
+    // For profit calculation
+    const closedValueUSD = _.sumBy(farmInfos, 'totalCloseValueUSD') || 0
+
+    // At
     const beginInvestedAt = farmInfos[farmInfos.length - 1].investedAt
     const endInvestedAt = farmInfos[0].investedAt
 
@@ -87,13 +101,18 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
       vaultAddress: farmInfos[0].vaultAddress,
       stratSymbol: farmInfos[0].stratSymbol,
       principalSymbol: farmInfos[0].principalSymbol,
+
       spends,
+      takes,
+
       positionValueUSD,
       debtValueUSD,
       equityValueUSD,
+      closedValueUSD,
+
       beginInvestedAt,
       endInvestedAt,
-    }
+    } as IPositionSummary
   })
 
   return farmPositions
@@ -113,21 +132,23 @@ const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
 
   return earnCurrents
 }
-// $2471.62  $2064.94(-16.45%)
-const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: any[]) => {
+
+const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionSummary[]) => {
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
     // farmCurrent.equityValueUSD === 0 mean closed position
-    const profitValueUSD = farmCurrent.equityValueUSD > 0 ?
+    const profitValueUSD = farmSummary.closedValueUSD + farmCurrent.equityValueUSD > 0 ?
       farmCurrent.equityValueUSD - farmSummary.equityValueUSD :
       farmSummary.equityValueUSD
 
     const profitPercent = farmCurrent.equityValueUSD > 0 && farmSummary.equityValueUSD > 0 ?
-      100 * ((farmCurrent.equityValueUSD / farmSummary.equityValueUSD) - 1) : 0
+      100 * (((farmCurrent.equityValueUSD + farmSummary.closedValueUSD) / farmSummary.equityValueUSD) - 1) : 0
 
     return {
       farmName: farmCurrent.farmName,
       positionId: farmCurrent.positionId,
+      investedValueUSD: farmSummary.equityValueUSD,
+      closedValueUSD: farmSummary.closedValueUSD,
       equityValueUSD: farmCurrent.equityValueUSD,
       profitValueUSD,
       profitPercent,

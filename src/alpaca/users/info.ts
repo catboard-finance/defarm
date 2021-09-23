@@ -29,7 +29,7 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
   // Get transfer and gathering symbol
   const transfers = await getTransfers(account)
   let transferInfos = withDirection(account, transfers)
-  transferInfos = filterInvestmentTransfers(transferInfos) as ITransferInfo[]
+  transferInfos = filterInvestmentTransfers(account, transferInfos) as ITransferInfo[]
 
   return transferInfos as ITransferInfo[]
 }

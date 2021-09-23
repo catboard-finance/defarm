@@ -11,13 +11,11 @@ const ALPACA_VAULT_ADDRESSES = [
   ...alpacaInfo.Vaults.map(vault => vault.address.toLowerCase())
 ].map(vault => vault.toLowerCase())
 
-export const filterVaults = (txList: ITransfer[]) => txList.filter(tx =>
-  ALPACA_VAULT_ADDRESSES.includes(tx.from_address.toLowerCase()) ||
-  ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
+export const filterRelated = (whiteList: string[], txList: ITransfer[]) => txList.filter(tx =>
+  whiteList.includes(tx.from_address.toLowerCase()) ||
+  whiteList.includes(tx.to_address.toLowerCase())
 )
 
-export const filterDepositVaults = (txList: ITransfer[]) => txList.filter(tx =>
-  ALPACA_VAULT_ADDRESSES.includes(tx.to_address.toLowerCase())
-)
-
-export const filterInvestmentTransfers = (transfers: ITransfer[]) => filterVaults(transfers)
+export const filterInvestmentTransfers = (account: string, transfers: ITransfer[]) => {
+  return filterRelated(ALPACA_VAULT_ADDRESSES.concat([account]), transfers)
+}

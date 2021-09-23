@@ -1,4 +1,4 @@
-import { filterVaults } from ".";
+import { filterRelated } from ".";
 import { _fetchUserPositionWithAPIs } from "../api";
 import { parseVaultInput } from "./worker";
 import mockedTransactions from './__snapshots__/transactions.json'
@@ -13,7 +13,7 @@ describe('🦙 Vault', () => {
   });
 
   it('can get all alpaca vault related transfers.', async () => {
-    const res = filterVaults(mocked_transfers['result'])
+    const res = filterRelated([TEST_ACCOUNT_ADDRESS], mocked_transfers['result'])
     expect(res).toBeDefined()
   });
 

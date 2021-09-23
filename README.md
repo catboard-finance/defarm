@@ -152,6 +152,15 @@ const lends = await alpaca.fetchUserLends('0x8155430e4860e791aeddb43e4764d15de7e
 const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de7e0def1')
 ```
 
+### TOFIX
+- [ ] const tokenPriceUSD = tokenAmount > 0 ? tokenValueUSD / tokenAmount : tokenValueUSD
+- [ ] taken should separated rewards.
+- [ ] withdraw not reflect profit.
+- [ ] test partial close.
+- [ ] `investedAt` -> `updatedAt`
+- [ ] `beginInvestedAt` -> `createdAt`
+- [ ] `endInvestedAt` -> `updatedAt`
+
 ### TODO
 - [ ] summary `stake`, `lend`.
 - [ ] Define `liquidate` position state.
