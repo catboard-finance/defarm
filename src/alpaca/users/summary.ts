@@ -141,7 +141,6 @@ const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
 const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionSummary[]) => {
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
-    // farmCurrent.equityValueUSD === 0 mean closed position
     const allEquity = farmSummary.totalCloseValueUSD + farmSummary.totalPartialCloseValueUSD + farmCurrent.equityValueUSD
     const profitValueUSD = allEquity > 0 ?
       farmCurrent.equityValueUSD - farmSummary.equityValueUSD :
