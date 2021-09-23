@@ -86,14 +86,19 @@ export const getUniqueAddressesFromTransfers = (transfers: ITransfer[]) => [...A
 export const getUniqueSymbolsFromTransfers = (transfers: ITransfer[], chain = 'bsc') => {
   const tokenAddresses = getUniqueAddressesFromTransfers(transfers)
   const ymds = transfers.map(e => new Date(e.block_timestamp).toISOString().slice(0, 10))
-  const symbols = getSymbolsFromAddresses(tokenAddresses)
-  const symbolSlugYMDs = transfers.map((tf, i) => `${chain.toUpperCase()}:${getSymbolFromAddress(tf.address)}:${ymds[i]}`)
+  const symbols = getSymbolsFromAddresses(tokenAddresses).filter(e => e)
+  const symbolSlugYMDs = transfers.map((tf, i) => {
+    const symbol = getSymbolFromAddress(tf.address)
+    if (!symbol) return null
+    return `${chain.toUpperCase()}:${symbol}:${ymds[i]}`
+  }).filter(e => e)
+
   return { symbols, symbolSlugYMDs }
 }
 
 export const getSymbolsFromTransfers = (transfers: ITransfer[]) => {
   const tokenAddresses = transfers.map(e => e.address)
-  const tokenSymbols = getSymbolsFromAddresses(tokenAddresses)
+  const tokenSymbols = getSymbolsFromAddresses(tokenAddresses).filter(e => e)
   return tokenSymbols
 }
 
