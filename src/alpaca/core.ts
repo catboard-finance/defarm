@@ -100,18 +100,18 @@ export const getSymbolsFromTransfers = (transfers: ITransfer[]) => {
 export const getSymbolSlugsFromTransfers = (transfers: ITransfer[], chain = 'bsc') => {
   const tokenAddresses = transfers.map(e => e.address)
   const ymds = transfers.map(e => new Date(e.block_timestamp).toISOString().slice(0, 10))
-  const symbols = getSymbolsFromAddresses(tokenAddresses)
+  const symbols = getSymbolsFromAddresses(tokenAddresses).filter(e => e)
   const symbolSlugYMDs = symbols.map((symbol, i) => `${chain.toUpperCase()}:${symbol}:${ymds[i]}`)
   return { symbols, symbolSlugYMDs }
 }
 
 export const getUniqueSymbolsFromTransactions = (transactions: ITransactionInfo[], chain = 'bsc') => {
   const ymds = transactions.map(e => new Date(e.block_timestamp).toISOString().slice(0, 10))
-  const symbols = Array.from(new Set(
+  const symbols = Array.from(new Set([
     // TODO: move principalSymbol to IFarmTransactionInfo
     ...transactions.map(e => e['principalSymbol']),
     ...transactions.map(e => e['stratSymbol']),
-  ))
+  ])).filter(e => e)
 
   let symbolSlugYMDs = []
   transactions.forEach((tf, i) => {
