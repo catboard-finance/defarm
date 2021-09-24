@@ -8,7 +8,7 @@ const getUniqueSymbolsFromUserInvestmentTransfer = (transfers: IUserInvestmentTr
   return [...new Set(transfers.map(transfer => transfer.tokenSymbol))]
 }
 
-export interface ISpend {
+export interface ITokenActivity {
   tokenSymbol: string,
   tokenAmount: number,
   tokenPriceUSD: number,
@@ -19,7 +19,10 @@ export interface IPositionSummary {
   positionId: number,
   farmName: string,
   vaultAddress: string,
-  spends: ISpend[],
+
+  spends: ITokenActivity[],
+  takes: ITokenActivity[],
+
   positionValueUSD: number,
   debtValueUSD: number,
   equityValueUSD: number,
@@ -107,6 +110,7 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
 
       spends,
       takes,
+      farmInfos,
 
       positionValueUSD,
       debtValueUSD,
@@ -141,13 +145,18 @@ const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
 const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionSummary[]) => {
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
-    const allEquity = farmSummary.totalCloseValueUSD + farmSummary.totalPartialCloseValueUSD + farmCurrent.equityValueUSD
-    const profitValueUSD = allEquity > 0 ?
-      farmCurrent.equityValueUSD - farmSummary.equityValueUSD :
-      farmSummary.equityValueUSD
+    const takenValueUSD = farmSummary.totalCloseValueUSD + farmSummary.totalPartialCloseValueUSD
+    const profitValueUSD = farmCurrent.equityValueUSD > 0 ?
+      // Farm is still open, should minus withdraw value 
+      farmCurrent.equityValueUSD - takenValueUSD :
+      // Farm is closed
+      takenValueUSD - farmSummary.equityValueUSD
 
-    const profitPercent = farmSummary.equityValueUSD > 0 ?
-      100 * ((allEquity / farmSummary.equityValueUSD) - 1) : 0
+    const farmPastValueUSD = farmSummary.equityValueUSD - takenValueUSD
+
+    // percent = 100*(present - past) / past
+    const profitPercent = farmCurrent.equityValueUSD > 0 ?
+      100 * (farmCurrent.equityValueUSD - farmPastValueUSD) / farmPastValueUSD : 0
 
     return {
       positionId: farmCurrent.positionId,

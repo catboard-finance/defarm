@@ -42,13 +42,26 @@ export const withRecordedPriceUSD = (transfers: ITransfer[], symbolSlugYMDPriceU
 
   // Attach usd price and return
   return transfers.map((transfer, i) => {
-    const tokenSymbol = symbols[i]
-    const tokenSymbolSlug = symbolSlugYMDs[i]
-    const tokenPriceUSD = (symbolSlugYMDPriceUSDMap[tokenSymbolSlug] && !tokenSymbol.startsWith('ib')) ?
-      symbolSlugYMDPriceUSDMap[tokenSymbolSlug] :
-      symbolSlugYMDPriceUSDMap[tokenSymbolSlug.replace('BSC:ib', 'BSC:')]
-
     const tokenAmount = stringToFloat(transfer.value)
+    const tokenSymbol = symbols[i]
+
+    if (!tokenSymbol) return ({
+      ...transfer,
+      tokenSymbol,
+      tokenPriceUSD: 0,
+      tokenAmount,
+      tokenValueUSD: 0,
+    }) as unknown as ITransferInfo
+
+    const tokenSymbolSlug = symbolSlugYMDs[i]
+    const priceUSD = symbolSlugYMDPriceUSDMap[tokenSymbolSlug] || 0
+    const ib_priceUSD = (tokenSymbolSlug && tokenSymbol.startsWith('ib')) ? symbolSlugYMDPriceUSDMap[tokenSymbolSlug.replace('BSC:ib', 'BSC:')] : 0
+    const tokenPriceUSD = isNaN(priceUSD) ? 0 : priceUSD || ib_priceUSD || 0
+
+    if (tokenAmount > 0 && tokenPriceUSD === 0) {
+      throw new Error(`${tokenSymbol} price is 0`)
+    }
+
     const tokenValueUSD = tokenPriceUSD * tokenAmount
     return ({
       ...transfer,
