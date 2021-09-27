@@ -48,7 +48,7 @@ describe('User', () => {
     expect(investments).toBeDefined
   }, 100000);
 
-  it(`can calculate summary summary`, async () => {
+  it(`can calculate investment summary`, async () => {
     const summary = await fetchUserInvestmentSummary(TEST_ACCOUNT_ADDRESS)
     // console.log('summary:', summary)
 
