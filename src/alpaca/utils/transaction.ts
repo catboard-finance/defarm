@@ -7,7 +7,7 @@ import { getUserStakesByPoolIds } from "../users/stake";
 import { IUserStake } from "../users/type";
 import { parseVaultInput } from "../vaults/worker";
 import { stringToFloat } from "./converter";
-import { getPositionIdFromGetBlock } from "./events";
+import { getPositionIdFromMoralis } from "./events";
 
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
@@ -204,7 +204,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
 export const withRecordedPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
   const promises = transactionInfos.map(e => {
     if (e.investmentType !== InvestmentTypeObject.farm) return null
-    return getPositionIdFromGetBlock(e.to_address, e.block_number, e.hash)
+    return getPositionIdFromMoralis(e.to_address, e.block_number, e.hash)
   })
 
   const results = await Promise.all(promises)

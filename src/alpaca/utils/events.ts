@@ -9,11 +9,11 @@ import abi from '../../alpaca/users/userWork.abi.json'
 const GETBLOCK_API_KEY = process.env.GETBLOCK_API_KEY
 const RPC_URL = `https://bsc.getblock.io/mainnet/?api_key=${GETBLOCK_API_KEY}`
 
-export const getPositionRecordFromWorkEvent = async (address: string, blockNumber: string, transactionHash: string): Promise<{ id: number, loan: BigNumber }> => {
+export const getPositionIdFromMoralis = async (address: string, blockNumber: string, transactionHash: string): Promise<{ id: number, loan: BigNumber }> => {
   const workEvent = await getWorkEvent(address, blockNumber, transactionHash)
   return {
     id: parseInt(workEvent.uid),
-    loan: workEvent.loan,
+    loan: BigNumber.from(workEvent.loan),
   }
 }
 

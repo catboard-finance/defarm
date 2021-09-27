@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers"
 import { getEventsByBlockNumber } from "../../account"
-import abi from '../../alpaca/users/userKill.abi.json'
+import abi from '../../alpaca/users/userWork.abi.json'
 
 export interface IWorkEvent {
   uid: string // id
@@ -8,7 +8,7 @@ export interface IWorkEvent {
 }
 
 export const getWorkEvent = async (address: string, blockNumber: string, transactionHash: string): Promise<IWorkEvent> => {
-  const abiString = JSON.stringify(abi.Kill)
+  const abiString = JSON.stringify(abi.Work)
   const topic = 'Work(uint256,uint256)'
   const events = await getEventsByBlockNumber(address, abiString, topic, blockNumber)
   const matchedEvent = events.find(e => e.transaction_hash === transactionHash)
