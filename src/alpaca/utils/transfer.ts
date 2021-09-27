@@ -77,7 +77,7 @@ export const withDirection = (account: string, transfers: ITransfer[]) => {
   return transfers.map(transfer => {
     return ({
       ...transfer,
-      direction: account === transfer.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
+      direction: account.toLowerCase() === transfer.from_address.toLowerCase() ? DirectionType.OUT : DirectionType.IN
     })
   })
 }

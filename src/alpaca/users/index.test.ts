@@ -1,7 +1,7 @@
 import { fetchUserPositionWithAPIs, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserBalance, fetchUserInvestmentSummary, fetchUserFarmEarns } from ".";
 
-const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
-// const TEST_ACCOUNT_ADDRESS = '0x1B619F05CE70cc0E4D7dfaD3fC5bb6d4a938a1f7'
+// const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
+const TEST_ACCOUNT_ADDRESS = '0x1B619F05CE70cc0E4D7dfaD3fC5bb6d4a938a1f7'
 
 describe('User', () => {
   beforeAll(() => {
