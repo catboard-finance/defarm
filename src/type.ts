@@ -101,6 +101,7 @@ export interface ITransferInfo extends ITransfer {
   stratName: string,
 
   tokenSymbol: string,
+  tokenAddress: string,
   tokenPriceUSD: number,
   tokenAmount: number,
   tokenValueUSD: number,

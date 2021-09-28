@@ -2,14 +2,28 @@ import { getSymbolFromAddress, getSymbolsFromTransfers, getSymbolSlugsFromTransf
 import { DirectionType, ITransfer, ITransferInfo } from "../../type"
 import { stringToFloat } from "./converter"
 
-export const getTokenInfoFromTransferAddressMap = (transferInfos: ITransfer[]) => {
+export const getTokenInfoFromTransferToAddressMap = (transferInfos: ITransfer[]) => {
   return Object.assign({},
     ...Object.keys(transferInfos).map(k => {
       const transferInfo = transferInfos[k]
       return {
         [transferInfo.to_address.toLowerCase()]: {
           symbol: getSymbolFromAddress(transferInfo.address),
-          address: transferInfo.address
+          address: transferInfo.address,
+        }
+      }
+    })
+  )
+}
+
+export const getTokenInfoFromTransferAddressMap = (transferInfos: ITransfer[]) => {
+  return Object.assign({},
+    ...Object.keys(transferInfos).map(k => {
+      const transferInfo = transferInfos[k]
+      return {
+        [transferInfo.address.toLowerCase()]: {
+          symbol: getSymbolFromAddress(transferInfo.address),
+          address: transferInfo.address,
         }
       }
     })

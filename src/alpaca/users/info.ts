@@ -4,7 +4,7 @@ import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD, fetchRecordedPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
 import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withTransactionFlatPriceUSD, withRecordedTransactionPriceUSD } from "../utils/transaction"
-import { getTokenInfoFromTransferAddressMap, withDirection, withPriceUSD, withRecordedPriceUSD } from "../utils/transfer"
+import { withDirection, withPriceUSD, withRecordedPriceUSD } from "../utils/transfer"
 import { ITransactionTransferInfo } from "./investment"
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
@@ -29,18 +29,18 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
   // Get transfer and gathering symbol
   const transfers = await getTransfers(account)
   let transferInfos = withDirection(account, transfers)
-  transferInfos = filterInvestmentTransfers(account, transferInfos) as ITransferInfo[]
+  transferInfos = filterInvestmentTransfers(account, transferInfos).map(e => ({
+    ...e,
+    tokenAddress: e.address,
+  }) as ITransferInfo)
 
   return transferInfos as ITransferInfo[]
 }
 
 export const getTransactionTransferInfos = async (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
 
-  // Prepare symbol map from transfer
-  const tokenInfoFromTransferAddressMap = getTokenInfoFromTransferAddressMap(transferInfos)
-
   // Add token info by tokens address
-  transactionInfos = withSymbol(transactionInfos, tokenInfoFromTransferAddressMap)
+  transactionInfos = withSymbol(transactionInfos, transferInfos)
 
   // TODO: use withSymbol with transferInfos
 

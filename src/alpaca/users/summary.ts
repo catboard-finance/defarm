@@ -127,10 +127,10 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
   return farmPositions
 }
 
-const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
-  const earnCurrentFarms = userCurrentBalances
-    .filter(e => e.investmentType === InvestmentTypeObject.farm)
-  const earnCurrents = [...new Set(Object.values(_.groupBy(earnCurrentFarms, 'rewardPoolAddress')))]
+const getCurrentRewardsByType = (userCurrentBalances: ICurrentBalanceInfo[], investmentType: InvestmentTypeObject) => {
+  const rewardCurrentFarms = userCurrentBalances
+    .filter(e => e.investmentType === investmentType)
+  const rewardCurrents = [...new Set(Object.values(_.groupBy(rewardCurrentFarms, 'rewardPoolAddress')))]
     .map(e => ({
       rewardPoolName: e[0].rewardPoolName,
       rewardPoolAddress: e[0].rewardPoolAddress,
@@ -139,7 +139,7 @@ const getCurrentFarmEarns = (userCurrentBalances: ICurrentBalanceInfo[]) => {
       rewardValueUSD: e[0].rewardValueUSD,
     }))
 
-  return earnCurrents
+  return rewardCurrents
 }
 
 const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionSummary[]) => {
@@ -197,11 +197,19 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
 
   const farmPNLs = getFarmPNLs(farmCurrents, farmSummaries)
 
-  ///////// EARN /////////
+  ///////// REWARD /////////
 
   // TODO: Gathering from claim history?
   // const earnHistories = userInvestmentInfos.filter(e => e.investmentType === InvestmentTypeObject.farm) as IFarmInvestmentInfo[]
-  const earnCurrents = getCurrentFarmEarns(userCurrentBalances)
+  const rewardCurrentFarms = getCurrentRewardsByType(userCurrentBalances, InvestmentTypeObject.farm)
+  const rewardCurrentStakes = getCurrentRewardsByType(userCurrentBalances, InvestmentTypeObject.stake)
+  const rewards = [...rewardCurrentFarms, ...rewardCurrentStakes]
+
+  const totalFarmRewardValueUSD = _.sumBy(rewardCurrentFarms, 'rewardValueUSD')
+  const totalStakeRewardValueUSD = _.sumBy(rewardCurrentStakes, 'rewardValueUSD')
+
+  const totalRewardValueUSD = _.sumBy(rewards, 'rewardValueUSD')
+  const totalRewardAmount = _.sumBy(rewards, 'rewardAmount')
 
   ///////// ALL /////////
 
@@ -213,6 +221,7 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
     },
     summary: {
       farms: farmSummaries,
+      // TODO: stakeSummaries,
     },
     current: {
       farms: farmCurrents,
@@ -220,13 +229,17 @@ export const getInvestmentSummary = async (userInvestmentInfos: IUserInvestmentI
       stakes: stakeCurrents,
     },
     pnl: {
-      rewards: earnCurrents,
       farms: farmPNLs,
-      totalReward: _.sumBy(earnCurrents, 'rewardAmount'),
-      totalRewardUSD: _.sumBy(earnCurrents, 'rewardValueUSD'),
+
       totalFarmsPNL: _.sumBy(farmPNLs, 'profitValueUSD'),
       totalFarmsEquity: _.sumBy(farmPNLs, 'equityValueUSD'),
       totalFarmsProfitPercent: _.sumBy(farmPNLs, 'profitPercent'),
+
+      totalFarmRewardValueUSD,
+      totalStakeRewardValueUSD,
+
+      totalRewardAmount,
+      totalRewardValueUSD,
     }
   }
 

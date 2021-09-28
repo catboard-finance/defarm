@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import _ from "lodash";
-import { IToken, ITransaction, MethodType } from "../../type";
+import { IToken, ITransaction, ITransferInfo, MethodType } from "../../type";
 import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingSymbol, getDebtPoolBySymbol } from "../core";
 import { getUserEarnsByPoolIds } from "../users/earn";
 import { getUserStakesByPoolIds } from "../users/stake";
@@ -8,6 +8,7 @@ import { IUserStake } from "../users/type";
 import { parseVaultInput } from "../vaults/worker";
 import { stringToFloat } from "./converter";
 import { getPositionIdFromMoralis } from "./events";
+import { getTokenInfoFromTransferAddressMap, getTokenInfoFromTransferToAddressMap } from "./transfer";
 
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
@@ -126,6 +127,7 @@ export interface IStakeTransaction extends ITransactionInfo {
   poolAddress: string
 
   stakeSymbol: string
+  stakeTokenAddress: string
 
   totalStakeAmount?: number
   totalStakeValueUSD?: number
@@ -140,14 +142,23 @@ export interface IStakeTransaction extends ITransactionInfo {
   rewardValueUSD: number
 }
 
-export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTransferAddressMap: { [address: string]: IToken })
+interface ITransferAddressMap {
+  [address: string]: IToken
+}
+
+export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[])
   : IFarmTransaction[] | IStakeTransaction[] | ILendTransaction[] => {
+
+  // Prepare symbol map from transfer
+  const tokenInfoFromTransferToAddressMap: ITransferAddressMap[] = getTokenInfoFromTransferToAddressMap(transferInfos)
+  const tokenInfoFromTransferAddressMap: ITransferAddressMap[] = getTokenInfoFromTransferAddressMap(transferInfos)
+
   const res = transactionInfos.map(e => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as IFarmTransaction
         var pool = getPoolByPoolAddress(e.to_address)
-        const stratToken = tokenInfoFromTransferAddressMap[farmTx.stratAddress.toLowerCase()]
+        const stratToken = tokenInfoFromTransferToAddressMap[farmTx.stratAddress.toLowerCase()]
 
         // Try again with worker address
         const stratSymbol = stratToken ? stratToken.symbol : farmTx.name.split(' ')[0].split('-')[0]
@@ -176,13 +187,16 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], tokenInfoFromTr
           withdrawSymbol: pool.stakingToken,
         } as ILendTransaction
       case InvestmentTypeObject.stake:
-        const stakeToken = tokenInfoFromTransferAddressMap[e.to_address.toLowerCase()]
+        console.log(e)
+        const tokenAddress = transferInfos.find(tf => tf.block_hash === e.block_hash)?.address
+        const stakeToken = tokenInfoFromTransferAddressMap[tokenAddress.toLowerCase()]
         var pool = getIBPoolByStakingSymbol(stakeToken.symbol)
         return {
           ...e,
 
           fairLaunchAddress: e.to_address,
           stakeSymbol: stakeToken.symbol,
+          stakeTokenAddress: tokenAddress,
           unstakeSymbol: pool.unstakeToken,
 
           poolId: pool.id,
@@ -308,6 +322,7 @@ export const withCurrentReward = async (account: string, transactionInfos: ITran
         return e
       case InvestmentTypeObject.stake:
         const stakeTx = e as IStakeTransaction
+        // TOFIX
         const poolId = getIBPoolByStakingSymbol(stakeTx.stakeSymbol)?.id
         const stakeInfo = (userStakeMap[poolId] || [])[0] as IUserStake
         return {
