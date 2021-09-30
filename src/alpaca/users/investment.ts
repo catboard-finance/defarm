@@ -74,7 +74,7 @@ export interface IUserInvestmentInfo {
   investmentType: InvestmentTypeObject
   transfers: IUserInvestmentTransfer[],
 
-  updatedAt: string // "2021-08-07T14:45:51.000Z",
+  entryAt: string // "2021-08-07T14:45:51.000Z",
 }
 
 export interface ITransactionTransferInfo extends ITransactionInfo {
@@ -105,7 +105,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
     const baseInvestment: IUserInvestmentInfo = {
       investmentType: e.investmentType,
-      updatedAt: e.block_timestamp,
+      entryAt: e.block_timestamp,
       transfers,
     }
 
