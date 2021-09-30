@@ -98,8 +98,8 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
     const totalRewardValueUSD = _.sumBy(farmInfos, 'totalRewardValueUSD') || 0
 
     // At
-    const beginInvestedAt = farmInfos[farmInfos.length - 1].investedAt
-    const endInvestedAt = farmInfos[0].investedAt
+    const beginInvestedAt = farmInfos[farmInfos.length - 1].updatedAt
+    const endInvestedAt = farmInfos[0].updatedAt
 
     return {
       positionId: farmInfos[0].positionId,
