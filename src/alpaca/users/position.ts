@@ -56,6 +56,7 @@ interface IFarmPair {
 }
 
 export interface ICurrentPosition {
+  isPartialClose: any
   positionId: number
   farmName: string
   farmStatus: PositionStatusType

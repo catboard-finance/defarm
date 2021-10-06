@@ -145,10 +145,12 @@ const getCurrentRewardsByType = (userCurrentBalances: ICurrentBalanceInfo[], inv
 const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionSummary[]) => {
   const farmPNLs = farmCurrents.map((farmCurrent, i) => {
     const farmSummary = farmSummaries[i]
+    const isPartialClose = farmSummary.totalPartialCloseValueUSD > 0
+
     const takenValueUSD = farmSummary.totalCloseValueUSD + farmSummary.totalPartialCloseValueUSD
     const profitValueUSD = farmCurrent.equityValueUSD > 0 ?
       // Farm is still open, should minus withdraw value 
-      farmCurrent.equityValueUSD - takenValueUSD :
+      takenValueUSD - farmSummary.equityValueUSD + farmCurrent.equityValueUSD :
       // Farm is closed
       takenValueUSD - farmSummary.equityValueUSD
 
@@ -156,7 +158,15 @@ const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionS
 
     // percent = 100*(present - past) / past
     const profitPercent = farmCurrent.equityValueUSD > 0 ?
-      100 * (farmCurrent.equityValueUSD - farmPastValueUSD) / farmPastValueUSD : 0
+      isPartialClose ?
+        100 * (takenValueUSD - farmSummary.equityValueUSD) / farmSummary.equityValueUSD :
+        100 * (farmCurrent.equityValueUSD - farmPastValueUSD) / farmPastValueUSD :
+      0
+
+    // partial close
+    if (isPartialClose) {
+      console.log(farmCurrent)
+    }
 
     return {
       positionId: farmCurrent.positionId,
