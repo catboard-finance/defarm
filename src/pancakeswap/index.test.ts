@@ -63,18 +63,10 @@ describe('🍰 global data', () => {
 
 describe('🍰 user data', () => {
   it('can get user data', async () => {
-    const account = "0xE462f59392C5b2754283162A665bb4d6Ff5033ab"
+    const account = "0x8155430e4860e791aeddb43e4764d15de7e0def1"
     const pid = farmsConfig[0].pid
     const userData = await fetchFarmUserDataAsync(farmsConfig, { account, pids: [pid] })
 
-    expect(userData).toEqual([
-      {
-        pid: 0,
-        allowance: '0',
-        tokenBalance: '0',
-        stakedBalance: '0',
-        earnings: '0'
-      }
-    ])
+    expect(parseFloat(userData[0].tokenBalance)).toBeGreaterThan(0)
   }, 10000)
 });
