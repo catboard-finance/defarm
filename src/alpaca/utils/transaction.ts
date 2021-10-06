@@ -187,10 +187,13 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: 
           withdrawSymbol: pool.stakingToken,
         } as ILendTransaction
       case InvestmentTypeObject.stake:
-        console.log(e)
         const tokenAddress = transferInfos.find(tf => tf.block_hash === e.block_hash)?.address
         const stakeToken = tokenInfoFromTransferAddressMap[tokenAddress.toLowerCase()]
         var pool = getIBPoolByStakingSymbol(stakeToken.symbol)
+        if (!pool) {
+          return e
+        }
+
         return {
           ...e,
 

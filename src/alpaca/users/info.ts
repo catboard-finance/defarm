@@ -1,5 +1,5 @@
 import _ from "lodash"
-import { filterInvestmentTransfers, getUniqueSymbolsFromTransactions, getUniqueSymbolsFromTransfers } from ".."
+import { filterInvestmentTransaction, filterInvestmentTransfers, getUniqueSymbolsFromTransactions, getUniqueSymbolsFromTransfers } from ".."
 import { getTransactions, getTransfers } from "../../account"
 import { fetchPriceUSD, fetchRecordedPriceUSD } from "../../coingecko"
 import { ITransferInfo } from "../../type"
@@ -9,7 +9,10 @@ import { ITransactionTransferInfo } from "./investment"
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
   // Get transactions
-  const transactions = await getTransactions(account)
+  let transactions = await getTransactions(account)
+
+  // Filter related transactions
+  transactions = filterInvestmentTransaction(account, transactions)
 
   // Decode methods
   let transactionInfos = await withMethod(transactions)
@@ -38,7 +41,6 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
 }
 
 export const getTransactionTransferInfos = async (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]) => {
-
   // Add token info by tokens address
   transactionInfos = withSymbol(transactionInfos, transferInfos)
 
