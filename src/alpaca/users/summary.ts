@@ -158,15 +158,12 @@ const getFarmPNLs = (farmCurrents: ICurrentPosition[], farmSummaries: IPositionS
 
     // percent = 100*(present - past) / past
     const profitPercent = farmCurrent.equityValueUSD > 0 ?
-      isPartialClose ?
-        100 * (takenValueUSD - farmSummary.equityValueUSD) / farmSummary.equityValueUSD :
-        100 * (farmCurrent.equityValueUSD - farmPastValueUSD) / farmPastValueUSD :
-      0
+      (
+        isPartialClose ?
+          100 * (takenValueUSD - farmSummary.equityValueUSD) / farmSummary.equityValueUSD :
+          100 * (farmCurrent.equityValueUSD - farmPastValueUSD) / farmPastValueUSD
+      ) : 0
 
-    // partial close
-    if (isPartialClose) {
-      console.log(farmCurrent)
-    }
 
     return {
       positionId: farmCurrent.positionId,
