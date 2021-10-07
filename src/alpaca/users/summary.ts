@@ -97,6 +97,12 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
     const totalCloseValueUSD = _.sumBy(farmInfos, 'totalCloseValueUSD') || 0
     const totalRewardValueUSD = _.sumBy(farmInfos, 'totalRewardValueUSD') || 0
 
+    // For single token strategy
+    const totalSpendAmount = _.sumBy(farmInfos, 'totalSpendAmount') || 0
+    const totalPartialCloseAmount = _.sumBy(farmInfos, 'totalPartialCloseAmount') || 0
+    const totalCloseAmount = _.sumBy(farmInfos, 'totalCloseAmount') || 0
+    const totalRewardAmount = _.sumBy(farmInfos, 'totalRewardAmount') || 0
+
     // At
     const firstEntryAt = farmInfos[farmInfos.length - 1].entryAt
     const lastEntryAt = farmInfos[0].entryAt
@@ -118,6 +124,11 @@ const withPositionSummaries = (farmHistories: IFarmInvestmentInfo[]): IPositionS
       totalPartialCloseValueUSD,
       totalCloseValueUSD,
       totalRewardValueUSD,
+
+      totalSpendAmount, // deposit as amount
+      totalPartialCloseAmount, // partial withdraw as amount
+      totalCloseAmount, // last withdraw (close) as amount
+      totalRewardAmount, // rewards as amount
 
       firstEntryAt,
       lastEntryAt,

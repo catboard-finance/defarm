@@ -24,6 +24,11 @@ export interface IFarmInvestmentInfo extends IUserInvestmentInfo {
   // depositValueUSD: number // 1000,
   totalSpendValueUSD: number // 1000,
 
+  totalSpendAmount: number // deposit as amount
+  totalPartialCloseAmount: number // partial withdraw as amount
+  totalCloseAmount: number // last withdraw (close) as amount
+  totalRewardAmount: number // rewards as amount
+
   stratAddress: string // "0x50380Ac8DA73D73719785F0A4433192F4e0E6c90",
   stratSymbol: string // "CAKE",
   stratAmount: number // 128,
@@ -129,6 +134,12 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
         const withdrawTransfers = (e.stratType === 'withdraw') ? takingTransfers : []
         const totalCloseValueUSD = _.sumBy(withdrawTransfers.filter(e => e.tokenSymbol === takenSymbol), 'tokenValueUSD')
 
+        // For single token strategy
+        const totalSpendAmount = _.sumBy(spendingTransfers, 'tokenAmount') || 0
+        const totalPartialCloseAmount = (e.stratName === 'StrategyPartialCloseMinimizeTrading') ? _.sumBy(takingTransfers.filter(e => e.tokenSymbol === takenSymbol), 'tokenAmount') : 0
+        const totalCloseAmount = _.sumBy(withdrawTransfers.filter(e => e.tokenSymbol === takenSymbol), 'tokenAmount')
+        const totalRewardAmount = _.sumBy(takingTransfers.filter(e => e.tokenSymbol === REWARD_TOKEN_SYMBOL), 'tokenAmount')
+
         return {
           ...baseInvestment,
 
@@ -149,10 +160,13 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
           totalSpendValueUSD, // deposit
           totalPartialCloseValueUSD, // partial withdraw
-
           totalCloseValueUSD, // last withdraw (close)
-
           totalRewardValueUSD, // rewards
+
+          totalSpendAmount, // deposit as amount
+          totalPartialCloseAmount, // partial withdraw as amount
+          totalCloseAmount, // last withdraw (close) as amount
+          totalRewardAmount, // rewards as amount
         } as IFarmInvestmentInfo
       case InvestmentTypeObject.lend:
         const lendTx = e as unknown as ILendTransaction
