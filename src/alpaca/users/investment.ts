@@ -155,7 +155,7 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
           stratAmount: farmTx.stratAmount || 0,
           stratValueUSD: farmTx.stratValueUSD,
 
-          borrowValueUSD: farmTx.borrowValueUSD,
+          borrowValueUSD: farmTx.borrowValueUSD || 0,
 
           totalSpendValueUSD, // deposit
           totalPartialCloseValueUSD, // partial withdraw

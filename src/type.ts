@@ -78,6 +78,7 @@ export enum MethodType {
   claim = 'claim',
   harvest = 'harvest',
   kill = 'kill',
+  addCollateral = 'addCollateral',
 
   // Pancake
   swapETHForExactTokens = 'swapETHForExactTokens',

@@ -67,6 +67,27 @@ export const parseVaultInput = (data: string) => {
         }
         break;
 
+      // Function: addCollateral(uint256 id, uint256 amount, bool goRogue, bytes data)
+      /// @param id The ID of the position to add collaterals.
+      /// @param amount The amount of BTOKEN to be added to the position
+      /// @param goRogue If on skip worker stability check, else only check reserve consistency.
+      /// @param data The calldata to pass along to the worker for more working context.
+      case MethodType.addCollateral:
+        var { id, amount, data: addCollateralData } = args
+
+        const [stratAddress, amountByte] = ethers.utils.defaultAbiCoder.decode(["address", "bytes"], addCollateralData)
+        const [stratAmount] = ethers.utils.defaultAbiCoder.decode(["uint256"], amountByte)
+
+        parsed = {
+          ...parsed,
+          principalAmount: stringToFloat(amount),
+          positionId: ethers.BigNumber.from(id).toNumber(),
+          stratAddress,
+          stratAmount: stringToFloat(stratAmount),
+        }
+
+        break;
+
       case MethodType.deposit:
         const { _for, _amount, _pid } = args
         if (_for) {
@@ -74,7 +95,7 @@ export const parseVaultInput = (data: string) => {
             ...parsed,
             for: _for,
             amount: stringToFloat(_amount),
-            positionId: ethers.BigNumber.from(_pid).toString(),
+            positionId: ethers.BigNumber.from(_pid).toNumber(),
           }
         } else {
           const { amountToken } = args
@@ -86,14 +107,14 @@ export const parseVaultInput = (data: string) => {
         break;
 
       case MethodType.work:
-        const { id, worker, principalAmount, borrowAmount, maxReturn } = args
+        var { id, worker, principalAmount, borrowAmount, maxReturn } = args
         parsed = {
           ...parsed,
           name: WORKER_ADDRESS_MAP[worker].name,
-          positionId: ethers.BigNumber.from(id).toString(),
+          positionId: ethers.BigNumber.from(id).toNumber(),
           workerAddress: worker,
           principalAmount: stringToFloat(principalAmount),
-          borrowAmount: stringToFloat(borrowAmount),
+          borrowAmount: stringToFloat(borrowAmount) || 0,
           maxReturn: stringToFloat(maxReturn),
         }
 

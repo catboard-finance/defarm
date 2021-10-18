@@ -6,7 +6,7 @@ export interface ICurrentBalanceInfo {
   investmentType: InvestmentTypeObject,
   aggregatedAt: string // Date
 
-  positionId?: string
+  positionId?: number
   poolId?: string
 
   rewardPoolName?: string

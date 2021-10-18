@@ -55,6 +55,7 @@ export const withType = async (transactions: ITransactionInfo[]): Promise<ITrans
           ...e,
           investmentType: ibSymbol ? InvestmentTypeObject.lend : InvestmentTypeObject.stake,
         }
+      case MethodType.addCollateral:
       case MethodType.work:
         // farms
         return {
@@ -219,22 +220,31 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: 
 }
 
 export const withRecordedPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
-  const promises = transactionInfos.map(e => {
+  const promises = transactionInfos.map(async e => {
     if (e.investmentType !== InvestmentTypeObject.farm) return null
-    return getPositionIdFromMoralis(e.to_address, e.block_number, e.hash)
+    // if (e.positionId !== 0) return null
+
+    const positionIdFromMoralis = e.positionId === 0 ? getPositionIdFromMoralis(e.to_address, e.block_number, e.hash) : {
+      id: e.positionId,
+      loan: BigNumber.from(0),
+    }
+
+    return positionIdFromMoralis
   })
 
   const results = await Promise.all(promises)
   const res = transactionInfos.map((e, i) => {
+    // if (e.positionId !== 0) return e
+
     const result = results[i]
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const positionId = result ? result.id : null
-        const loanAmount = result ? stringToFloat(result.loan?.toString() ?? '0') : null
+        // const loanAmount = result ? stringToFloat(result.loan?.toString() ?? '0') : null
         return {
           ...e,
           positionId,
-          loanAmount,
+          // loanAmount,
         } as IFarmTransaction
       default:
         return e
@@ -402,7 +412,7 @@ export const withRecordedTransactionPriceUSD = (transactionInfos: ITransactionIn
           // TOFIX: We can't get correct stratSymbol yet
           stratValueUSD: farmTx.stratAmount * stratPriceUSD,
           principalValueUSD: farmTx.principalAmount * principalPriceUSD,
-          borrowValueUSD: farmTx.borrowAmount * principalPriceUSD,
+          borrowValueUSD: farmTx.borrowAmount * principalPriceUSD || 0,
         }
       default:
         return e

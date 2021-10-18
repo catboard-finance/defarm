@@ -153,6 +153,7 @@ const stakes = await alpaca.fetchUserStakes('0x8155430e4860e791aeddb43e4764d15de
 ```
 
 ### TODO
+- [ ] Support `addCollateral` with debt.
 - [ ] summary `stake`, `lend`.
 - [ ] Define `liquidate` position state.
 - [ ] Add all `kill` related support.
