@@ -92,9 +92,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
 
   // sum each transfers
   const userInvestmentInfos = transactionTransferInfo.map(e => {
-
     // parse for view
-    const transfers = e.transferInfos
+    const transfers = e.transferInfos && e.transferInfos
       .filter(e => e)
       .map(transfer => ({
         fromAddress: transfer.from_address,
@@ -114,8 +113,8 @@ export const getUserInvestmentInfos = async (transactionTransferInfo: ITransacti
       transfers,
     }
 
-    const spendingTransfers = e.transferInfos.filter(e => e.direction === DirectionType.OUT)
-    const takingTransfers = e.transferInfos.filter(e => e.direction === DirectionType.IN)
+    const spendingTransfers = e.transferInfos ? e.transferInfos.filter(e => e.direction === DirectionType.OUT) : []
+    const takingTransfers = e.transferInfos ? e.transferInfos.filter(e => e.direction === DirectionType.IN) : []
 
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:

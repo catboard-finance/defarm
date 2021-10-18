@@ -6,10 +6,12 @@ import { FAIR_LAUNCH_ADDRESS } from '../core';
 import { ALL_STRATEGY_LOWER_ADDRESSES } from './config';
 import { getPoolByPoolAddress } from '..';
 
+const ALL_VAULT_ADDRESSES = alpacaInfo.Vaults.map(vault => vault.address.toLowerCase())
+
 const ALPACA_VAULT_ADDRESSES = [
   FAIR_LAUNCH_ADDRESS,
   ...ALL_STRATEGY_LOWER_ADDRESSES,
-  ...alpacaInfo.Vaults.map(vault => vault.address.toLowerCase())
+  ...ALL_VAULT_ADDRESSES,
 ].map(vault => vault.toLowerCase())
 
 interface IFromTo {

@@ -36,7 +36,7 @@ export interface IPositionSummary {
 const getSummaryPerTokenByDirection = (farmInfos: IFarmInvestmentInfo[], direction: 'in' | 'out') => {
   // Sum sent from transfers
   const spendAlls = farmInfos.map(farmInfo => {
-    const outTransfers = farmInfo.transfers.filter(transfer => transfer.direction === direction)
+    const outTransfers = farmInfo.transfers ? farmInfo.transfers.filter(transfer => transfer.direction === direction) : []
     const symbols = getUniqueSymbolsFromUserInvestmentTransfer(outTransfers)
     const symbolInfos = symbols.map(tokenSymbol => {
       // This is no use but just in case we have more than 2 symbols and 2 transfers in same transaction.
