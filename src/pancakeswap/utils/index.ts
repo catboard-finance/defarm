@@ -4,7 +4,7 @@ import { AddressZero } from '@ethersproject/constants'
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers'
 import { BigNumber } from '@ethersproject/bignumber'
 import { abi as IUniswapV2Router02ABI } from '@uniswap/v2-periphery/build/IUniswapV2Router02.json'
-import { ChainId, JSBI, Percent, Token, CurrencyAmount, Currency, ETHER } from '@pancakeswap/sdk'
+import { ChainId, JSBI, Percent, Token, CurrencyAmount, Currency, ETHER } from '@undefiorg/pancake-swap-sdk'
 import { ROUTER_ADDRESS } from '../config/constants'
 import { BASE_BSC_SCAN_URLS } from '../config'
 
@@ -34,9 +34,7 @@ export class WrappedTokenInfo extends Token {
   }
 }
 
-export type TokenAddressMap = Readonly<
-  { [chainId in ChainId]: Readonly<{ [tokenAddress: string]: { token: WrappedTokenInfo; list: TokenList } }> }
->
+export type TokenAddressMap = Readonly<{ [chainId in ChainId]: Readonly<{ [tokenAddress: string]: { token: WrappedTokenInfo; list: TokenList } }> }>
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -47,11 +45,7 @@ export function isAddress(value: any): string | false {
   }
 }
 
-export function getBscScanLink(
-  data: string | number,
-  type: 'transaction' | 'token' | 'address' | 'block' | 'countdown',
-  chainId: ChainId = ChainId.MAINNET,
-): string {
+export function getBscScanLink(data: string | number, type: 'transaction' | 'token' | 'address' | 'block' | 'countdown', chainId: ChainId = ChainId.MAINNET): string {
   switch (type) {
     case 'transaction': {
       return `${BASE_BSC_SCAN_URLS[chainId]}/tx/${data}`
@@ -94,10 +88,7 @@ export function calculateSlippageAmount(value: CurrencyAmount, slippage: number)
   if (slippage < 0 || slippage > 10000) {
     throw Error(`Unexpected slippage value: ${slippage}`)
   }
-  return [
-    JSBI.divide(JSBI.multiply(value.raw, JSBI.BigInt(10000 - slippage)), JSBI.BigInt(10000)),
-    JSBI.divide(JSBI.multiply(value.raw, JSBI.BigInt(10000 + slippage)), JSBI.BigInt(10000)),
-  ]
+  return [JSBI.divide(JSBI.multiply(value.raw, JSBI.BigInt(10000 - slippage)), JSBI.BigInt(10000)), JSBI.divide(JSBI.multiply(value.raw, JSBI.BigInt(10000 + slippage)), JSBI.BigInt(10000))]
 }
 
 // account is not optional

@@ -1,4 +1,4 @@
-import { ChainId, JSBI, Percent, Token, WETH } from '@pancakeswap/sdk'
+import { ChainId, JSBI, Percent, Token, WETH } from '@undefiorg/pancake-swap-sdk'
 import { BUSD, DAI, USDT, BTCB, CAKE, WBNB, UST, ETH, USDC } from './tokens'
 
 export const ROUTER_ADDRESS = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
@@ -11,7 +11,7 @@ type ChainTokenList = {
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [ChainId.MAINNET]: [WETH[ChainId.MAINNET], CAKE[ChainId.MAINNET], BUSD[ChainId.MAINNET], USDT, BTCB, UST, ETH, USDC],
-  [ChainId.TESTNET]: [WETH[ChainId.TESTNET], CAKE[ChainId.TESTNET], BUSD[ChainId.TESTNET]],
+  [ChainId.TESTNET]: [WETH[ChainId.TESTNET], CAKE[ChainId.TESTNET], BUSD[ChainId.TESTNET]]
 }
 
 /**
@@ -19,7 +19,7 @@ export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
  * @example { [WBTC.address]: [renBTC], [renBTC.address]: [WBTC] }
  */
 export const ADDITIONAL_BASES: { [chainId in ChainId]?: { [tokenAddress: string]: Token[] } } = {
-  [ChainId.MAINNET]: {},
+  [ChainId.MAINNET]: {}
 }
 
 /**
@@ -28,27 +28,27 @@ export const ADDITIONAL_BASES: { [chainId in ChainId]?: { [tokenAddress: string]
  * @example [AMPL.address]: [DAI, WETH[ChainId.MAINNET]]
  */
 export const CUSTOM_BASES: { [chainId in ChainId]?: { [tokenAddress: string]: Token[] } } = {
-  [ChainId.MAINNET]: {},
+  [ChainId.MAINNET]: {}
 }
 
 // used for display in the default list when adding liquidity
 export const SUGGESTED_BASES: ChainTokenList = {
   [ChainId.MAINNET]: [BUSD[ChainId.MAINNET], CAKE[ChainId.MAINNET], BTCB],
-  [ChainId.TESTNET]: [WETH[ChainId.TESTNET], CAKE[ChainId.TESTNET], BUSD[ChainId.TESTNET]],
+  [ChainId.TESTNET]: [WETH[ChainId.TESTNET], CAKE[ChainId.TESTNET], BUSD[ChainId.TESTNET]]
 }
 
 // used to construct the list of all pairs we consider by default in the frontend
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   [ChainId.MAINNET]: [WETH[ChainId.MAINNET], DAI, BUSD[ChainId.MAINNET], USDT],
-  [ChainId.TESTNET]: [WETH[ChainId.TESTNET], CAKE[ChainId.TESTNET], BUSD[ChainId.TESTNET]],
+  [ChainId.TESTNET]: [WETH[ChainId.TESTNET], CAKE[ChainId.TESTNET], BUSD[ChainId.TESTNET]]
 }
 
 export const PINNED_PAIRS: { readonly [chainId in ChainId]?: [Token, Token][] } = {
   [ChainId.MAINNET]: [
     [CAKE[ChainId.MAINNET], WBNB],
     [BUSD[ChainId.MAINNET], USDT],
-    [DAI, USDT],
-  ],
+    [DAI, USDT]
+  ]
 }
 
 export const NetworkContextName = 'NETWORK'
@@ -85,7 +85,7 @@ export const BLOCKED_ADDRESSES: string[] = [
   '0xd882cFc20F52f2599D84b8e8D58C7FB62cfE344b',
   '0x901bb9583b24D97e995513C6778dc6888AB6870e',
   '0xA7e5d5A720f06526557c513402f2e6B5fA20b008',
-  '0x8576aCC5C05D6Ce88f4e49bf65BdF0C62F91353C',
+  '0x8576aCC5C05D6Ce88f4e49bf65BdF0C62F91353C'
 ]
 
 export { default as farmsConfig } from './farms'

@@ -1,4 +1,4 @@
-import { ChainId, TokenAmount, Pair, Token, JSBI, CurrencyAmount, Currency } from '@pancakeswap/sdk'
+import { ChainId, TokenAmount, Pair, Token, JSBI, CurrencyAmount, Currency } from '@undefiorg/pancake-swap-sdk'
 import { parseUnits } from '@ethersproject/units'
 import { BigNumber } from 'ethers'
 import { Farm } from '../types'
@@ -17,9 +17,7 @@ export function tryParseAmount(value?: string, currency?: Currency): CurrencyAmo
   try {
     const typedValueParsed = parseUnits(value, currency.decimals).toString()
     if (typedValueParsed !== '0') {
-      return currency instanceof Token
-        ? new TokenAmount(currency, JSBI.BigInt(typedValueParsed))
-        : CurrencyAmount.ether(JSBI.BigInt(typedValueParsed))
+      return currency instanceof Token ? new TokenAmount(currency, JSBI.BigInt(typedValueParsed)) : CurrencyAmount.ether(JSBI.BigInt(typedValueParsed))
     }
   } catch (error) {
     // should fail if the user specifies too many decimal places of precision (or maybe exceed max uint?)
@@ -35,18 +33,12 @@ export const calculateLiquidityMinted = (chainId: ChainId, farm: Farm, a: string
   const TokenA = new Token(chainId, ta.address[chainId], ta.decimals, ta.symbol)
   const TokenB = new Token(chainId, tb.address[chainId], tb.decimals, tb.symbol)
 
-  const pair = new Pair(
-    new TokenAmount(TokenA, parseUnits(farm.tokenAmountTotal, TokenA.decimals).toString()),
-    new TokenAmount(TokenB, parseUnits(farm.quoteTokenAmountTotal, TokenB.decimals).toString())
-  )
+  const pair = new Pair(new TokenAmount(TokenA, parseUnits(farm.tokenAmountTotal, TokenA.decimals).toString()), new TokenAmount(TokenB, parseUnits(farm.quoteTokenAmountTotal, TokenB.decimals).toString()))
 
   const currencyAAmount = tryParseAmount(a.toString().slice(0, 7), TokenA)
   const currencyBAmount = tryParseAmount(b.toString().slice(0, 7), TokenB)
 
-  const [tokenAmountA, tokenAmountB] = [
-    wrappedCurrencyAmount(currencyAAmount, chainId),
-    wrappedCurrencyAmount(currencyBAmount, chainId),
-  ]
+  const [tokenAmountA, tokenAmountB] = [wrappedCurrencyAmount(currencyAAmount, chainId), wrappedCurrencyAmount(currencyBAmount, chainId)]
 
   if (pair && tokenAmountA && tokenAmountB) {
     const farmToken = new Token(chainId, farm.lpAddresses[chainId], farm.token.decimals)
