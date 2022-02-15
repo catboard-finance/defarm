@@ -29,7 +29,7 @@
   "dependencies": {
     "@defillama/sdk": "^2.2.10",
     "@ethersproject/units": "^5.4.0",
-    "@pancakeswap/sdk": "^2.4.0",
+    "@pancakeswap/sdk": "file:./@pancakeswap/sdk",
     "@uniswap/token-lists": "^1.0.0-beta.25",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "bignumber.js": "^9.0.1",
