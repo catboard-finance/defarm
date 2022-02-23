@@ -1,30 +1,35 @@
-import { ethers } from 'ethers';
+import { ethers } from 'ethers'
 
 import ALPACA_VAULT_ABI from '../abi/Vault.abi.json'
 import ALPACA_FAIRLAUNCH_ABI from '../abi/FairLaunch.abi.json'
 import ALPACA_DEBT_ABI from '../abi/DebtToken.abi.json'
 import PANCAKESWAP_ROUTER_V2_ABI from '../abi/PancakeSwap_Router_v2.abi.json'
 
-import { parseEther } from 'ethers/lib/utils';
-import { stringToFloat } from '../utils/converter';
-import { MethodType } from '../../type';
+import { parseEther } from 'ethers/lib/utils'
+import { stringToFloat } from '../../utils/converter'
+import { MethodType } from '../../type'
 
 import alpacaInfo from '../info.mainnet.json'
 
 export enum STRAT_TYPE {
   withdraw = 'withdraw',
-  deposit = 'deposit',
+  deposit = 'deposit'
 }
 
-const WORKER_ADDRESS_MAP = Object.assign({}, ...alpacaInfo.Vaults.map(
-  vault => vault.workers.map(
-    worker => ({
-      [worker.address]: worker,
-    })
+const WORKER_ADDRESS_MAP = Object.assign(
+  {},
+  ...alpacaInfo.Vaults.map((vault) =>
+    vault.workers
+      .map((worker) => ({
+        [worker.address]: worker
+      }))
+      .flat()
   ).flat()
-).flat())
+)
 
-const SHARED_STRATEGIES_ADDRESSES = Object.values(alpacaInfo.SharedStrategies).map(e => Object.values(e)).flat()
+const SHARED_STRATEGIES_ADDRESSES = Object.values(alpacaInfo.SharedStrategies)
+  .map((e) => Object.values(e))
+  .flat()
 const SHARED_STRATEGIES_KEYS = Object.keys(alpacaInfo.SharedStrategies)
 const SHARED_STRATEGIES_VALUES = Object.values(alpacaInfo.SharedStrategies)
 const SHARED_STRATEGIES_MAP = SHARED_STRATEGIES_KEYS.map((e, i) => {
@@ -38,22 +43,17 @@ const SHARED_STRATEGIES_MAP = SHARED_STRATEGIES_KEYS.map((e, i) => {
 }).flat()
 
 export const parseVaultInput = (data: string) => {
-  const iface = new ethers.utils.Interface(Array.from(new Set([
-    ...ALPACA_VAULT_ABI,
-    ...ALPACA_FAIRLAUNCH_ABI,
-    ...ALPACA_DEBT_ABI,
-    ...PANCAKESWAP_ROUTER_V2_ABI,
-  ])));
+  const iface = new ethers.utils.Interface(Array.from(new Set([...ALPACA_VAULT_ABI, ...ALPACA_FAIRLAUNCH_ABI, ...ALPACA_DEBT_ABI, ...PANCAKESWAP_ROUTER_V2_ABI])))
 
-  const value = parseEther("1.0");
+  const value = parseEther('1.0')
   try {
-    const parsedTransaction = iface.parseTransaction({ data, value });
+    const parsedTransaction = iface.parseTransaction({ data, value })
 
     const { name, args } = parsedTransaction
 
     let parsed: any = {
       method: name,
-      name,
+      name
     }
 
     switch (name) {
@@ -63,9 +63,9 @@ export const parseVaultInput = (data: string) => {
         parsed = {
           ...parsed,
           to,
-          amount: stringToFloat(amount),
+          amount: stringToFloat(amount)
         }
-        break;
+        break
 
       // Function: addCollateral(uint256 id, uint256 amount, bool goRogue, bytes data)
       /// @param id The ID of the position to add collaterals.
@@ -75,18 +75,18 @@ export const parseVaultInput = (data: string) => {
       case MethodType.addCollateral:
         var { id, amount, data: addCollateralData } = args
 
-        const [stratAddress, amountByte] = ethers.utils.defaultAbiCoder.decode(["address", "bytes"], addCollateralData)
-        const [stratAmount] = ethers.utils.defaultAbiCoder.decode(["uint256"], amountByte)
+        const [stratAddress, amountByte] = ethers.utils.defaultAbiCoder.decode(['address', 'bytes'], addCollateralData)
+        const [stratAmount] = ethers.utils.defaultAbiCoder.decode(['uint256'], amountByte)
 
         parsed = {
           ...parsed,
           principalAmount: stringToFloat(amount),
           positionId: ethers.BigNumber.from(id).toNumber(),
           stratAddress,
-          stratAmount: stringToFloat(stratAmount),
+          stratAmount: stringToFloat(stratAmount)
         }
 
-        break;
+        break
 
       case MethodType.deposit:
         const { _for, _amount, _pid } = args
@@ -95,16 +95,16 @@ export const parseVaultInput = (data: string) => {
             ...parsed,
             for: _for,
             amount: stringToFloat(_amount),
-            positionId: ethers.BigNumber.from(_pid).toNumber(),
+            positionId: ethers.BigNumber.from(_pid).toNumber()
           }
         } else {
           const { amountToken } = args
           parsed = {
             ...parsed,
-            amount: stringToFloat(amountToken),
+            amount: stringToFloat(amountToken)
           }
         }
-        break;
+        break
 
       case MethodType.work:
         var { id, worker, principalAmount, borrowAmount, maxReturn } = args
@@ -115,14 +115,14 @@ export const parseVaultInput = (data: string) => {
           workerAddress: worker,
           principalAmount: stringToFloat(principalAmount),
           borrowAmount: stringToFloat(borrowAmount) || 0,
-          maxReturn: stringToFloat(maxReturn),
+          maxReturn: stringToFloat(maxReturn)
         }
 
         // TODO: move to withWorkContext
         // Vault.sol: data = The calldata to pass along to the worker for more working context.
         if (args[5]) {
-          const [stratAddress, amountByte] = ethers.utils.defaultAbiCoder.decode(["address", "bytes"], args[5])
-          const [stratAmount] = ethers.utils.defaultAbiCoder.decode(["uint256"], amountByte)
+          const [stratAddress, amountByte] = ethers.utils.defaultAbiCoder.decode(['address', 'bytes'], args[5])
+          const [stratAmount] = ethers.utils.defaultAbiCoder.decode(['uint256'], amountByte)
 
           parsed = {
             ...parsed,
@@ -135,10 +135,10 @@ export const parseVaultInput = (data: string) => {
           // TODO: more clarify/test on this
           if (SHARED_STRATEGIES_ADDRESSES.includes(stratAddress)) {
             // Which strategy is this?
-            const strat = SHARED_STRATEGIES_MAP.find(e => e.stratAddress === stratAddress)
+            const strat = SHARED_STRATEGIES_MAP.find((e) => e.stratAddress === stratAddress)
             parsed = {
               ...parsed,
-              ...strat,
+              ...strat
             }
 
             // withdraw?
@@ -151,10 +151,10 @@ export const parseVaultInput = (data: string) => {
             parsed.stratAmount = 0
           }
         }
-        break;
+        break
       // Special case for pancake
       case MethodType.swapETHForExactTokens:
-        var { amountOut, path, to, deadline, } = args
+        var { amountOut, path, to, deadline } = args
         parsed = {
           ...parsed,
           name,
@@ -162,11 +162,11 @@ export const parseVaultInput = (data: string) => {
           deadline,
           tokenAddressIn: path[0],
           tokenAddressOut: path[1],
-          to,
+          to
         }
       case MethodType.swapExactETHForTokens:
       case MethodType.swapExactETHForTokensSupportingFeeOnTransferTokens:
-        var { amountOutMin, path, to, deadline, } = args
+        var { amountOutMin, path, to, deadline } = args
         parsed = {
           ...parsed,
           name,
@@ -174,11 +174,11 @@ export const parseVaultInput = (data: string) => {
           deadline,
           tokenAddressIn: path[0],
           tokenAddressOut: path[1],
-          to,
+          to
         }
-        break;
+        break
       case MethodType.swapTokensForExactETH:
-        var { amountOut, amountInMax, path, to, deadline, } = args
+        var { amountOut, amountInMax, path, to, deadline } = args
         parsed = {
           ...parsed,
           name,
@@ -187,14 +187,14 @@ export const parseVaultInput = (data: string) => {
           deadline,
           tokenAddressIn: path[0],
           tokenAddressOut: path[1],
-          to,
+          to
         }
-        break;
+        break
       case MethodType.swapExactTokensForTokensSupportingFeeOnTransferTokens:
       case MethodType.swapExactTokensForETHSupportingFeeOnTransferTokens:
       case MethodType.swapExactTokensForETH:
       case MethodType.swapExactTokensForTokens:
-        var { amountIn, amountOutMin, path, to, deadline, } = args
+        var { amountIn, amountOutMin, path, to, deadline } = args
         parsed = {
           ...parsed,
           name,
@@ -203,16 +203,16 @@ export const parseVaultInput = (data: string) => {
           deadline,
           tokenAddressIn: path[0],
           tokenAddressOut: path[1],
-          to,
+          to
         }
-        break;
+        break
     }
 
     return parsed
   } catch (e) {
     // Transfer between account
     return {
-      method: MethodType.transfer,
+      method: MethodType.transfer
     }
   }
 }

@@ -1,17 +1,17 @@
-import { api } from "@defillama/sdk"
-import { Chain } from "@defillama/sdk/build/general"
-import { BigNumber } from "ethers"
-import _ from "lodash"
-import { getPoolByPoolAddress } from ".."
-import { fetchRecordedPriceUSD } from "../../coingecko"
-import { stringToFloat } from "../utils/converter"
-import { IPositionSummary } from "./summary"
+import { api } from '@defillama/sdk'
+import { Chain } from '@defillama/sdk/build/general'
+import { BigNumber } from 'ethers'
+import _ from 'lodash'
+import { getPoolByPoolAddress } from '..'
+import { fetchRecordedPriceUSD } from '../../coingecko'
+import { stringToFloat } from '../../utils/converter'
+import { IPositionSummary } from './summary'
 import abi from './userPosition.abi.json'
 
 export interface IGetPositionParams {
-  vaultAddress: string,
-  farmName: string,
-  positionId: number,
+  vaultAddress: string
+  farmName: string
+  positionId: number
 }
 
 interface IEncodedUserPosition extends IGetPositionParams {
@@ -21,9 +21,9 @@ interface IEncodedUserPosition extends IGetPositionParams {
 
 export const getCurrentPositions = async (positions: IGetPositionParams[], block = 'latest', chain: Chain = 'bsc'): Promise<IEncodedUserPosition[]> => {
   // Call positionInfo for positionValue, debtValue
-  const calls = positions.map(position => ({
+  const calls = positions.map((position) => ({
     target: position.vaultAddress,
-    params: [position.positionId],
+    params: [position.positionId]
   }))
 
   const positionInfos = (
@@ -32,7 +32,7 @@ export const getCurrentPositions = async (positions: IGetPositionParams[], block
       block,
       calls,
       abi: abi.positionInfo,
-      chain,
+      chain
     })
   ).output
 
@@ -47,7 +47,7 @@ export const getCurrentPositions = async (positions: IGetPositionParams[], block
 
 export enum PositionStatusType {
   open = 'open',
-  close = 'close',
+  close = 'close'
 }
 
 interface IFarmPair {
@@ -95,11 +95,17 @@ export const withCurrentPosition = async (positionParams: IPositionSummary[]): P
   const today = new Date().toISOString().slice(0, 10)
 
   // Prepare symbol
-  const symbolKeys = [...new Set(positions.map((position, i) => {
-    const pool = getPoolByPoolAddress(position.vaultAddress)
-    const stratSymbol = positionParams[i].stratSymbol
-    return [`BSC:${pool.unstakeToken}:${today}`, `BSC:${stratSymbol}:${today}`]
-  }).flat())]
+  const symbolKeys = [
+    ...new Set(
+      positions
+        .map((position, i) => {
+          const pool = getPoolByPoolAddress(position.vaultAddress)
+          const stratSymbol = positionParams[i].stratSymbol
+          return [`BSC:${pool.unstakeToken}:${today}`, `BSC:${stratSymbol}:${today}`]
+        })
+        .flat()
+    )
+  ]
 
   // Prepare price
   const symbolPriceUSDMap = await fetchRecordedPriceUSD(symbolKeys)
@@ -149,19 +155,19 @@ export const withCurrentPosition = async (positionParams: IPositionSummary[]): P
     // Position value
     const positionValueAsset = {
       stratAmount,
-      principalAmount,
+      principalAmount
     }
 
     // Converted position value
     const convertedPositionValueAsset = {
       stratAmount: stratAmount + tradeStratAmount,
-      principalAmount: principalAmount - tradeValue,
+      principalAmount: principalAmount - tradeValue
     }
 
     // Receive
     const receiveValueAsset = {
       stratAmount: convertedPositionValueAsset.stratAmount,
-      principalAmount: convertedPositionValueAsset.principalAmount - debtPrincipalAmount,
+      principalAmount: convertedPositionValueAsset.principalAmount - debtPrincipalAmount
     }
 
     // Status
@@ -199,7 +205,7 @@ export const withCurrentPosition = async (positionParams: IPositionSummary[]): P
       convertedPositionValueAsset,
       receiveValueAsset,
 
-      positionAt,
+      positionAt
     } as ICurrentPosition
   })
 

@@ -26,8 +26,8 @@ export interface ITransaction {
   input: string // "0xd72ef7710000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e8084d7ded35e2840386f04d609cdb49c7e36d8800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000050380ac8da73d73719785f0a4433192f4e0e6c9000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000006f05b59d3b20000000000000000000000000000000000000000000000000000000000000000000000",
   receipt_cumulative_gas_used: string // "73396504",
   receipt_gas_used: string // "743092",
-  receipt_contract_address: string | null,
-  receipt_root: string | null,
+  receipt_contract_address: string | null
+  receipt_root: string | null
   receipt_status: string // "1",
   block_timestamp: string // "2021-08-12T14:29:54.000Z",
   block_number: string // "9967403",
@@ -88,23 +88,23 @@ export enum MethodType {
   swapExactTokensForETHSupportingFeeOnTransferTokens = 'swapExactTokensForETHSupportingFeeOnTransferTokens',
   swapExactTokensForTokensSupportingFeeOnTransferTokens = 'swapExactTokensForTokensSupportingFeeOnTransferTokens',
   swapTokensForExactETH = 'swapTokensForExactETH',
-  swapExactTokensForTokens = 'swapExactTokensForTokens',
+  swapExactTokensForTokens = 'swapExactTokensForTokens'
 }
 
 export enum DirectionType {
   OUT = 'out',
-  IN = 'in',
+  IN = 'in'
 }
 
 export interface ITransferInfo extends ITransfer {
-  direction: DirectionType,
-  stratType: string,
-  stratName: string,
+  direction: DirectionType
+  stratType: string
+  stratName: string
 
-  tokenSymbol: string,
-  tokenAddress: string,
-  tokenPriceUSD: number,
-  tokenAmount: number,
-  tokenValueUSD: number,
-  positionId: number,
+  tokenSymbol: string
+  tokenAddress: string
+  tokenPriceUSD: number
+  tokenAmount: number
+  tokenValueUSD: number
+  positionId: number
 }

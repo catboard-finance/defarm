@@ -1,13 +1,12 @@
 import _ from 'lodash'
-import { getERC20Balance, getNativeBalance } from '../../account'
 import { ITransferInfo } from '../../type'
-import { formatBigNumberToFixed, stringToFloat } from '../utils/converter'
-import { _fetchUserPositionWithAPIs } from "../api"
+import { formatBigNumberToFixed } from '../../utils/converter'
+import { _fetchUserPositionWithAPIs } from '../api'
 import { getUserInvestmentInfos } from './investment'
 import { getTransactionTransferInfos, getTransactionInfos, getTransferInfos } from './info'
 import { getUserLends } from './lend'
 import { getUserStakes } from './stake'
-import { IUserBalance, IUserPositionUSD } from './type'
+import { IUserPositionUSD } from './type'
 import { getInvestmentSummary } from './summary'
 import { getUserEarns } from './earn'
 import { getUserPositionWithAPIs } from './positionWithAPI'
@@ -15,63 +14,34 @@ import { getCurrentBalanceInfos } from './current'
 
 // User////////////////////////
 
-export const fetchUserBalance = async (account: string): Promise<IUserBalance[]> => {
-  const [native, erc20] = await Promise.all([
-    getNativeBalance(account),
-    getERC20Balance(account),
-  ])
-
-  const parsedERC20s = erc20.map(e => {
-    // Ignore null from API
-    if (e.decimals === null || e.balance === null) {
-      return null
-    }
-
-    return {
-      symbol: e.symbol,
-      name: e.name,
-      address: e.token_address,
-      amount: stringToFloat(e.balance, parseInt(e.decimals), parseInt(e.decimals)),
-    }
-  }).filter(e => e)
-
-  return [
-    {
-      symbol: 'BNB',
-      amount: stringToFloat(native.balance),
-    },
-    ...parsedERC20s,
-  ]
-}
-
 export const fetchUserPositionWithAPIs = async (account: string): Promise<IUserPositionUSD[]> => {
   // Raw
   const positions = await _fetchUserPositionWithAPIs(account)
   const userPositions = await getUserPositionWithAPIs(positions)
 
   // Parsed
-  const parsedUserPositions = userPositions.map(userPosition => {
+  const parsedUserPositions = userPositions.map((userPosition) => {
     const positionValue = parseFloat(formatBigNumberToFixed(userPosition.positionValueBN))
     const debtValue = parseFloat(formatBigNumberToFixed(userPosition.debtValueBN))
     const equityValue = positionValue - debtValue
-    const debtRatio = debtValue <= 0 ? 0 : 100 * debtValue / positionValue
+    const debtRatio = debtValue <= 0 ? 0 : (100 * debtValue) / positionValue
     const safetyBuffer = 80 - debtRatio
 
     // const farmTokenPriceUSD = parseFloat(symbolPriceUSDMap[userPosition.farmSymbol.toUpperCase()])
     // const quoteTokenAmount = positionValue * 0.5
     // const farmTokenAmount = quoteTokenAmount / farmTokenPriceUSD
 
-    return ({
+    return {
       ...userPosition,
       positionValue,
       debtValue,
       vaultSymbol: userPosition.vaultSymbol,
       equityValue,
       debtRatio,
-      safetyBuffer,
+      safetyBuffer
       // farmTokenAmount,
       // quoteTokenAmount,
-    })
+    }
   })
 
   return parsedUserPositions
@@ -80,7 +50,7 @@ export const fetchUserPositionWithAPIs = async (account: string): Promise<IUserP
 export const fetchUserLends = async (account: string) => {
   // Raw
   const lends = await getUserLends(account)
-  const parsedLends = lends.map(lend => ({
+  const parsedLends = lends.map((lend) => ({
     ...lend,
     amount: parseFloat(formatBigNumberToFixed(lend.amount))
   }))
@@ -91,14 +61,14 @@ export const fetchUserLends = async (account: string) => {
 export const fetchUserStakes = async (account: string) => {
   // Raw
   const stakes = await getUserStakes(account)
-  const parsedStakes = stakes.map(stake => ({
+  const parsedStakes = stakes.map((stake) => ({
     ...stake,
     amount: parseFloat(formatBigNumberToFixed(stake.amount)),
     rewardDebt: parseFloat(formatBigNumberToFixed(stake.rewardDebt)),
     bonusDebt: parseFloat(formatBigNumberToFixed(stake.bonusDebt)),
     fundedBy: stake.fundedBy,
 
-    pendingAlpaca: parseFloat(formatBigNumberToFixed(stake.pendingAlpaca)),
+    pendingAlpaca: parseFloat(formatBigNumberToFixed(stake.pendingAlpaca))
   }))
 
   return parsedStakes
@@ -107,14 +77,13 @@ export const fetchUserStakes = async (account: string) => {
 export const fetchUserFarmEarns = async (account: string) => {
   // Raw
   const earns = await getUserEarns(account)
-  const parsedEarns = earns.map(earn => ({
+  const parsedEarns = earns.map((earn) => ({
     ...earn,
-    pendingAlpaca: parseFloat(formatBigNumberToFixed(earn.pendingAlpaca)),
+    pendingAlpaca: parseFloat(formatBigNumberToFixed(earn.pendingAlpaca))
   }))
 
   return parsedEarns
 }
-
 
 export interface IDepositTransferUSDMap {
   [address: string]: ITransferInfo[]
@@ -122,8 +91,8 @@ export interface IDepositTransferUSDMap {
 
 /**
  * Investment per account
- * @param account 
- * @returns 
+ * @param account
+ * @returns
  */
 export const fetchUserInvestments = async (account: string) => {
   const transactionsInfos = await getTransactionInfos(account)

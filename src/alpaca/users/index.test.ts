@@ -1,4 +1,4 @@
-import { fetchUserPositionWithAPIs, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserBalance, fetchUserInvestmentSummary, fetchUserFarmEarns } from ".";
+import { fetchUserPositionWithAPIs, fetchUserLends, fetchUserStakes, fetchUserInvestments, fetchUserInvestmentSummary, fetchUserFarmEarns } from '.'
 
 const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 // const TEST_ACCOUNT_ADDRESS = '0x1B619F05CE70cc0E4D7dfaD3fC5bb6d4a938a1f7'
@@ -7,22 +7,16 @@ const TEST_ACCOUNT_ADDRESS = '0x8155430e4860e791aeddb43e4764d15de7e0def1'
 
 describe('User', () => {
   beforeAll(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => { });
-    jest.spyOn(console, 'log').mockImplementation(() => { });
-  });
-
-  it(`can fetch user balance value`, async () => {
-    const balances = await fetchUserBalance(TEST_ACCOUNT_ADDRESS)
-    console.log('balances:', balances)
-    expect(balances).toBeDefined
-  }, 10000);
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    jest.spyOn(console, 'log').mockImplementation(() => {})
+  })
 
   it(`can fetch user position value`, async () => {
     const positions = await fetchUserPositionWithAPIs(TEST_ACCOUNT_ADDRESS)
     // console.log('positions:', positions)
 
     expect(positions).toBeDefined
-  }, 10000);
+  }, 10000)
 
   it(`can fetch balance from lends`, async () => {
     const lends = await fetchUserLends(TEST_ACCOUNT_ADDRESS)
@@ -50,12 +44,12 @@ describe('User', () => {
     // console.log('investments:', investments)
 
     expect(investments).toBeDefined
-  }, 100000);
+  }, 100000)
 
   it(`can calculate investment summary`, async () => {
     const result = await fetchUserInvestmentSummary(TEST_ACCOUNT_ADDRESS)
     // console.log('result:', result)
 
     expect(result).toBeDefined
-  }, 100000);
+  }, 100000)
 })

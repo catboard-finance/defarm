@@ -1,14 +1,14 @@
-import { BigNumber } from "ethers";
-import _ from "lodash";
-import { IToken, ITransaction, ITransferInfo, MethodType } from "../../type";
-import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingSymbol, getDebtPoolBySymbol } from "../core";
-import { getUserEarnsByPoolIds } from "../users/earn";
-import { getUserStakesByPoolIds } from "../users/stake";
-import { IUserStake } from "../users/type";
-import { parseVaultInput } from "../vaults/worker";
-import { stringToFloat } from "./converter";
-import { getPositionIdFromMoralis } from "./events";
-import { getTokenInfoFromTransferAddressMap, getTokenInfoFromTransferToAddressMap } from "./transfer";
+import { BigNumber } from 'ethers'
+import _ from 'lodash'
+import { IToken, ITransaction, ITransferInfo, MethodType } from '../../type'
+import { getPoolByPoolAddress, getAddressFromSymbol, getIBPoolByStakingSymbol, getDebtPoolBySymbol } from '../core'
+import { getUserEarnsByPoolIds } from '../users/earn'
+import { getUserStakesByPoolIds } from '../users/stake'
+import { IUserStake } from '../users/type'
+import { parseVaultInput } from '../vaults/worker'
+import { stringToFloat } from '../../utils/converter'
+import { getPositionIdFromMoralis } from './events'
+import { getTokenInfoFromTransferAddressMap, getTokenInfoFromTransferToAddressMap } from './transfer'
 
 export interface ITransactionInfo extends ITransaction {
   method: MethodType
@@ -34,45 +34,47 @@ export enum InvestmentTypeObject {
   lend = 'lend',
   stake = 'stake',
   none = 'none',
-  harvest = 'harvest',
+  harvest = 'harvest'
 }
 
 export const withMethod = async (transactions: ITransaction[]): Promise<ITransactionInfo[]> => {
-  const res = transactions.map(e => {
-    const parsed = parseVaultInput(e.input)
-    return { ...e, ...parsed }
-  }).filter(e => e)
+  const res = transactions
+    .map((e) => {
+      const parsed = parseVaultInput(e.input)
+      return { ...e, ...parsed }
+    })
+    .filter((e) => e)
   return res
 }
 
 export const withType = async (transactions: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
-  const res = transactions.map(e => {
+  const res = transactions.map((e) => {
     switch (e.method) {
       case MethodType.deposit:
         // lends or stake
         const ibSymbol = getPoolByPoolAddress(e.to_address)?.stakingToken
         return {
           ...e,
-          investmentType: ibSymbol ? InvestmentTypeObject.lend : InvestmentTypeObject.stake,
+          investmentType: ibSymbol ? InvestmentTypeObject.lend : InvestmentTypeObject.stake
         }
       case MethodType.addCollateral:
       case MethodType.work:
         // farms
         return {
           ...e,
-          investmentType: InvestmentTypeObject.farm,
+          investmentType: InvestmentTypeObject.farm
         }
       case MethodType.harvest:
         return {
           ...e,
-          investmentType: InvestmentTypeObject.harvest,
+          investmentType: InvestmentTypeObject.harvest
         }
       case MethodType.approve:
       case MethodType.transfer:
       default:
         return {
           ...e,
-          investmentType: InvestmentTypeObject.none,
+          investmentType: InvestmentTypeObject.none
         }
     }
   })
@@ -147,14 +149,12 @@ interface ITransferAddressMap {
   [address: string]: IToken
 }
 
-export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[])
-  : IFarmTransaction[] | IStakeTransaction[] | ILendTransaction[] => {
-
+export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: ITransferInfo[]): IFarmTransaction[] | IStakeTransaction[] | ILendTransaction[] => {
   // Prepare symbol map from transfer
   const tokenInfoFromTransferToAddressMap: ITransferAddressMap[] = getTokenInfoFromTransferToAddressMap(transferInfos)
   const tokenInfoFromTransferAddressMap: ITransferAddressMap[] = getTokenInfoFromTransferAddressMap(transferInfos)
 
-  const res = transactionInfos.map(e => {
+  const res = transactionInfos.map((e) => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as IFarmTransaction
@@ -173,7 +173,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: 
 
           rewardPoolName: `${pool.stakingToken}-${pool.unstakeToken}`,
           rewardSymbol: pool.rewardToken,
-          rewardTokenAddress: getAddressFromSymbol(pool.rewardToken),
+          rewardTokenAddress: getAddressFromSymbol(pool.rewardToken)
         }
       case InvestmentTypeObject.lend:
         var pool = getPoolByPoolAddress(e.to_address)
@@ -185,10 +185,10 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: 
           poolName: `${pool.stakingToken}-${pool.unstakeToken}`,
 
           depositSymbol: pool.unstakeToken,
-          withdrawSymbol: pool.stakingToken,
+          withdrawSymbol: pool.stakingToken
         } as ILendTransaction
       case InvestmentTypeObject.stake:
-        const tokenAddress = transferInfos.find(tf => tf.block_hash === e.block_hash)?.address
+        const tokenAddress = transferInfos.find((tf) => tf.block_hash === e.block_hash)?.address
         const stakeToken = tokenInfoFromTransferAddressMap[tokenAddress.toLowerCase()]
         var pool = getIBPoolByStakingSymbol(stakeToken.symbol)
         if (!pool) {
@@ -209,7 +209,7 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: 
 
           rewardPoolName: `${pool.stakingToken}-${pool.unstakeToken}`,
           rewardSymbol: pool.unstakeToken,
-          rewardTokenAddress: getAddressFromSymbol(pool.unstakeToken),
+          rewardTokenAddress: getAddressFromSymbol(pool.unstakeToken)
         } as IStakeTransaction
       default:
         return e as IFarmTransaction
@@ -220,14 +220,17 @@ export const withSymbol = (transactionInfos: ITransactionInfo[], transferInfos: 
 }
 
 export const withRecordedPosition = async (transactionInfos: ITransactionInfo[]): Promise<ITransactionInfo[]> => {
-  const promises = transactionInfos.map(async e => {
+  const promises = transactionInfos.map(async (e) => {
     if (e.investmentType !== InvestmentTypeObject.farm) return null
     // if (e.positionId !== 0) return null
 
-    const positionIdFromMoralis = e.positionId === 0 ? getPositionIdFromMoralis(e.to_address, e.block_number, e.hash) : {
-      id: e.positionId,
-      loan: BigNumber.from(0),
-    }
+    const positionIdFromMoralis =
+      e.positionId === 0
+        ? getPositionIdFromMoralis(e.to_address, e.block_number, e.hash)
+        : {
+            id: e.positionId,
+            loan: BigNumber.from(0)
+          }
 
     return positionIdFromMoralis
   })
@@ -243,7 +246,7 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
         // const loanAmount = result ? stringToFloat(result.loan?.toString() ?? '0') : null
         return {
           ...e,
-          positionId,
+          positionId
           // loanAmount,
         } as IFarmTransaction
       default:
@@ -280,24 +283,24 @@ export const withRecordedPosition = async (transactionInfos: ITransactionInfo[])
 
 const getFarmDebtPools = (transactionInfos: ITransactionInfo[]) => {
   const poolIds = transactionInfos
-    .filter(e => e.investmentType === InvestmentTypeObject.farm)
-    .map(e => {
+    .filter((e) => e.investmentType === InvestmentTypeObject.farm)
+    .map((e) => {
       const principalSymbol = (e as IFarmTransaction).principalSymbol
       return {
         ...getDebtPoolBySymbol(principalSymbol),
-        principalSymbol,
+        principalSymbol
       }
     })
-    .filter(e => e)
+    .filter((e) => e)
 
   return poolIds
 }
 
 const getStakePoolIDs = (transactionInfos: ITransactionInfo[]) => {
   const poolIds = transactionInfos
-    .filter(e => e.investmentType === InvestmentTypeObject.stake)
-    .map(e => (e as IStakeTransaction).poolId)
-    .filter(e => e)
+    .filter((e) => e.investmentType === InvestmentTypeObject.stake)
+    .map((e) => (e as IStakeTransaction).poolId)
+    .filter((e) => e)
 
   return poolIds
 }
@@ -305,11 +308,11 @@ const getStakePoolIDs = (transactionInfos: ITransactionInfo[]) => {
 export const withCurrentReward = async (account: string, transactionInfos: ITransactionInfo[]) => {
   // Farm
   const farmDebtPools = getFarmDebtPools(transactionInfos)
-  const farmDebtPoolIds = [...new Set(farmDebtPools.map(e => e.id))]
+  const farmDebtPoolIds = [...new Set(farmDebtPools.map((e) => e.id))]
   const userFarmEarnings = await getUserEarnsByPoolIds(account, farmDebtPoolIds)
-  const userFarmEarningSymbolMaps = farmDebtPools.map(e => ({
+  const userFarmEarningSymbolMaps = farmDebtPools.map((e) => ({
     ...e,
-    pendingAlpaca: userFarmEarnings.find(f => f.poolId === e.id)?.pendingAlpaca,
+    pendingAlpaca: userFarmEarnings.find((f) => f.poolId === e.id)?.pendingAlpaca
   }))
 
   // Stake
@@ -317,18 +320,17 @@ export const withCurrentReward = async (account: string, transactionInfos: ITran
   const userStakes = await getUserStakesByPoolIds(account, stakePoolIds)
   const userStakeMap = _.groupBy(userStakes, 'poolId')
 
-  const res = transactionInfos.map(e => {
-
+  const res = transactionInfos.map((e) => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         // Reward from leveraged position
         const farmTx = e as IFarmTransaction
-        const farmEarning = userFarmEarningSymbolMaps.find(f => f.principalSymbol.toLowerCase() === farmTx.principalSymbol.toLowerCase())
+        const farmEarning = userFarmEarningSymbolMaps.find((f) => f.principalSymbol.toLowerCase() === farmTx.principalSymbol.toLowerCase())
         return {
           ...e,
           // rewardSymbol: REWARD_TOKEN_SYMBOL,
           rewardPoolAddress: farmEarning.address,
-          rewardAmount: stringToFloat(BigNumber.from(farmEarning?.pendingAlpaca || 0).toString()),
+          rewardAmount: stringToFloat(BigNumber.from(farmEarning?.pendingAlpaca || 0).toString())
         }
       case InvestmentTypeObject.lend:
         // TODO: rewards from lend?
@@ -343,7 +345,7 @@ export const withCurrentReward = async (account: string, transactionInfos: ITran
           // rewardTokenAddress: getAddressFromSymbol(stakeInfo.rewardToken), // TODO: reward as ib?
           rewardSymbol: stakeInfo?.rewardToken,
           rewardPoolAddress: stakeInfo?.poolAddress,
-          rewardAmount: stringToFloat(BigNumber.from(stakeInfo?.pendingAlpaca || 0).toString()),
+          rewardAmount: stringToFloat(BigNumber.from(stakeInfo?.pendingAlpaca || 0).toString())
         }
       default:
         return e
@@ -354,13 +356,13 @@ export const withCurrentReward = async (account: string, transactionInfos: ITran
 }
 
 export const withCurrentRewardPriceUSD = (transactionInfos: ITransactionInfo[], symbolPriceUSDMap: { [symbol: string]: string }) => {
-  const res = transactionInfos.map(e => {
+  const res = transactionInfos.map((e) => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as unknown as IFarmTransaction
         return {
           ...e,
-          rewardValueUSD: farmTx.rewardAmount * parseFloat(symbolPriceUSDMap[farmTx.rewardSymbol]),
+          rewardValueUSD: farmTx.rewardAmount * parseFloat(symbolPriceUSDMap[farmTx.rewardSymbol])
         }
       case InvestmentTypeObject.lend:
         // TODO: reward from lend?
@@ -369,7 +371,7 @@ export const withCurrentRewardPriceUSD = (transactionInfos: ITransactionInfo[], 
         const stakeTx = e as unknown as IStakeTransaction
         return {
           ...e,
-          rewardValueUSD: stakeTx.rewardAmount * parseFloat(symbolPriceUSDMap[stakeTx.rewardSymbol]),
+          rewardValueUSD: stakeTx.rewardAmount * parseFloat(symbolPriceUSDMap[stakeTx.rewardSymbol])
         }
       default:
         return e
@@ -380,7 +382,7 @@ export const withCurrentRewardPriceUSD = (transactionInfos: ITransactionInfo[], 
 }
 
 export const withTransactionFlatPriceUSD = (transactionInfos: ITransactionInfo[], symbolPriceUSDMap: { [symbol: string]: string }) => {
-  const res = transactionInfos.map(e => {
+  const res = transactionInfos.map((e) => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as unknown as IFarmTransaction
@@ -388,7 +390,7 @@ export const withTransactionFlatPriceUSD = (transactionInfos: ITransactionInfo[]
           ...e,
           // TOFIX: We can't get correct stratSymbol yet
           stratValueUSD: farmTx.stratAmount * parseFloat(symbolPriceUSDMap[farmTx.stratSymbol]),
-          principalValueUSD: farmTx.principalAmount * parseFloat(symbolPriceUSDMap[farmTx.principalSymbol]),
+          principalValueUSD: farmTx.principalAmount * parseFloat(symbolPriceUSDMap[farmTx.principalSymbol])
         }
       default:
         return e
@@ -399,7 +401,7 @@ export const withTransactionFlatPriceUSD = (transactionInfos: ITransactionInfo[]
 }
 
 export const withRecordedTransactionPriceUSD = (transactionInfos: ITransactionInfo[], symbolSlugYMDPriceUSDMap: { [symbolSlugYMD: string]: string }, chain = 'bsc') => {
-  const res = transactionInfos.map(e => {
+  const res = transactionInfos.map((e) => {
     switch (e.investmentType) {
       case InvestmentTypeObject.farm:
         const farmTx = e as unknown as IFarmTransaction
@@ -412,7 +414,7 @@ export const withRecordedTransactionPriceUSD = (transactionInfos: ITransactionIn
           // TOFIX: We can't get correct stratSymbol yet
           stratValueUSD: farmTx.stratAmount * stratPriceUSD,
           principalValueUSD: farmTx.principalAmount * principalPriceUSD,
-          borrowValueUSD: farmTx.borrowAmount * principalPriceUSD || 0,
+          borrowValueUSD: farmTx.borrowAmount * principalPriceUSD || 0
         }
       default:
         return e

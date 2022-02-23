@@ -1,53 +1,46 @@
-import { BigNumber } from "ethers";
+import { BigNumber } from 'ethers'
 
 export interface ICall {
-  target: string;
-  params?: any[];
+  target: string
+  params?: any[]
 }
 
 export interface IUserLend {
-  poolAddress: string;
-  amount: BigNumber;
+  poolAddress: string
+  amount: BigNumber
 }
 
 export interface IUserStake {
   fairLaunchPoolAddress: string
   poolId: number
-  poolAddress: string; // address;
+  poolAddress: string // address;
   stakingToken: string
   rewardToken: string
 
-  amount: BigNumber;
-  rewardDebt: BigNumber; // pending reward = (user.amount * pool.accAlpacaPerShare) - user.rewardDebt
-  bonusDebt: BigNumber;
+  amount: BigNumber
+  rewardDebt: BigNumber // pending reward = (user.amount * pool.accAlpacaPerShare) - user.rewardDebt
+  bonusDebt: BigNumber
   fundedBy: string // address;
 
-  pendingAlpaca: BigNumber;
+  pendingAlpaca: BigNumber
 }
 
 export interface IUserEarn {
   fairLaunchPoolAddress: string
   poolId: number
-  poolAddress: string; // address;
+  poolAddress: string // address;
 
-  pendingAlpaca: BigNumber;
-}
-
-export interface IUserBalance {
-  symbol: string,
-  name?: string,
-  address?: string,
-  amount: number,
+  pendingAlpaca: BigNumber
 }
 
 export interface IUserPositionUSD {
-  positionValue: number;
-  debtValue: number;
-  equityValue: number;
+  positionValue: number
+  debtValue: number
+  equityValue: number
 
-  vaultSymbol: string;
-  debtRatio: number;
-  safetyBuffer: number;
+  vaultSymbol: string
+  debtRatio: number
+  safetyBuffer: number
 
   farmSymbol: string // symbol
   // farmTokenAmount: number;
