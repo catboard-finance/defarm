@@ -27,37 +27,37 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@defillama/sdk": "^2.2.10",
-    "@ethersproject/units": "^5.4.0",
+    "@defillama/sdk": "^2.3.46",
+    "@ethersproject/units": "^5.5.0",
     "@undefiorg/pancake-swap-sdk": "2.4.0",
-    "@uniswap/token-lists": "^1.0.0-beta.25",
+    "@uniswap/token-lists": "^1.0.0-beta.27",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
-    "bignumber.js": "^9.0.1",
-    "dotenv": "^10.0.0",
-    "ethers": "^5.4.6",
+    "bignumber.js": "^9.0.2",
+    "dotenv": "^16.0.0",
+    "ethers": "^5.5.4",
     "lodash": "^4.17.21",
     "node-fetch": "2",
-    "web3": "^1.5.2",
-    "web3-core-helpers": "^1.5.2",
-    "web3-eth-contract": "^1.5.2"
+    "web3": "^1.7.0",
+    "web3-core-helpers": "^1.7.0",
+    "web3-eth-contract": "^1.7.0"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.1",
+    "@types/jest": "^27.4.1",
     "@types/node-fetch": "^3.0.3",
-    "@typescript-eslint/eslint-plugin": "^4.31.0",
-    "@typescript-eslint/parser": "^4.31.0",
-    "eslint": "^7.32.0",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "eslint": "^8.9.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-import": "^2.24.2",
-    "firebase-functions-test": "^0.3.2",
-    "jest": "^27.1.1",
-    "nodemon": "^2.0.12",
-    "ts-jest": "^27.0.5",
+    "eslint-plugin-import": "^2.25.4",
+    "firebase-functions-test": "^0.3.3",
+    "jest": "^27.5.1",
+    "nodemon": "^2.0.15",
+    "ts-jest": "^27.1.3",
     "ts-node-dev": "^1.1.8",
     "tslint": "^6.1.3",
-    "typescript": "^4.4.2"
+    "typescript": "^4.5.5"
   },
   "peerDependencies": {
-    "ethers": "^5.4.6"
+    "ethers": "^5.5.4"
   }
 }
