@@ -1,6 +1,6 @@
 import { Chain } from '@defillama/sdk/build/general'
 import { getERC20Balance, getEVMNativeBalance, getSPLBalance, getSPLNativeBalance } from '.'
-import { getSolanaSymbolInfoByMintAddress } from '../solana/tokens'
+import { getSolanaSymbolInfoByAddress } from '../solana/tokens'
 import { stringToFloat } from '../utils/converter'
 import { getSymbolByChain, IAccountBalance, SolanaCluster, WhiteListChain } from './type'
 
@@ -45,10 +45,10 @@ export const fetchSolanaAccountBalance = async (chain: WhiteListChain, account: 
             return null
           }
 
-          const symbolInfo = getSolanaSymbolInfoByMintAddress(e.mint)
+          const symbolInfo = getSolanaSymbolInfoByAddress(e.mint)
 
           return {
-            symbol: symbolInfo.symbol,
+            symbol: symbolInfo?.symbol || 'UNKNOWN',
             address: e.mint,
             amount: parseFloat(e.amount)
           }
@@ -59,7 +59,8 @@ export const fetchSolanaAccountBalance = async (chain: WhiteListChain, account: 
   return [
     {
       symbol: getSymbolByChain(chain),
-      amount: parseFloat(native.solana)
+      amount: parseFloat(native.solana),
+      address: 'So11111111111111111111111111111111111111112'
     },
     ...parsedSPLs
   ]

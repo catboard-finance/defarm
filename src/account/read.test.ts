@@ -16,6 +16,14 @@ describe('User', () => {
 
   it(`can fetch solana account balance value`, async () => {
     const balances = await fetchAccountBalance(WhiteListChain.solana, SOLANA_TEST_ACCOUNT_ADDRESS)
-    expect(balances[0].amount).toBeGreaterThan(0)
+    expect(balances).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          symbol: expect.any(String),
+          address: expect.any(String),
+          amount: expect.any(Number)
+        })
+      ])
+    )
   }, 10000)
 })

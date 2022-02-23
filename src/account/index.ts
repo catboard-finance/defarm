@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 import { Chain } from '@defillama/sdk/build/general'
 import { ITransaction, ITransfer, IBlockEvent, IBalance, IERC20 } from '../type'
 import { SolanaCluster } from './type'
-import { ISPLBalance, ISPLTokens } from '../type.solana'
+import { ISPLBalance, ISPLTokens } from '../solana/type'
 
 const MORALIS_EVM_API_URI = `https://deep-index.moralis.io/api/v2`
 const MORALIS_SOLANA_API_URI = `https://solana-gateway.moralis.io`
