@@ -1,6 +1,6 @@
 // Blockchain Scope
 
-export interface IBalance {
+export interface IERC20Balance {
   balance: string // "1234567890"
 }
 

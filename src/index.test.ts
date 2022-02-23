@@ -1,26 +1,26 @@
-import { fetchLendsBySymbols } from "./alpaca";
-import { fetchFarmsWithAPRBySymbols, fetchFarmUserDataAsync, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from "./pancakeswap";
-import { farmsConfig } from "./pancakeswap/config/constants";
-import { farmsSymbolMap } from "./pancakeswap/config/constants/mapper";
-import tokens from "./pancakeswap/config/constants/tokens";
+import { fetchLendsBySymbols } from './alpaca'
+import { fetchFarmsWithAPRBySymbols, fetchFarmUserDataAsync, fetchTokenUSDPricesBySymbols, getSupportedUSDSymbols } from './pancakeswap'
+import { farmsConfig } from './pancakeswap/config/constants'
+import { farmsSymbolMap } from './pancakeswap/config/constants/mapper'
+import tokens from './pancakeswap/config/constants/tokens'
 
 describe('🍰🦙 global data', () => {
   beforeAll(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => { });
-    jest.spyOn(console, 'log').mockImplementation(() => { });
-  });
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    jest.spyOn(console, 'log').mockImplementation(() => {})
+  })
 
   it('has supported symbol list', async () => {
     const supportedSymbols = getSupportedUSDSymbols()
     expect(supportedSymbols).toMatchSnapshot()
-  });
+  })
 
   it('can get CAKE price', async () => {
     const [cake] = await fetchTokenUSDPricesBySymbols(['CAKE'])
 
     expect(cake.address).toMatchSnapshot()
     expect(parseFloat(cake.busdPrice)).toBeGreaterThan(1)
-  }, 10000);
+  }, 10000)
 
   it('can get ALPACA, ETH, BNB prices', async () => {
     const [alpaca, eth, bnb] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'ETH', 'BNB'])
@@ -37,14 +37,14 @@ describe('🍰🦙 global data', () => {
     expect(bnb.symbol).toEqual(tokens.bnb.symbol)
     expect(bnb.address).toEqual(tokens.wbnb.address[56])
     expect(parseFloat(bnb.busdPrice)).toBeGreaterThan(0)
-  }, 10000);
+  }, 10000)
 
   it('can get ALPACA price', async () => {
     const [alpaca] = await fetchLendsBySymbols(['ALPACA'])
 
     expect(parseFloat(alpaca.outputToken.busdPrice)).toBeGreaterThan(0)
     expect(parseFloat(alpaca.ibTokenPrice)).toBeGreaterThan(0)
-  }, 10000);
+  }, 10000)
 
   it('can get CAKE-BNB LP info', async () => {
     const [cake_bnb] = await fetchFarmsWithAPRBySymbols(['CAKE-BNB LP'])
@@ -54,7 +54,7 @@ describe('🍰🦙 global data', () => {
     expect(parseFloat(cake_bnb.cakeRewardsApr)).toBeGreaterThan(0)
     expect(parseFloat(cake_bnb.lpRewardsApr)).toBeGreaterThan(0)
     expect(parseFloat(cake_bnb.mintRate)).toBeGreaterThan(0)
-  }, 10000);
+  }, 10000)
 
   it('can return null for unknown price', async () => {
     const [alpaca, not_exist] = await fetchTokenUSDPricesBySymbols(['ALPACA', 'NOT_EXIST'])
@@ -66,12 +66,12 @@ describe('🍰🦙 global data', () => {
     expect(alpaca.symbol).toEqual(tokens.alpaca.symbol)
     expect(alpaca.address).toEqual(tokens.alpaca.address[56])
     expect(parseFloat(alpaca.busdPrice)).toBeGreaterThan(0)
-  }, 10000);
+  }, 10000)
 })
 
-describe('🍰 account data', () => {
-  it('can get account data', async () => {
-    const account = "0xE462f59392C5b2754283162A665bb4d6Ff5033ab"
+describe('🍰 user data', () => {
+  it('can get farm user data', async () => {
+    const account = '0xE462f59392C5b2754283162A665bb4d6Ff5033ab'
     const pid = farmsConfig[0].pid
     const accountData = await fetchFarmUserDataAsync(farmsConfig, { account, pids: [pid] })
 
@@ -85,4 +85,4 @@ describe('🍰 account data', () => {
       }
     ])
   }, 10000)
-});
+})

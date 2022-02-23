@@ -1,11 +1,11 @@
-import _ from "lodash"
-import { filterInvestmentTransaction, filterInvestmentTransfers, getUniqueSymbolsFromTransactions, getUniqueSymbolsFromTransfers } from ".."
-import { getTransactions, getTransfers } from "../../account"
-import { fetchPriceUSD, fetchRecordedPriceUSD } from "../../coingecko"
-import { ITransferInfo } from "../../type"
-import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withTransactionFlatPriceUSD, withRecordedTransactionPriceUSD } from "../utils/transaction"
-import { withDirection, withPriceUSD, withRecordedPriceUSD } from "../utils/transfer"
-import { ITransactionTransferInfo } from "./investment"
+import _ from 'lodash'
+import { filterInvestmentTransaction, filterInvestmentTransfers, getUniqueSymbolsFromTransactions, getUniqueSymbolsFromTransfers } from '..'
+import { getTransactions, getTransfers } from '../../lib/moralis'
+import { fetchPriceUSD, fetchRecordedPriceUSD } from '../../lib/coingecko'
+import { ITransferInfo } from '../../type'
+import { ITransactionInfo, withMethod, withType, withRecordedPosition, withSymbol, withTransactionFlatPriceUSD, withRecordedTransactionPriceUSD } from '../utils/transaction'
+import { withDirection, withPriceUSD, withRecordedPriceUSD } from '../utils/transfer'
+import { ITransactionTransferInfo } from './investment'
 
 export const getTransactionInfos = async (account: string): Promise<ITransactionInfo[]> => {
   // Get transactions
@@ -32,10 +32,13 @@ export const getTransferInfos = async (account: string): Promise<ITransferInfo[]
   // Get transfer and gathering symbol
   const transfers = await getTransfers(account)
   let transferInfos = withDirection(account, transfers)
-  transferInfos = filterInvestmentTransfers(account, transferInfos).map(e => ({
-    ...e,
-    tokenAddress: e.address,
-  }) as ITransferInfo)
+  transferInfos = filterInvestmentTransfers(account, transferInfos).map(
+    (e) =>
+      ({
+        ...e,
+        tokenAddress: e.address
+      } as ITransferInfo)
+  )
 
   return transferInfos as ITransferInfo[]
 }
@@ -55,20 +58,20 @@ export const getTransactionTransferInfos = async (transactionInfos: ITransaction
   const symbolSlugYMDs = _.uniq([...tf_symbolSlugYMDs, ...tx_symbolSlugYMDs])
 
   // ib?
-  const noib_symbolSlugYMDs = symbolSlugYMDs.map(symbol => symbol.startsWith('BSC:ib') ? symbol.replace('BSC:ib', 'BSC:') : symbol)
+  const noib_symbolSlugYMDs = symbolSlugYMDs.map((symbol) => (symbol.startsWith('BSC:ib') ? symbol.replace('BSC:ib', 'BSC:') : symbol))
 
   // Get historical price by symbol and date
   let _error
-  const symbolSlugYMDPriceUSDMap = await fetchRecordedPriceUSD(noib_symbolSlugYMDs).catch(e => _error = e)
+  const symbolSlugYMDPriceUSDMap = await fetchRecordedPriceUSD(noib_symbolSlugYMDs).catch((e) => (_error = e))
 
   // Fallback to current price
   if (_error) {
     console.error(_error)
 
     // ib?
-    const ibSymbols = symbols.filter(symbol => symbol.startsWith('ib'))
-    const ibPairedSymbols = ibSymbols.map(symbol => symbol.slice(2))
-    const otherSymbols = symbols.filter(symbol => !symbol.startsWith('ib'))
+    const ibSymbols = symbols.filter((symbol) => symbol.startsWith('ib'))
+    const ibPairedSymbols = ibSymbols.map((symbol) => symbol.slice(2))
+    const otherSymbols = symbols.filter((symbol) => !symbol.startsWith('ib'))
     const mixedSymbols = [...Array.from(new Set([...otherSymbols, ...ibPairedSymbols]))]
 
     const symbolPriceUSDMap = await fetchPriceUSD(mixedSymbols)
@@ -95,7 +98,7 @@ export const getTransactionTransferInfos = async (transactionInfos: ITransaction
 
   // Group transfers by block number
   const transferGroup = _.groupBy(transferInfos, 'block_number')
-  let transactionTransferInfos = transactionInfos.map(e => ({
+  let transactionTransferInfos = transactionInfos.map((e) => ({
     ...e,
     transferInfos: transferGroup[e.block_number]
   })) as unknown as ITransactionTransferInfo[]

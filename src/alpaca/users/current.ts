@@ -1,9 +1,9 @@
-import { fetchPriceUSD } from "../../coingecko"
-import { getPoolByPoolId, REWARD_TOKEN_SYMBOL } from "../core"
-import { IFarmTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo, withCurrentReward, withCurrentRewardPriceUSD } from "../utils/transaction"
+import { fetchPriceUSD } from '../../lib/coingecko'
+import { getPoolByPoolId, REWARD_TOKEN_SYMBOL } from '../core'
+import { IFarmTransaction, InvestmentTypeObject, IStakeTransaction, ITransactionInfo, withCurrentReward, withCurrentRewardPriceUSD } from '../utils/transaction'
 
 export interface ICurrentBalanceInfo {
-  investmentType: InvestmentTypeObject,
+  investmentType: InvestmentTypeObject
   aggregatedAt: string // Date
 
   positionId?: number
@@ -18,7 +18,7 @@ export interface ICurrentBalanceInfo {
 
 export const getCurrentBalanceInfos = async (account: string, transactionInfos: ITransactionInfo[]): Promise<ICurrentBalanceInfo[]> => {
   // only investment related
-  transactionInfos = transactionInfos.filter(e => e.investmentType !== InvestmentTypeObject.none)
+  transactionInfos = transactionInfos.filter((e) => e.investmentType !== InvestmentTypeObject.none)
 
   // Get current reward from chain
   let currentBalanceInfos = await withCurrentReward(account, transactionInfos)
@@ -28,12 +28,11 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
   currentBalanceInfos = withCurrentRewardPriceUSD(currentBalanceInfos, symbolPriceUSDMap)
 
   // sum each transfers
-  const userInvestmentInfos = currentBalanceInfos.map(e => {
-
+  const userInvestmentInfos = currentBalanceInfos.map((e) => {
     // parse for view
     const baseInvestment: ICurrentBalanceInfo = {
       investmentType: e.investmentType,
-      aggregatedAt: new Date().toISOString(),
+      aggregatedAt: new Date().toISOString()
     }
 
     switch (e.investmentType) {
@@ -49,7 +48,7 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
           rewardPoolAddress: farmTx.rewardPoolAddress,
           rewardSymbol: farmTx.rewardSymbol,
           rewardAmount: farmTx.rewardAmount,
-          rewardValueUSD: farmTx.rewardValueUSD,
+          rewardValueUSD: farmTx.rewardValueUSD
         }
       case InvestmentTypeObject.lend:
         return baseInvestment
@@ -66,12 +65,12 @@ export const getCurrentBalanceInfos = async (account: string, transactionInfos: 
           rewardPoolAddress: stakeTx.rewardPoolAddress,
           rewardSymbol: stakeTx.rewardSymbol,
           rewardAmount: stakeTx.rewardAmount,
-          rewardValueUSD: stakeTx.rewardValueUSD,
+          rewardValueUSD: stakeTx.rewardValueUSD
         }
       default:
         return null
     }
   })
 
-  return userInvestmentInfos.filter(e => e) as ICurrentBalanceInfo[]
+  return userInvestmentInfos.filter((e) => e) as ICurrentBalanceInfo[]
 }

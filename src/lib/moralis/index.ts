@@ -2,24 +2,12 @@ require('dotenv').config()
 
 import fetch from 'node-fetch'
 import { Chain } from '@defillama/sdk/build/general'
-import { ITransaction, ITransfer, IBlockEvent, IBalance, IERC20 } from '../type'
-import { SolanaCluster } from './type'
-import { ISPLBalance, ISPLTokens } from '../solana/type'
+import { ITransaction, ITransfer, IBlockEvent, IERC20Balance, IERC20 } from '../../type'
 
 const MORALIS_EVM_API_URI = `https://deep-index.moralis.io/api/v2`
-const MORALIS_SOLANA_API_URI = `https://solana-gateway.moralis.io`
 
 const _evm_caller = async (address: string, target: string = '', body: any = null, params: URLSearchParams, chain: Chain = 'bsc'): Promise<any> => {
   let uri = `${MORALIS_EVM_API_URI}/${address}/${target}?chain=${chain}`
-  if (params) {
-    uri = `${uri}&${params}`
-  }
-
-  return _caller(uri, body)
-}
-
-const _solana_caller = async (address: string, target: string = '', body: any = null, params: URLSearchParams, network: SolanaCluster): Promise<any> => {
-  let uri = `${MORALIS_SOLANA_API_URI}/account/${network}/${address}/${target}`
   if (params) {
     uri = `${uri}&${params}`
   }
@@ -56,7 +44,7 @@ const _caller = async (uri: string, body: any = null): Promise<any> => {
   return data.result || data
 }
 
-export const getEVMNativeBalance = async (address: string, chain: Chain = 'bsc'): Promise<IBalance> => {
+export const getEVMNativeBalance = async (address: string, chain: Chain = 'bsc'): Promise<IERC20Balance> => {
   return _evm_caller(address, 'balance', null, null, chain)
 }
 
@@ -98,16 +86,3 @@ export const getEventsByBlockNumber = async (address: string, abi: string, topic
   const searchParams = new URLSearchParams(params)
   return _evm_caller(address, 'events', abi, searchParams, chain)
 }
-
-// Solana
-
-export const getSPLNativeBalance = async (address: string, cluster: SolanaCluster): Promise<ISPLBalance> => {
-  return _solana_caller(address, 'balance', null, null, cluster)
-}
-
-export const getSPLBalance = async (address: string, cluster: SolanaCluster): Promise<ISPLTokens[]> => {
-  return _solana_caller(address, 'tokens', null, null, cluster)
-}
-
-// Rich func
-export { fetchAccountBalance as fetchAccountBalance } from './read'
