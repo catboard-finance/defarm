@@ -9,9 +9,6 @@ Decode Defi Farm for human readable.
 - [x] `CAKE`: fetchTokenUSDPricesBySymbols
 - [x] `ALPACA`: `USER` Get user's active position with addition info.
 - [x] `CAKE`: `USER` fetchPoolReward
-
-## TODO
-
 - [x] `ALPACA`: `USER` Get account tx to get investment information.
 
 ## Installation
@@ -38,6 +35,13 @@ npm test-dev
 ```
 npm login
 npm run release
+```
+
+## Use
+```
+## Copy and fill all env var for RPC endpoint
+cp .env.example .env
+code .env
 ```
 
 ## Example: USD Price
